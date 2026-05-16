@@ -74,20 +74,28 @@ export async function onRequestPost(context) {
   }
 
   const passwordHash = await sha256(password);
-  const result = await tursoExecute(
+  const existingAccess = await tursoExecute(
     context,
-    `INSERT INTO patient_portal_access (participant_no, password_hash, enabled, updated_at)
-     VALUES (?, ?, ?, datetime('now'))
-     ON CONFLICT(participant_no) DO UPDATE SET
-       password_hash = excluded.password_hash,
-       enabled = excluded.enabled,
-       updated_at = datetime('now')`,
-    [
-      { type: "integer", value: participantNo },
-      { type: "text", value: passwordHash },
-      { type: "integer", value: enabled },
-    ],
+    "SELECT participant_no FROM patient_portal_access WHERE participant_no = ?",
+    [{ type: "integer", value: participantNo }],
   );
+
+  if (!existingAccess.ok) {
+    return json({ error: existingAccess.error }, { status: existingAccess.status || 500 });
+  }
+
+  const sql = existingAccess.rows.length
+    ? `UPDATE patient_portal_access
+       SET password_hash = ?, enabled = ?, updated_at = datetime('now')
+       WHERE participant_no = ?`
+    : `INSERT INTO patient_portal_access (password_hash, enabled, updated_at, participant_no)
+       VALUES (?, ?, datetime('now'), ?)`;
+
+  const result = await tursoExecute(context, sql, [
+    { type: "text", value: passwordHash },
+    { type: "integer", value: enabled },
+    { type: "integer", value: participantNo },
+  ]);
 
   if (!result.ok) return json({ error: result.error }, { status: result.status || 500 });
 
