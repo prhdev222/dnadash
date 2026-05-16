@@ -963,8 +963,7 @@ async function checkExistingSession() {
     if (event.key === 'Enter') patientLogin();
   });
   try {
-    const session = await apiFetch('/api/patient/session');
-    if (session.authenticated) await loadPortalData();
+    await fetch('/api/patient/logout', { method: 'POST' });
   } catch {}
 }
 

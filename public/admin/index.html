@@ -66,6 +66,26 @@ body{background:var(--bg);color:var(--text);font-family:'Sarabun',system-ui,sans
 .ov-label{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:4px}
 .ov-val{font-size:24px;font-weight:800;font-family:'DM Mono',monospace}
 .ov-sub{font-size:10px;color:var(--dim);margin-top:2px}
+.chart-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin-bottom:20px}
+.chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px}
+.chart-title{font-size:14px;font-weight:700;margin-bottom:4px}
+.chart-sub{font-size:11px;color:var(--muted);margin-bottom:14px}
+.bar-list{display:grid;gap:10px}
+.bar-row2{display:grid;grid-template-columns:minmax(0,1fr) 64px;gap:10px;align-items:center}
+.bar-label{font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-value{font-size:11px;color:var(--muted);text-align:right}
+.bar-track2{height:10px;background:rgba(255,255,255,.05);border-radius:999px;overflow:hidden}
+.bar-fill2{height:100%;border-radius:999px}
+.stack{display:flex;height:14px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.05);margin-bottom:10px}
+.stack-seg{height:100%}
+.legend{display:flex;gap:10px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)}
+.legend-dot{width:10px;height:10px;border-radius:999px}
+.mini-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.mini-stat{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);border-radius:10px;padding:12px}
+.mini-stat-label{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.mini-stat-val{font-size:20px;font-weight:800;font-family:'DM Mono',monospace}
+.mini-stat-sub{font-size:11px;color:var(--muted);margin-top:4px}
 
 /* TABLE */
 .tbl-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px}
@@ -159,6 +179,8 @@ var(--bg)}
   .logo{align-items:flex-start}
   .logo-txt{font-size:13px}
   .overview-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .chart-grid{grid-template-columns:1fr}
+  .mini-grid{grid-template-columns:1fr}
   .ov-card{padding:12px}
   .ov-val{font-size:20px}
   .tbl-wrap{overflow-x:auto}
@@ -527,14 +549,64 @@ function setMainContent(html) {
 // ─── OVERVIEW ───────────────────────────────────────────────
 function renderOverview() {
   const topRisks = {};
-  DB.risks.filter(r => r.rank_order == 1).forEach(r => {
+  const topRiskRows = DB.risks.filter(r => r.rank_order == 1);
+  topRiskRows.forEach(r => {
     const d = r.disease_name;
     topRisks[d] = (topRisks[d] || 0) + 1;
   });
-  const sorted = Object.entries(topRisks).sort((a,b) => b[1]-a[1]).slice(0,5);
+  const sorted = Object.entries(topRisks).sort((a,b) => b[1]-a[1]).slice(0,10);
 
-  const maxMult = Math.max(...DB.risks.filter(r => r.rank_order == 1).map(r => parseFloat(r.multiplier)||0));
-  const avgMult = (DB.risks.filter(r=>r.rank_order==1).reduce((s,r)=>s+parseFloat(r.multiplier||0),0) / DB.patients.length).toFixed(1);
+  const maxMult = Math.max(...topRiskRows.map(r => parseFloat(r.multiplier)||0));
+  const avgMult = (topRiskRows.reduce((s,r)=>s+parseFloat(r.multiplier||0),0) / DB.patients.length).toFixed(1);
+  const accessCount = DB.access.filter(row => Number(row.has_access) === 1).length;
+  const accessPct = DB.patients.length ? Math.round(accessCount / DB.patients.length * 100) : 0;
+  const pgxPatients = new Set(DB.pgx.map(row => row.participant_no)).size;
+  const nutritionPatients = new Set(DB.nutrition.map(row => row.participant_no)).size;
+
+  const categoryOf = (name='') => {
+    const l = String(name).toLowerCase();
+    if(/cancer|carcinoma|lymphoma|leukemia|melanoma|neoplasm/.test(l)) return 'Cancer';
+    if(/stroke|cardiac|heart|vascular|thrombo|hypertension|aneurysm|aortic|coronary|myocardial/.test(l)) return 'Vascular';
+    if(/parkinson|alzheimer|sclerosis|als|epilepsy|tremor|dementia|glaucoma|macular|sleep apnea|palsy/.test(l)) return 'Neuro';
+    if(/depression|bipolar|schizophrenia|adhd|anxiety|mental|ocd|autism/.test(l)) return 'Mental';
+    if(/diabetes|gout|thyroid|metabolic|obesity|hypertriglyceridemia|renal|fatty liver/.test(l)) return 'Metabolic';
+    if(/lupus|sclero|sjögren|celiac|crohn|colitis|psoriasis|alopecia|vitiligo|kawasaki|sarcoid|autoimmune|urticaria|atopic|dermatitis|hepatitis|biliary|hashimoto/.test(l)) return 'Autoimmune';
+    return 'Other';
+  };
+
+  const catColors = {
+    Autoimmune:'var(--purple)',
+    Neuro:'var(--green)',
+    Vascular:'var(--blue)',
+    Mental:'#f472b6',
+    Cancer:'var(--red)',
+    Metabolic:'var(--orange)',
+    Other:'var(--muted)'
+  };
+
+  const categoryCounts = {};
+  topRiskRows.forEach(r => {
+    const key = categoryOf(r.disease_name);
+    categoryCounts[key] = (categoryCounts[key] || 0) + 1;
+  });
+  const categorySorted = Object.entries(categoryCounts).sort((a,b)=>b[1]-a[1]);
+
+  const pgxCounts = {
+    adverse_effect: DB.pgx.filter(d => d.risk_type === 'adverse_effect').length,
+    insufficient_efficacy: DB.pgx.filter(d => d.risk_type === 'insufficient_efficacy').length,
+    dose_reduction: DB.pgx.filter(d => d.risk_type === 'dose_reduction').length
+  };
+  const totalPgxEntries = Object.values(pgxCounts).reduce((s,n)=>s+n,0) || 1;
+
+  const nutritionCounts = {};
+  DB.nutrition.forEach(n => {
+    nutritionCounts[n.nutrient] = (nutritionCounts[n.nutrient] || 0) + 1;
+  });
+  const topNutrition = Object.entries(nutritionCounts).sort((a,b)=>b[1]-a[1]).slice(0,8);
+
+  const maxCommonRisk = sorted[0]?.[1] || 1;
+  const maxCategory = categorySorted[0]?.[1] || 1;
+  const maxNutrition = topNutrition[0]?.[1] || 1;
 
   return `
 <div class="page-title">📊 Research Overview</div>
@@ -548,25 +620,94 @@ function renderOverview() {
   <div class="ov-card"><div class="ov-label">Avg Top Risk</div><div class="ov-val" style="color:var(--blue)">${avgMult}×</div><div class="ov-sub">เฉลี่ยความเสี่ยงสูงสุด</div></div>
 </div>
 
-<div class="tbl-wrap">
-  <div class="tbl-header"><div class="tbl-title">🏆 Top 5 Most Common #1 Risks</div></div>
-  <table>
-    <tr><th>#</th><th>Disease</th><th>Count</th><th>% of cohort</th></tr>
-    ${sorted.map((([d,n],i) => `<tr><td style="color:var(--muted)">${i+1}</td><td>${d}</td><td style="font-weight:700;color:var(--red)">${n}</td><td><div style="display:flex;align-items:center;gap:6px"><div style="width:${Math.round(n/DB.patients.length*120)}px;height:6px;background:var(--red);border-radius:3px;opacity:.7"></div>${Math.round(n/DB.patients.length*100)}%</div></td></tr>`)).join('')}
-  </table>
+<div class="chart-grid">
+  <div class="chart-card">
+    <div class="chart-title">📈 Cohort Snapshot</div>
+    <div class="chart-sub">ตัวชี้วัดภาพรวมของผู้ป่วยทั้งหมดในระบบ</div>
+    <div class="mini-grid">
+      <div class="mini-stat">
+        <div class="mini-stat-label">Portal Access</div>
+        <div class="mini-stat-val" style="color:var(--purple)">${accessPct}%</div>
+        <div class="mini-stat-sub">${accessCount}/${DB.patients.length} คนตั้งรหัสผ่านแล้ว</div>
+      </div>
+      <div class="mini-stat">
+        <div class="mini-stat-label">PGx Coverage</div>
+        <div class="mini-stat-val" style="color:var(--amber)">${pgxPatients}</div>
+        <div class="mini-stat-sub">ผู้ป่วยที่มีข้อมูลยา PGx</div>
+      </div>
+      <div class="mini-stat">
+        <div class="mini-stat-label">Nutrition Coverage</div>
+        <div class="mini-stat-val" style="color:var(--green)">${nutritionPatients}</div>
+        <div class="mini-stat-sub">ผู้ป่วยที่มีข้อมูลโภชนาการ</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-title">🧬 Top Risk Categories</div>
+    <div class="chart-sub">โรคอันดับ 1 ของแต่ละคนถูกจัดเข้าหมวดใดบ่อยที่สุด</div>
+    <div class="bar-list">
+      ${categorySorted.map(([name,count]) => `
+        <div>
+          <div class="bar-row2">
+            <div class="bar-label">${name}</div>
+            <div class="bar-value">${count} people</div>
+          </div>
+          <div class="bar-track2"><div class="bar-fill2" style="width:${Math.round(count / maxCategory * 100)}%;background:${catColors[name]}"></div></div>
+        </div>
+      `).join('')}
+    </div>
+  </div>
 </div>
 
 <div class="tbl-wrap">
-  <div class="tbl-header"><div class="tbl-title">💊 PGx Drug Risk Distribution</div></div>
+  <div class="tbl-header"><div class="tbl-title">🏆 Top Most Common #1 Risks</div></div>
   <table>
-    <tr><th>Risk Type</th><th>Total Entries</th><th>Avg per Patient</th></tr>
-    ${['adverse_effect','insufficient_efficacy','dose_reduction'].map(rt => {
-      const n = DB.pgx.filter(d => d.risk_type === rt).length;
-      const label = rt === 'adverse_effect' ? 'Adverse Effect' : rt === 'insufficient_efficacy' ? 'Insufficient Efficacy' : 'Dose Reduction';
-      const cls = rt === 'adverse_effect' ? 'badge-ae' : rt === 'insufficient_efficacy' ? 'badge-eff' : 'badge-dose';
-      return `<tr><td><span class="badge ${cls}">${label}</span></td><td style="font-weight:700">${n}</td><td>${(n/DB.patients.length).toFixed(1)}</td></tr>`;
-    }).join('')}
+    <tr><th>#</th><th>Disease</th><th>Count</th><th>% of cohort</th></tr>
+    ${sorted.map((([d,n],i) => `<tr><td style="color:var(--muted)">${i+1}</td><td>${d}</td><td style="font-weight:700;color:var(--red)">${n}</td><td><div style="display:flex;align-items:center;gap:6px"><div style="width:${Math.round(n/maxCommonRisk*120)}px;height:6px;background:var(--red);border-radius:3px;opacity:.7"></div>${Math.round(n/DB.patients.length*100)}%</div></td></tr>`)).join('')}
   </table>
+</div>
+
+<div class="chart-grid">
+  <div class="chart-card">
+    <div class="chart-title">💊 PGx Risk Distribution</div>
+    <div class="chart-sub">สัดส่วนข้อมูล PGx ทั้งหมดแยกตามชนิดความเสี่ยง</div>
+    <div class="stack">
+      <div class="stack-seg" style="width:${(pgxCounts.adverse_effect/totalPgxEntries*100).toFixed(2)}%;background:var(--red)"></div>
+      <div class="stack-seg" style="width:${(pgxCounts.insufficient_efficacy/totalPgxEntries*100).toFixed(2)}%;background:var(--amber)"></div>
+      <div class="stack-seg" style="width:${(pgxCounts.dose_reduction/totalPgxEntries*100).toFixed(2)}%;background:var(--blue)"></div>
+    </div>
+    <div class="legend" style="margin-bottom:14px">
+      <div class="legend-item"><span class="legend-dot" style="background:var(--red)"></span>Adverse Effect ${pgxCounts.adverse_effect}</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--amber)"></span>Insufficient Efficacy ${pgxCounts.insufficient_efficacy}</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--blue)"></span>Dose Reduction ${pgxCounts.dose_reduction}</div>
+    </div>
+    <table>
+      <tr><th>Risk Type</th><th>Total Entries</th><th>Avg per Patient</th></tr>
+      ${['adverse_effect','insufficient_efficacy','dose_reduction'].map(rt => {
+        const n = pgxCounts[rt];
+        const label = rt === 'adverse_effect' ? 'Adverse Effect' : rt === 'insufficient_efficacy' ? 'Insufficient Efficacy' : 'Dose Reduction';
+        const cls = rt === 'adverse_effect' ? 'badge-ae' : rt === 'insufficient_efficacy' ? 'badge-eff' : 'badge-dose';
+        return `<tr><td><span class="badge ${cls}">${label}</span></td><td style="font-weight:700">${n}</td><td>${(n/DB.patients.length).toFixed(1)}</td></tr>`;
+      }).join('')}
+    </table>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-title">🥗 Top Nutrition Needs</div>
+    <div class="chart-sub">สารอาหารที่พบว่าต้องเสริมบ่อยที่สุดใน cohort</div>
+    <div class="bar-list">
+      ${topNutrition.map(([name,count]) => `
+        <div>
+          <div class="bar-row2">
+            <div class="bar-label">${name}</div>
+            <div class="bar-value">${count} people</div>
+          </div>
+          <div class="bar-track2"><div class="bar-fill2" style="width:${Math.round(count / maxNutrition * 100)}%;background:var(--green)"></div></div>
+        </div>
+      `).join('')}
+    </div>
+  </div>
 </div>`;
 }
 
