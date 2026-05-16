@@ -188,7 +188,6 @@ var(--bg)}
   <div class="top-actions">
     <span id="admin-user" style="font-size:11px;color:var(--muted)"></span>
     <span id="conn-status" style="font-size:11px;color:var(--muted)"><span class="status-dot dot-wait"></span>Not connected</span>
-    <button class="btn btn-primary" onclick="showPage('config')">⚙️ Server</button>
     <button class="btn" onclick="adminLogout()">Logout</button>
   </div>
 </div>
@@ -232,29 +231,11 @@ var(--bg)}
   </div>
 
   <div class="content" id="content">
-    <div class="config-panel" id="config-section">
-      <div class="config-title">⚙️ Server Settings</div>
-      <div class="config-grid">
-        <div class="field-group">
-          <div class="field-label">DATABASE URL</div>
-          <input class="field-input" type="text" value="Loaded from server environment" disabled />
-        </div>
-        <div class="field-group">
-          <div class="field-label">ACCESS TOKEN</div>
-          <input class="field-input" type="password" value="Loaded from server environment" disabled />
-        </div>
-      </div>
-      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn btn-primary" onclick="testConnection()">🔌 Test Connection</button>
-        <button class="btn btn-success" onclick="loadAll()">🔄 Load All Data</button>
-        <span id="conn-msg" style="font-size:12px;color:var(--muted);align-self:center">Set the database credentials in local environment files or Cloudflare project secrets.</span>
-      </div>
-    </div>
     <div id="main-content">
       <div style="text-align:center;padding:60px 20px;color:var(--muted)">
         <div style="font-size:40px;margin-bottom:12px">🧬</div>
-        <div style="font-size:16px;font-weight:600;margin-bottom:6px">ยังไม่ได้เชื่อมต่อฐานข้อมูล</div>
-        <div style="font-size:12px">ตั้งค่าฝั่งเซิร์ฟเวอร์ให้เรียบร้อย แล้วกด Load All Data</div>
+        <div style="font-size:16px;font-weight:600;margin-bottom:6px">กำลังโหลดข้อมูลแดชบอร์ด</div>
+        <div style="font-size:12px">ระบบจะโหลดข้อมูลให้อัตโนมัติหลังจากเข้าสู่ระบบ</div>
       </div>
     </div>
   </div>
@@ -331,6 +312,7 @@ async function adminLogin() {
   msg.textContent = '';
   currentAdmin = data.username || username;
   showAppShell();
+  await testConnection(true);
   await loadAll();
 }
 
@@ -347,6 +329,7 @@ async function checkAdminSession() {
   }
   currentAdmin = data.username || '';
   showAppShell();
+  await testConnection(true);
   await loadAll();
 }
 
@@ -367,17 +350,15 @@ function hideAppShell() {
 }
 
 // ─── CONNECTION ─────────────────────────────────────────────
-async function testConnection() {
-  const msg = document.getElementById('conn-msg');
-  msg.textContent = 'Testing...';
+async function testConnection(silent=false) {
   const rows = await tursoQuery('SELECT COUNT(*) as n FROM patients');
   if (rows !== null) {
-    const n = rows[0]?.n ?? '?';
-    msg.textContent = '✅ Connected — ' + n + ' patients';
     document.getElementById('conn-status').innerHTML = '<span class="status-dot dot-ok"></span>Connected';
-    toast('เชื่อมต่อสำเร็จ! พบ ' + n + ' patients', 'ok');
+    if (!silent) {
+      const n = rows[0]?.n ?? '?';
+      toast('เชื่อมต่อสำเร็จ! พบ ' + n + ' patients', 'ok');
+    }
   } else {
-    msg.textContent = '❌ Connection failed';
     document.getElementById('conn-status').innerHTML = '<span class="status-dot dot-err"></span>Error';
   }
 }
@@ -392,7 +373,19 @@ async function loadAll() {
     tursoQuery('SELECT * FROM nutrition_needs ORDER BY participant_no'),
     tursoQuery('SELECT * FROM food_exposure ORDER BY participant_no, item_type'),
   ]);
-  if (!patients) return;
+  if (!patients) {
+    document.getElementById('conn-status').innerHTML = '<span class="status-dot dot-err"></span>Error';
+    setMainContent(`
+<div class="tbl-wrap">
+  <div class="tbl-header"><div class="tbl-title">⚠️ Unable to Load Data</div></div>
+  <div style="padding:24px">
+    <div style="font-size:14px;font-weight:600;margin-bottom:6px">ระบบโหลดข้อมูลไม่สำเร็จ</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:14px">กรุณาลองใหม่อีกครั้ง หากยังไม่สำเร็จให้ตรวจสอบการตั้งค่าเซิร์ฟเวอร์ใน Cloudflare Pages</div>
+    <button class="btn btn-primary" onclick="loadAll()">ลองโหลดใหม่</button>
+  </div>
+</div>`);
+    return;
+  }
   DB.patients = patients || [];
   DB.risks = risks || [];
   DB.pgx = pgx || [];
@@ -437,8 +430,8 @@ function showPage(page) {
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
   const nav = document.getElementById('nav-' + page);
   if (nav) nav.classList.add('active');
-  if (DB.patients.length === 0 && page !== 'config') {
-    setMainContent('<div class="loading">⚠️ กรุณาโหลดข้อมูลก่อน — กด Load All Data</div>');
+  if (DB.patients.length === 0) {
+    setMainContent('<div class="loading">⚠️ ระบบยังโหลดข้อมูลไม่เสร็จ กรุณารอสักครู่</div>');
     return;
   }
   const pages = {

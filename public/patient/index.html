@@ -1,223 +1,673 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DNA Dashboard Patient Portal</title>
-  <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    :root{
-      --bg:#08101d;--bg2:#0f172a;--card:#13213a;--border:#2f3c58;
-      --text:#f8fafc;--muted:#94a3b8;--blue:#38bdf8;--green:#34d399;--red:#f87171;--amber:#fbbf24;
-    }
-    body{
-      min-height:100vh;padding:24px;font-family:'Sarabun',system-ui,sans-serif;color:var(--text);
-      background:
-        radial-gradient(circle at top left, rgba(52,211,153,.14), transparent 28%),
-        radial-gradient(circle at bottom right, rgba(56,189,248,.18), transparent 28%),
-        var(--bg);
-    }
-    .shell{width:min(1100px,100%);margin:0 auto;display:grid;gap:18px}
-    .card{background:rgba(15,23,42,.92);border:1px solid var(--border);border-radius:22px;padding:24px}
-    .hero{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
-    .title{font-size:clamp(28px,5vw,42px);line-height:1.05;margin-bottom:8px}
-    .sub{color:var(--muted);line-height:1.6;font-size:14px;max-width:720px}
-    .btn{padding:10px 14px;border-radius:999px;border:1px solid var(--border);background:#1e293b;color:var(--text);cursor:pointer;font-weight:700}
-    .btn-primary{background:var(--green);color:#05231a;border-color:transparent}
-    .btn-link{display:inline-flex;text-decoration:none}
-    .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:18px}
-    .field{display:flex;flex-direction:column;gap:6px}
-    .label{font-size:12px;color:var(--muted);font-weight:700}
-    .input{padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:#0b1323;color:var(--text);font:inherit}
-    .status{font-size:13px;color:var(--muted)}
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
-    .panel{background:rgba(19,33,58,.88);border:1px solid var(--border);border-radius:18px;padding:18px}
-    .panel h3{font-size:16px;margin-bottom:12px}
-    .list{display:grid;gap:8px}
-    .item{padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.03);font-size:13px;line-height:1.5}
-    .metric{display:grid;gap:4px}
-    .metric-label{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
-    .metric-value{font-size:14px;line-height:1.6}
-    .badge{display:inline-block;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:700}
-    .badge-red{background:rgba(248,113,113,.15);color:#fecaca}
-    .badge-amber{background:rgba(251,191,36,.15);color:#fde68a}
-    .badge-blue{background:rgba(56,189,248,.15);color:#bae6fd}
-    .empty{color:var(--muted);font-size:13px}
-    pre{white-space:pre-wrap;font-family:inherit;font-size:13px;line-height:1.6;color:var(--text)}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🧬 DNA Personal Risk Dashboard</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080d18;--bg2:rgba(255,255,255,0.03);--border:rgba(255,255,255,0.09);
+  --text:#e2e8f0;--muted:rgba(255,255,255,0.45);--dim:rgba(255,255,255,0.25);
+  --purple:#a78bfa;--blue:#38bdf8;--green:#34d399;--amber:#fbbf24;
+  --red:#f87171;--orange:#fb923c;
+}
+body{background:var(--bg);color:var(--text);font-family:'Sarabun',system-ui,'Noto Sans Thai',sans-serif;min-height:100vh;font-size:15px;line-height:1.6}
+.disclaimer{background:rgba(56,189,248,0.07);border-bottom:0.5px solid rgba(56,189,248,0.2);padding:9px 20px;text-align:center;font-size:11px;color:rgba(56,189,248,0.8);line-height:1.5}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:0.5px solid var(--border);flex-wrap:wrap;gap:10px;position:sticky;top:0;background:rgba(8,13,24,0.95);backdrop-filter:blur(12px);z-index:100}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#a78bfa,#38bdf8);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.logo-text{font-size:14px;font-weight:700;letter-spacing:.04em;color:#fff}
+.logo-sub{font-size:10px;color:var(--dim);letter-spacing:.06em}
+.controls{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.lang-wrap{display:flex;background:rgba(255,255,255,0.04);border:0.5px solid var(--border);border-radius:20px;overflow:hidden}
+.lang-btn{padding:7px 16px;border:none;background:transparent;cursor:pointer;font-size:12px;font-weight:700;color:var(--muted);transition:all .2s;font-family:inherit;white-space:nowrap}
+.lang-btn.active{background:rgba(167,139,250,0.2);color:var(--purple)}
+.btn{background:rgba(255,255,255,0.06);border:0.5px solid var(--border);border-radius:8px;color:var(--text);padding:8px 12px;font-size:13px;font-family:inherit;cursor:pointer;text-decoration:none}
+.btn:hover{border-color:rgba(255,255,255,.2)}
+.main{max-width:860px;margin:0 auto;padding:24px 16px 48px}
+.login-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:18px;padding:22px;margin-bottom:18px}
+.login-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:12px}
+.input{background:rgba(255,255,255,0.06);border:0.5px solid var(--border);border-radius:10px;color:var(--text);padding:10px 12px;font-size:14px;font-family:inherit;outline:none;width:100%}
+.input:focus{border-color:var(--purple)}
+.label{font-size:11px;color:var(--muted);margin-bottom:6px}
+.login-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.status{font-size:12px;color:var(--muted)}
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:42vh;gap:14px;text-align:center}
+.empty-icon{font-size:48px;opacity:.5}
+.empty-text{font-size:15px;color:var(--muted)}
+.empty-hint{font-size:12px;color:var(--dim)}
+.hero-top{text-align:center;padding:20px 0 12px}
+.hero-greeting{font-size:11px;color:var(--dim);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+.hero-id{font-size:26px;font-weight:800;color:#f1f5f9;margin-bottom:3px}
+.hero-sub{font-size:12px;color:var(--dim)}
+.hero-risk{background:linear-gradient(135deg,rgba(167,139,250,.1),rgba(56,189,248,.06));border:0.5px solid rgba(167,139,250,.22);border-radius:18px;padding:20px 22px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.risk-label{font-size:10px;color:var(--dim);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px}
+.risk-big{font-family:'DM Mono',monospace;font-size:46px;font-weight:800;line-height:1;letter-spacing:-.02em}
+.risk-name{font-size:15px;font-weight:500;color:rgba(255,255,255,.7);margin-top:5px}
+.apoe-label{font-size:10px;color:var(--dim);margin-bottom:5px;text-align:right}
+.apoe-badge{background:rgba(167,139,250,.15);border:0.5px solid rgba(167,139,250,.4);border-radius:8px;padding:7px 16px;font-size:15px;font-weight:800;color:var(--purple);font-family:'DM Mono',monospace;display:inline-block}
+.carrier{font-size:11px;color:var(--muted);margin-top:5px;text-align:right}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:18px}
+.stat-card{background:rgba(255,255,255,.04);border:0.5px solid var(--border);border-radius:12px;padding:12px 14px}
+.stat-lbl{font-size:9px;letter-spacing:.09em;text-transform:uppercase;color:var(--dim);font-weight:500;margin-bottom:4px}
+.stat-val{font-size:22px;font-weight:700;font-family:'DM Mono',monospace;line-height:1.2}
+.stat-sub{font-size:10px;color:var(--muted);margin-top:2px}
+.card{background:var(--bg2);border:0.5px solid var(--border);border-radius:18px;padding:20px 22px;margin-bottom:14px}
+.sh{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.sh-icon{font-size:18px}
+.sh-title{font-size:16px;font-weight:700;color:#f1f5f9}
+.sh-sub{font-size:11px;color:var(--dim);padding-left:26px;margin-bottom:12px}
+.risk-item{border-radius:12px;border:0.5px solid var(--border);background:rgba(255,255,255,.02);margin-bottom:4px;cursor:pointer;transition:border-color .2s,background .2s}
+.risk-item:hover{border-color:rgba(255,255,255,.18)}
+.risk-item.open{border-color:rgba(167,139,250,.4);background:rgba(167,139,250,.06)}
+.ri-header{padding:12px 14px;display:flex;align-items:center;gap:10px}
+.ri-num{font-size:11px;color:var(--dim);min-width:18px;font-family:'DM Mono',monospace}
+.ri-body{flex:1;min-width:0}
+.ri-name-row{display:flex;align-items:center;gap:7px;margin-bottom:6px;flex-wrap:wrap}
+.ri-name{font-size:14px;font-weight:600;color:#f1f5f9}
+.cat-badge{font-size:9px;padding:2px 7px;border-radius:20px;font-weight:600;white-space:nowrap}
+.bar-row{display:flex;align-items:center;gap:8px}
+.bar-track{flex:1;height:5px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;transition:width .7s cubic-bezier(.4,0,.2,1)}
+.ri-mult{font-size:12px;font-weight:700;font-family:'DM Mono',monospace;min-width:44px;text-align:right}
+.ri-chevron{font-size:10px;color:var(--dim);margin-left:4px}
+.ri-detail{padding:0 14px 14px 42px;border-top:0.5px solid rgba(167,139,250,.2)}
+.ri-explain{font-size:13px;line-height:1.7;margin-top:10px}
+.ri-advice{font-size:12px;color:var(--muted);margin-top:6px}
+.tap-hint{font-size:11px;color:var(--dim);text-align:center;margin-top:8px}
+.wgs-block{border-radius:12px;padding:14px 16px;margin-bottom:8px}
+.wgs-title{font-size:12px;font-weight:600;margin-bottom:8px}
+.cancer-tags{display:flex;flex-wrap:wrap;gap:6px}
+.c-tag{background:rgba(248,113,113,.12);border-radius:8px;padding:6px 12px}
+.c-name{font-size:13px;color:#f1f5f9;font-weight:600}
+.c-mult{font-size:11px;color:var(--red);font-family:'DM Mono',monospace}
+.nutr-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+.nutr-card{background:rgba(52,211,153,.07);border:0.5px solid rgba(52,211,153,.2);border-radius:12px;padding:12px 14px}
+.nutr-name{font-size:13px;font-weight:700;color:#6ee7b7;margin-bottom:2px}
+.nutr-level{font-size:10px;color:rgba(52,211,153,.6)}
+.tab-row{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.tab-btn{flex:1;min-width:90px;background:rgba(255,255,255,.03);border:0.5px solid var(--border);border-radius:10px;padding:10px 8px;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);transition:all .2s;text-align:center;font-family:inherit}
+.tab-btn.act-ex{background:rgba(56,189,248,.1);border-color:var(--blue);color:var(--blue)}
+.tab-btn.act-diet{background:rgba(52,211,153,.1);border-color:var(--green);color:var(--green)}
+.tab-btn.act-mon{background:rgba(251,146,60,.1);border-color:var(--orange);color:var(--orange)}
+.tab-icon{font-size:16px;display:block;margin-bottom:2px}
+.plan-sum{border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:13px;line-height:1.6}
+.plan-item{display:flex;gap:10px;align-items:flex-start;margin-bottom:9px}
+.plan-dot{width:5px;height:5px;border-radius:50%;margin-top:9px;flex-shrink:0}
+.plan-text{font-size:13px;color:rgba(255,255,255,.68);line-height:1.7}
+.pgx-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.pgx-card{border-radius:12px;padding:12px;text-align:center}
+.pgx-num{font-size:24px;font-weight:800;font-family:'DM Mono',monospace}
+.pgx-unit{font-size:10px;opacity:.7;margin-top:1px}
+.pgx-lbl{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.3}
+.drug-wrap{margin-top:8px}
+.drug-lbl{font-size:11px;color:var(--muted);margin-bottom:6px}
+.drug-tags{display:flex;flex-wrap:wrap;gap:5px}
+.drug-tag{background:rgba(251,191,36,.1);border:0.5px solid rgba(251,191,36,.25);border-radius:20px;padding:3px 10px;font-size:11px;color:#fcd34d}
+.allergy-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.al-lbl{font-size:12px;font-weight:600;margin-bottom:8px}
+.tag-list{display:flex;flex-wrap:wrap;gap:5px}
+.food-tag{background:rgba(251,146,60,.1);border:0.5px solid rgba(251,146,60,.3);border-radius:20px;padding:4px 11px;font-size:12px;color:#fdba74}
+.exp-tag{background:rgba(148,163,184,.08);border:0.5px solid rgba(148,163,184,.2);border-radius:20px;padding:4px 11px;font-size:12px;color:#cbd5e1}
+.footer{text-align:center;padding:16px 0;border-top:0.5px solid rgba(255,255,255,.05)}
+.footer-txt{font-size:10px;color:rgba(255,255,255,.2);margin-bottom:8px}
+.fbadges{display:flex;justify-content:center;gap:7px;flex-wrap:wrap}
+.fbadge{border-radius:20px;padding:3px 12px;font-size:10px;font-weight:600}
+.glow{position:fixed;top:-300px;left:50%;transform:translateX(-50%);width:700px;height:600px;background:radial-gradient(ellipse,rgba(167,139,250,.06) 0%,transparent 65%);pointer-events:none;z-index:0}
+.wrap{position:relative;z-index:1}
+@media(max-width:600px){
+  .hero-risk{flex-direction:column}
+  .apoe-label,.carrier{text-align:left}
+  .allergy-grid{grid-template-columns:1fr}
+}
+</style>
 </head>
 <body>
-  <div class="shell">
-    <section class="card">
-      <div class="hero">
-        <div>
-          <div style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--green);margin-bottom:10px">Patient Portal</div>
-          <div class="title">View your own DNA dashboard.</div>
-          <div class="sub">Sign in using your participant number and the password provided by the admin. This portal shows only your own record.</div>
-        </div>
-        <a class="btn btn-link" href="/">Back to home</a>
+<div class="glow"></div>
+<div class="wrap">
+
+<div class="disclaimer" id="disclaimer"></div>
+
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-icon">🧬</div>
+    <div>
+      <div class="logo-text">DNA Personal Risk Dashboard</div>
+      <div class="logo-sub" id="logo-sub"></div>
+    </div>
+  </div>
+  <div class="controls">
+    <div class="lang-wrap">
+      <button class="lang-btn active" id="btnTH" onclick="setLang('TH')">🇹🇭 TH</button>
+      <button class="lang-btn" id="btnEN" onclick="setLang('EN')">🇬🇧 EN</button>
+    </div>
+    <button class="btn" onclick="patientLogout()" id="logout-btn"></button>
+  </div>
+</div>
+
+<main class="main">
+  <div class="login-card">
+    <div class="sh"><span class="sh-icon">🔐</span><span class="sh-title" id="login-title"></span></div>
+    <div class="sh-sub" id="login-sub"></div>
+    <div class="login-grid">
+      <div>
+        <div class="label" id="label-pno"></div>
+        <input class="input" id="participant-no" type="number" min="1">
       </div>
-
-      <div class="form-grid">
-        <div class="field">
-          <label class="label">Participant Number</label>
-          <input class="input" id="participant-no" type="number" min="1">
-        </div>
-        <div class="field">
-          <label class="label">Password</label>
-          <input class="input" id="participant-password" type="password" autocomplete="current-password">
-        </div>
+      <div>
+        <div class="label" id="label-pass"></div>
+        <input class="input" id="participant-password" type="password" autocomplete="current-password">
       </div>
-
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:18px">
-        <button class="btn btn-primary" onclick="patientLogin()">Sign In</button>
-        <button class="btn" onclick="patientLogout()">Logout</button>
-        <span id="portal-status" class="status">Not signed in</span>
-      </div>
-    </section>
-
-    <div id="portal-content" style="display:none;gap:18px">
-      <section class="grid">
-        <div class="panel">
-          <h3>Basic Information</h3>
-          <div class="list" id="basic-info"></div>
-        </div>
-        <div class="panel">
-          <h3>Plans</h3>
-          <div class="list" id="plans"></div>
-        </div>
-      </section>
-
-      <section class="grid">
-        <div class="panel">
-          <h3>Top Health Risks</h3>
-          <div class="list" id="risks-list"></div>
-        </div>
-        <div class="panel">
-          <h3>WGS Cancer</h3>
-          <div class="list" id="cancer-list"></div>
-        </div>
-      </section>
-
-      <section class="grid">
-        <div class="panel">
-          <h3>Nutrition Needs</h3>
-          <div class="list" id="nutrition-list"></div>
-        </div>
-        <div class="panel">
-          <h3>Food / Exposure</h3>
-          <div class="list" id="food-list"></div>
-        </div>
-      </section>
-
-      <section class="panel">
-        <h3>PGx Drug Notes</h3>
-        <div class="list" id="pgx-list"></div>
-      </section>
+    </div>
+    <div class="login-actions">
+      <button class="btn" onclick="patientLogin()" id="login-btn"></button>
+      <span class="status" id="portal-status"></span>
     </div>
   </div>
 
-  <script>
-    function queryParam(name) {
-      return new URLSearchParams(location.search).get(name);
-    }
+  <div id="empty" class="empty-state">
+    <div class="empty-icon">🧬</div>
+    <div class="empty-text" id="empty-text"></div>
+    <div class="empty-hint" id="empty-hint"></div>
+  </div>
 
-    async function apiFetch(url, options={}) {
-      const res = await fetch(url, options);
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Request failed');
-      return data;
-    }
+  <div id="dash" style="display:none"></div>
+</main>
 
-    function itemHtml(label, value) {
-      return `<div class="item"><div class="metric"><div class="metric-label">${label}</div><div class="metric-value">${value || '—'}</div></div></div>`;
-    }
+</div>
 
-    function badgeForRisk(type) {
-      if (type === 'adverse_effect') return '<span class="badge badge-red">Adverse effect</span>';
-      if (type === 'insufficient_efficacy') return '<span class="badge badge-amber">Insufficient efficacy</span>';
-      return '<span class="badge badge-blue">Dose reduction</span>';
-    }
+<script>
+const DTH = {
+  "Type 2 Diabetes (T2D)":"เบาหวานชนิดที่ 2","Stroke":"โรคหลอดเลือดสมอง","Gout":"โรคเกาต์","Venous Thromboembolism (VTE)":"ลิ่มเลือดอุดตันในหลอดเลือดดำ",
+  "Schizophrenia":"โรคจิตเภท","Chronic Obstructive Pulmonary Disease (COPD)":"โรคปอดอุดกั้นเรื้อรัง","Hypertension":"ความดันโลหิตสูง",
+  "Parkinson's Disease (PD)":"โรคพาร์กินสัน","Depression":"ภาวะซึมเศร้า","Bipolar Disorder":"โรคอารมณ์สองขั้ว",
+  "Coronary Heart Disease (CHD)":"โรคหลอดเลือดหัวใจ","Celiac Disease":"โรคแพ้กลูเตน","Sarcoidosis":"โรคซาร์คอยโดซิส"
+};
 
-    async function patientLogin() {
-      const participantNo = Number(document.getElementById('participant-no').value);
-      const password = document.getElementById('participant-password').value;
-      const status = document.getElementById('portal-status');
-      status.textContent = 'Signing in...';
-      try {
-        await apiFetch('/api/patient/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ participantNo, password })
-        });
-        await loadPortalData();
-      } catch (error) {
-        status.textContent = error.message;
-      }
-    }
+const EXP_TH = {
+  "Type 2 Diabetes (T2D)":"ร่างกายควบคุมน้ำตาลในเลือดได้ไม่ดี ส่งผลต่อไต ตา และหัวใจในระยะยาว",
+  "Stroke":"เลือดไปเลี้ยงสมองไม่พอ เสี่ยงอัมพฤกษ์ อัมพาต หรือเสียชีวิตเฉียบพลัน",
+  "Gout":"กรดยูริกสะสมในข้อ ทำให้ปวดข้อรุนแรงและอักเสบ",
+  "Venous Thromboembolism (VTE)":"ลิ่มเลือดก่อตัวในหลอดเลือดดำ อาจหลุดไปอุดตันที่ปอดได้",
+  "Schizophrenia":"โรคทางจิตเวชที่กระทบความคิด การรับรู้ และพฤติกรรม",
+  "Chronic Obstructive Pulmonary Disease (COPD)":"โรคปอดเรื้อรังที่ทำให้หายใจลำบาก ไอเรื้อรัง"
+};
 
-    async function patientLogout() {
-      try {
-        await fetch('/api/patient/logout', { method: 'POST' });
-      } finally {
-        document.getElementById('portal-content').style.display = 'none';
-        document.getElementById('portal-status').textContent = 'Not signed in';
-        document.getElementById('participant-password').value = '';
-      }
-    }
+const EXP_EN = {
+  "Type 2 Diabetes (T2D)":"The body cannot regulate blood sugar well, leading to long-term kidney, eye, and heart damage.",
+  "Stroke":"Insufficient blood flow to the brain, risking paralysis or sudden death.",
+  "Gout":"Uric acid crystals accumulate in joints, causing severe pain and inflammation.",
+  "Venous Thromboembolism (VTE)":"Blood clots form in veins and may travel to the lungs.",
+  "Schizophrenia":"A psychiatric disorder affecting thought, perception, and behaviour.",
+  "Chronic Obstructive Pulmonary Disease (COPD)":"A chronic lung condition causing breathlessness and persistent cough."
+};
 
-    async function loadPortalData() {
-      const data = await apiFetch('/api/patient/data');
-      document.getElementById('participant-no').value = data.participantNo;
-      document.getElementById('portal-status').textContent = `Signed in as participant ${data.participantNo}`;
-      document.getElementById('portal-content').style.display = 'grid';
+const CATS = {
+  autoimmune:{bg:"rgba(167,139,250,.14)",border:"rgba(167,139,250,.35)",text:"#c4b5fd",th:"ภูมิคุ้มกัน",en:"Autoimmune"},
+  neuro:{bg:"rgba(52,211,153,.12)",border:"rgba(52,211,153,.3)",text:"#6ee7b7",th:"สมอง/ประสาท",en:"Neuro"},
+  vascular:{bg:"rgba(56,189,248,.12)",border:"rgba(56,189,248,.3)",text:"#7dd3fc",th:"หัวใจ/หลอดเลือด",en:"Vascular"},
+  mental:{bg:"rgba(244,114,182,.12)",border:"rgba(244,114,182,.3)",text:"#f9a8d4",th:"สุขภาพจิต",en:"Mental"},
+  cancer:{bg:"rgba(248,113,113,.12)",border:"rgba(248,113,113,.3)",text:"#fca5a5",th:"มะเร็ง",en:"Cancer"},
+  metabolic:{bg:"rgba(251,146,60,.14)",border:"rgba(251,146,60,.35)",text:"#fdba74",th:"เมตาบอลิก",en:"Metabolic"},
+  other:{bg:"rgba(148,163,184,.1)",border:"rgba(148,163,184,.2)",text:"#cbd5e1",th:"อื่น ๆ",en:"Other"}
+};
 
-      document.getElementById('basic-info').innerHTML = [
-        itemHtml('APOE', data.patient.apoe_genotype),
-        itemHtml('Genetic diseases', data.patient.genetic_diseases),
-        itemHtml('WGS heart', data.patient.wgs_heart),
-        itemHtml('WGS other', data.patient.wgs_other),
-      ].join('');
+const TEXT = {
+  TH: {
+    disclaimer:"🔒 <strong>ข้อมูลนี้เป็นความลับ</strong> ใช้เพื่อการสื่อสารผลเฉพาะของผู้เข้าร่วมวิจัยเท่านั้น ไม่ใช่การวินิจฉัยโรค",
+    logoSub:"Patient Portal",
+    logout:"ออกจากระบบ",
+    loginTitle:"เข้าสู่ระบบผู้ป่วย",
+    loginSub:"กรอกหมายเลขผู้เข้าร่วมและรหัสผ่านที่แอดมินกำหนดให้",
+    pno:"หมายเลขผู้เข้าร่วม",
+    pass:"รหัสผ่าน",
+    login:"เข้าสู่ระบบ",
+    notSigned:"ยังไม่ได้เข้าสู่ระบบ",
+    emptyText:"กรุณาเข้าสู่ระบบเพื่อดูรายงานของคุณ",
+    emptyHint:"ระบบจะแสดงเฉพาะข้อมูลของผู้เข้าร่วมที่ล็อกอินอยู่เท่านั้น",
+    greeting:"ผลการตรวจดีเอ็นเอส่วนบุคคล · รหัสผู้เข้าร่วม",
+    participant:"หมายเลข",
+    researchOnly:"ข้อมูลเพื่อการวิจัยเท่านั้น · ไม่ใช่การวินิจฉัยโรค",
+    highestRisk:"ความเสี่ยงสูงสุดที่พบ",
+    apoe:"ยีน APOE (ความเสี่ยงสมองเสื่อม)",
+    noCarrier:"ไม่พบข้อมูลยีนโรคทางพันธุกรรม",
+    nutrition:"สารอาหาร",
+    nutritionSub:"รายการที่ต้องเสริม",
+    cancer:"ยีนมะเร็ง",
+    cancerSub:"ชนิดที่พบ",
+    pgx:"ยาที่ต้องระวัง",
+    pgxSub:"รายการทั้งหมด",
+    riskCount:"อันดับความเสี่ยง",
+    riskCountSub:"โรคที่พบ",
+    riskProfile:"ความเสี่ยงโรคของคุณ",
+    riskProfileSub:"เทียบกับประชากรกลุ่มเดียวกัน — กดที่ชื่อโรคเพื่ออ่านคำอธิบาย",
+    tapHint:"👆 แตะที่ชื่อโรคเพื่ออ่านคำอธิบาย",
+    genericRisk:"พบความเสี่ยงทางพันธุกรรมสำหรับโรคนี้",
+    urgent:"ควรปรึกษาแพทย์โดยเร็ว",
+    monitor:"แจ้งแพทย์และติดตามอาการ",
+    prevent:"ดูแลสุขภาพเชิงป้องกัน",
+    riskHigher:"ความเสี่ยงสูงกว่าคนทั่วไป",
+    wgs:"ผลตรวจยีนพิเศษ (WGS)",
+    wgsSub:"ไม่ได้แปลว่าป่วยอยู่ — เป็นความเสี่ยงที่พบในยีน",
+    cancerFlags:"ยีนที่เกี่ยวกับมะเร็ง",
+    noCancer:"ไม่พบยีนมะเร็งที่น่าเป็นห่วง",
+    cancerNote:"แนะนำตรวจคัดกรองกับแพทย์ตามช่วงอายุ",
+    heartFlags:"ยีนที่เกี่ยวกับหัวใจ",
+    noHeart:"ไม่พบความผิดปกติ",
+    other:"ข้อมูลอื่น ๆ",
+    nutrients:"สารอาหารที่ร่างกายต้องการพิเศษ",
+    nutrientsSub:"จากยีนของคุณ ร่างกายอาจต้องการสารอาหารเหล่านี้มากกว่าปกติ",
+    highNeed:"⬆ ต้องการสูง",
+    slightNeed:"↑ ต้องการสูงเล็กน้อย",
+    plan:"แผนดูแลตัวเองสำหรับคุณ",
+    sum:"สรุป: ",
+    ex:"ออกกำลังกาย",
+    diet:"การกิน",
+    mon:"ติดตาม",
+    exSum:"เน้น Cardio ปานกลาง + เสริมกล้ามเนื้อ ตามข้อมูลของคุณ",
+    dietSum:"อาหาร Mediterranean/DASH ลดแป้ง-หวาน-เค็ม",
+    monSum:"ตรวจสม่ำเสมอตามที่แพทย์แนะนำ",
+    pgxTitle:"ข้อมูลยีนที่เกี่ยวกับยา (PGx)",
+    pgxSub2:"ยีนของคุณอาจส่งผลต่อการตอบสนองต่อยาบางชนิด — แจ้งแพทย์และเภสัชกรทุกครั้ง",
+    ae:"เสี่ยงผลข้างเคียง",
+    eff:"ประสิทธิภาพลดลง",
+    dose:"ปรับขนาดยา",
+    items:"รายการ",
+    exampleDrugs:"ตัวอย่างยาที่มีข้อมูล PGx สำคัญ:",
+    allergy:"ภูมิแพ้และสิ่งแวดล้อมที่ควรระวัง",
+    foodRisk:"อาหารที่อาจแพ้",
+    envRisk:"สิ่งแวดล้อมที่ควรระวัง",
+    noData:"ไม่มีข้อมูล",
+    footer:"ที่มา: ข้อมูลผู้ป่วยในฐานข้อมูล · รายงานนี้ไม่ใช่การวินิจฉัยโรค",
+    pdpa:"คุ้มครองโดย PDPA",
+    researchBadge:"ข้อมูลเพื่อการวิจัย",
+    signedIn:"เข้าสู่ระบบเป็นผู้เข้าร่วม",
+  },
+  EN: {
+    disclaimer:"🔒 <strong>This information is confidential.</strong> It is for participant communication only and is not a medical diagnosis.",
+    logoSub:"Patient Portal",
+    logout:"Logout",
+    loginTitle:"Patient Sign In",
+    loginSub:"Enter the participant number and password assigned by the admin",
+    pno:"Participant Number",
+    pass:"Password",
+    login:"Sign In",
+    notSigned:"Not signed in",
+    emptyText:"Please sign in to view your report",
+    emptyHint:"Only the currently authenticated participant record is shown here",
+    greeting:"Personal DNA Report · Participant",
+    participant:"Participant",
+    researchOnly:"Research data only · Not a medical diagnosis",
+    highestRisk:"Highest Risk Found",
+    apoe:"APOE Genotype",
+    noCarrier:"No genetic disease carrier noted",
+    nutrition:"Nutrition",
+    nutritionSub:"items to supplement",
+    cancer:"Cancer WGS",
+    cancerSub:"types flagged",
+    pgx:"PGx Alerts",
+    pgxSub:"total entries",
+    riskCount:"Risks Ranked",
+    riskCountSub:"diseases found",
+    riskProfile:"Your Disease Risk Profile",
+    riskProfileSub:"Compared to the general population — tap a disease name for details",
+    tapHint:"👆 Tap a disease name to read explanation",
+    genericRisk:"Genetic predisposition identified for this condition.",
+    urgent:"Consult a doctor promptly",
+    monitor:"Inform your doctor and monitor symptoms",
+    prevent:"Preventive health care",
+    riskHigher:"Risk is higher than average",
+    wgs:"Whole Genome Sequencing Findings",
+    wgsSub:"These indicate genetic predisposition, not current disease",
+    cancerFlags:"Cancer-related Gene Flags",
+    noCancer:"No significant cancer flags",
+    cancerNote:"Recommend screening with your doctor based on age",
+    heartFlags:"Cardiac Gene Findings",
+    noHeart:"No cardiac variants detected",
+    other:"Other Findings",
+    nutrients:"Nutritional Needs",
+    nutrientsSub:"Your genes suggest increased need for these nutrients",
+    highNeed:"⬆ High need",
+    slightNeed:"↑ Slightly high need",
+    plan:"Your Personalised Action Plan",
+    sum:"Summary: ",
+    ex:"Exercise",
+    diet:"Diet",
+    mon:"Monitoring",
+    exSum:"Moderate cardio + strength training based on your data",
+    dietSum:"Mediterranean/DASH — reduce refined carbs, sugar, and sodium",
+    monSum:"Regular check-ups as recommended",
+    pgxTitle:"Pharmacogenomics (PGx)",
+    pgxSub2:"Your genes may affect drug response — always inform your doctor and pharmacist",
+    ae:"Adverse Effect Risk",
+    eff:"Reduced Efficacy",
+    dose:"Dose Adjustment",
+    items:"items",
+    exampleDrugs:"Example drugs with key PGx data:",
+    allergy:"Allergy & Environmental Risks",
+    foodRisk:"Food Allergy Risk",
+    envRisk:"Environmental Exposures",
+    noData:"No data",
+    footer:"Source: patient database data · Not a medical diagnosis",
+    pdpa:"PDPA Protected",
+    researchBadge:"Research Data Only",
+    signedIn:"Signed in as participant",
+  }
+};
 
-      document.getElementById('plans').innerHTML = [
-        itemHtml('Exercise plan', `<pre>${data.patient.exercise_plan || '—'}</pre>`),
-        itemHtml('Diet plan', `<pre>${data.patient.diet_plan || '—'}</pre>`),
-        itemHtml('Monitoring plan', `<pre>${data.patient.monitoring_plan || '—'}</pre>`),
-      ].join('');
+let currentLang = 'TH';
+let currentData = null;
+let openR = null;
+let activeTab = 'ex';
 
-      document.getElementById('risks-list').innerHTML = data.risks.length
-        ? data.risks.map((risk) => `<div class="item"><strong>#${risk.rank_order}</strong> ${risk.disease_name}<div class="status">${Number(risk.multiplier).toFixed(2)}x</div></div>`).join('')
-        : '<div class="empty">No risk records</div>';
+function t(key){ return TEXT[currentLang][key] || key; }
+function dn(name){ return (currentLang === 'TH' && DTH[name]) || name; }
+function expl(name){ return currentLang === 'TH' ? (EXP_TH[name] || '') : (EXP_EN[name] || ''); }
+function mc(m){ return m>=10?"#f87171":m>=5?"#fb923c":m>=3?"#fbbf24":"#34d399"; }
+function getCat(n){
+  const l = String(n || '').toLowerCase();
+  if(/cancer|carcinoma|lymphoma|leukemia|melanoma|neuroblastoma|neoplasm/.test(l))return"cancer";
+  if(/diabetes|gout|thyroid|metabolic|obesity|hypertriglyceridemia/.test(l))return"metabolic";
+  if(/lupus|sclero|sjögren|celiac|crohn|colitis|psoriasis|alopecia|vitiligo|kawasaki|sarcoid|autoimmune|urticaria|atopic|dermatitis|hepatitis|biliary|hashimoto/.test(l))return"autoimmune";
+  if(/stroke|cardiac|heart|vascular|thrombo|hypertension|aneurysm|aortic|coronary|myocardial/.test(l))return"vascular";
+  if(/parkinson|alzheimer|sclerosis|als|epilepsy|tremor|dementia|macular|glaucoma|sleep apnea|palsy/.test(l))return"neuro";
+  if(/depression|bipolar|schizophrenia|adhd|anxiety|mental/.test(l))return"mental";
+  return"other";
+}
+function parseLines(raw){
+  return String(raw || '')
+    .split(/<br\s*\/?>/i)
+    .map(s=>s.replace(/<[^>]+>/g,"").trim())
+    .filter(Boolean)
+    .slice(0,8);
+}
+function queryParam(name){ return new URLSearchParams(location.search).get(name); }
 
-      document.getElementById('cancer-list').innerHTML = data.cancer.length
-        ? data.cancer.map((row) => `<div class="item">${row.cancer_type}<div class="status">${row.carrier_status || '—'} ${row.multiplier ? `• ${Number(row.multiplier).toFixed(2)}x` : ''}</div></div>`).join('')
-        : '<div class="empty">No WGS cancer records</div>';
+async function apiFetch(url, options={}) {
+  const res = await fetch(url, options);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Request failed');
+  return data;
+}
 
-      document.getElementById('nutrition-list').innerHTML = data.nutrition.length
-        ? data.nutrition.map((row) => `<div class="item">${row.nutrient}<div class="status">${row.need_level}</div></div>`).join('')
-        : '<div class="empty">No nutrition records</div>';
+function setStaticText(){
+  document.getElementById('disclaimer').innerHTML = t('disclaimer');
+  document.getElementById('logo-sub').textContent = t('logoSub');
+  document.getElementById('logout-btn').textContent = t('logout');
+  document.getElementById('login-title').textContent = t('loginTitle');
+  document.getElementById('login-sub').textContent = t('loginSub');
+  document.getElementById('label-pno').textContent = t('pno');
+  document.getElementById('label-pass').textContent = t('pass');
+  document.getElementById('login-btn').textContent = t('login');
+  document.getElementById('empty-text').textContent = t('emptyText');
+  document.getElementById('empty-hint').textContent = t('emptyHint');
+}
 
-      document.getElementById('food-list').innerHTML = data.food.length
-        ? data.food.map((row) => `<div class="item">${row.item_name}<div class="status">${row.item_type} • ${row.risk_level}</div></div>`).join('')
-        : '<div class="empty">No food or exposure records</div>';
+function setLang(lang){
+  currentLang = lang;
+  document.getElementById("btnTH").classList.toggle("active",lang==="TH");
+  document.getElementById("btnEN").classList.toggle("active",lang==="EN");
+  setStaticText();
+  if (currentData) render();
+}
 
-      document.getElementById('pgx-list').innerHTML = data.pgx.length
-        ? data.pgx.map((row) => `<div class="item">${row.drug_name}<div class="status">${badgeForRisk(row.risk_type)}</div></div>`).join('')
-        : '<div class="empty">No PGx records</div>';
-    }
+function getTopRiskSummary(risks){
+  const ordered = [...risks].sort((a,b)=>Number(a.rank_order)-Number(b.rank_order));
+  const top10 = ordered.slice(0,10).map(item => ({
+    name: item.disease_name,
+    mult: Number(item.multiplier || 0)
+  }));
+  return {
+    top10,
+    topRisk: top10[0] || { name: '-', mult: 0 }
+  };
+}
 
-    async function checkExistingSession() {
-      const participant = queryParam('participant');
-      if (participant) document.getElementById('participant-no').value = participant;
-      try {
-        const session = await apiFetch('/api/patient/session');
-        if (session.authenticated) await loadPortalData();
-      } catch {
-        document.getElementById('portal-status').textContent = 'Not signed in';
-      }
-    }
+function splitPgx(pgx){
+  const ae = pgx.filter(row => row.risk_type === 'adverse_effect');
+  const eff = pgx.filter(row => row.risk_type === 'insufficient_efficacy');
+  const dose = pgx.filter(row => row.risk_type === 'dose_reduction');
+  return { ae, eff, dose };
+}
 
-    window.onload = checkExistingSession;
-  </script>
+function render(){
+  const data = currentData;
+  const isTH = currentLang === 'TH';
+  const riskInfo = getTopRiskSummary(data.risks || []);
+  const top10 = riskInfo.top10;
+  const topRisk = riskInfo.topRisk;
+  const max = top10[0]?.mult || 1;
+  const tc = mc(topRisk.mult || 0);
+  const pgxGroups = splitPgx(data.pgx || []);
+  const totalPgx = pgxGroups.ae.length + pgxGroups.eff.length + pgxGroups.dose.length;
+
+  let h = `<div class="hero-top">
+    <div class="hero-greeting">${t('greeting')}</div>
+    <div class="hero-id">${t('participant')} ${data.participantNo}</div>
+    <div class="hero-sub">${t('researchOnly')}</div>
+  </div>
+  <div class="hero-risk">
+    <div>
+      <div class="risk-label">${t('highestRisk')}</div>
+      <div class="risk-big" style="color:${tc}">${Number(topRisk.mult || 0).toFixed(2)}×</div>
+      <div class="risk-name">${dn(topRisk.name || '-')}</div>
+    </div>
+    <div>
+      <div class="apoe-label">${t('apoe')}</div>
+      <div class="apoe-badge">${data.patient.apoe_genotype || "ε3/ε3"}</div>
+      <div class="carrier">🧬 ${data.patient.genetic_diseases || t('noCarrier')}</div>
+    </div>
+  </div>`;
+
+  h += `<div class="stat-grid">
+    <div class="stat-card"><div class="stat-lbl">${t('nutrition')}</div><div class="stat-val" style="color:var(--green)">${data.nutrition.length}</div><div class="stat-sub">${t('nutritionSub')}</div></div>
+    <div class="stat-card"><div class="stat-lbl">${t('cancer')}</div><div class="stat-val" style="color:var(--red)">${data.cancer.length}</div><div class="stat-sub">${t('cancerSub')}</div></div>
+    <div class="stat-card"><div class="stat-lbl">${t('pgx')}</div><div class="stat-val" style="color:var(--amber)">${totalPgx}</div><div class="stat-sub">${t('pgxSub')}</div></div>
+    <div class="stat-card"><div class="stat-lbl">${t('riskCount')}</div><div class="stat-val" style="color:var(--purple)">${top10.length}</div><div class="stat-sub">${t('riskCountSub')}</div></div>
+  </div>`;
+
+  const riskRows = top10.map((item,i)=>{
+    const cat = getCat(item.name);
+    const c = CATS[cat];
+    const pct = Math.min(item.mult / max * 100, 100);
+    const col = mc(item.mult);
+    const isO = openR === i;
+    const catLbl = isTH ? c.th : c.en;
+    const exp = expl(item.name);
+    const adv = isTH ? (item.mult>=10?t('urgent'):item.mult>=3?t('monitor'):t('prevent')) : (item.mult>=10?t('urgent'):item.mult>=3?t('monitor'):t('prevent'));
+    return `<div class="risk-item${isO?" open":""}" onclick="toggleR(${i})">
+      <div class="ri-header">
+        <span class="ri-num">#${i+1}</span>
+        <div class="ri-body">
+          <div class="ri-name-row">
+            <span class="ri-name">${dn(item.name)}</span>
+            <span class="cat-badge" style="background:${c.bg};border:0.5px solid ${c.border};color:${c.text}">${catLbl}</span>
+          </div>
+          <div class="bar-row">
+            <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${col}"></div></div>
+            <span class="ri-mult" style="color:${col}">${item.mult.toFixed(2)}×</span>
+          </div>
+        </div>
+        <span class="ri-chevron">${isO?"▲":"▼"}</span>
+      </div>
+      ${isO?`<div class="ri-detail">
+        <div class="ri-explain" style="color:${c.text}">💬 ${exp || t('genericRisk')}</div>
+        <div class="ri-advice">${t('riskHigher')} <strong style="color:${col}">${item.mult.toFixed(2)}×</strong> — ${adv}</div>
+      </div>`:""}
+    </div>`;
+  }).join("");
+
+  h += `<div class="card">
+    <div class="sh"><span class="sh-icon">📊</span><span class="sh-title">${t('riskProfile')}</span></div>
+    <div class="sh-sub">${t('riskProfileSub')}</div>
+    ${riskRows || `<div class="empty-text">${t('noData')}</div>`}
+    <div class="tap-hint">${t('tapHint')}</div>
+  </div>`;
+
+  const cancerH = data.cancer.length
+    ? data.cancer.map(c=>`<div class="c-tag"><div class="c-name">${c.cancer_type}</div><div class="c-mult">${c.multiplier ? `${Number(c.multiplier).toFixed(2)}×` : ''}</div></div>`).join("")
+    : `<span style="font-size:13px;color:var(--muted)">${t('noCancer')}</span>`;
+  h += `<div class="card">
+    <div class="sh"><span class="sh-icon">🔬</span><span class="sh-title">${t('wgs')}</span></div>
+    <div class="sh-sub">${t('wgsSub')}</div>
+    <div class="wgs-block" style="background:rgba(248,113,113,.07);border:0.5px solid rgba(248,113,113,.2)">
+      <div class="wgs-title" style="color:#fca5a5">🎗️ ${t('cancerFlags')}</div>
+      <div class="cancer-tags">${cancerH}</div>
+      ${data.cancer.length?`<div style="font-size:11px;color:var(--muted);margin-top:8px">💬 ${t('cancerNote')}</div>`:""}
+    </div>
+    <div class="wgs-block" style="background:rgba(56,189,248,.07);border:0.5px solid rgba(56,189,248,.2)">
+      <div class="wgs-title" style="color:#7dd3fc">❤️ ${t('heartFlags')}</div>
+      <div style="font-size:13px;color:var(--text)">${data.patient.wgs_heart || t('noHeart')}</div>
+    </div>
+    ${data.patient.wgs_other ? `<div class="wgs-block" style="background:rgba(148,163,184,.07);border:0.5px solid rgba(148,163,184,.15)">
+      <div class="wgs-title" style="color:#cbd5e1">🧬 ${t('other')}</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.6);line-height:1.6">${data.patient.wgs_other}</div>
+    </div>` : ""}
+  </div>`;
+
+  const nCards = data.nutrition.map(n=>`<div class="nutr-card">
+    <div class="nutr-name">${n.nutrient}</div>
+    <div class="nutr-level">${n.need_level === "High" ? t('highNeed') : t('slightNeed')}</div>
+  </div>`).join("");
+  h += `<div class="card">
+    <div class="sh"><span class="sh-icon">🥗</span><span class="sh-title">${t('nutrients')}</span></div>
+    <div class="sh-sub">${t('nutrientsSub')}</div>
+    <div class="nutr-grid">${nCards || `<span style="color:var(--muted);font-size:12px">${t('noData')}</span>`}</div>
+  </div>`;
+
+  const exL = parseLines(data.patient.exercise_plan);
+  const dL = parseLines(data.patient.diet_plan);
+  const mL = parseLines(data.patient.monitoring_plan);
+  const mkItems = (lines,dot)=>lines.map(l=>`<div class="plan-item"><div class="plan-dot" style="background:${dot}"></div><div class="plan-text">${l}</div></div>`).join("");
+  const tabs = [
+    {key:"ex",icon:"🏃",label:t('ex'),col:"var(--blue)",items:exL,sum:t('exSum')},
+    {key:"diet",icon:"🥗",label:t('diet'),col:"var(--green)",items:dL,sum:t('dietSum')},
+    {key:"mon",icon:"🏥",label:t('mon'),col:"var(--orange)",items:mL,sum:t('monSum')}
+  ];
+  const tabBtns = tabs.map(ti=>`<button class="tab-btn${activeTab===ti.key?" act-"+ti.key:""}" onclick="switchTab('${ti.key}')"><span class="tab-icon">${ti.icon}</span>${ti.label}</button>`).join("");
+  const tabPanels = tabs.map(ti=>{
+    const sumC = ti.key==="ex"?"rgba(56,189,248,.08)":ti.key==="diet"?"rgba(52,211,153,.08)":"rgba(251,146,60,.08)";
+    const sumB = ti.key==="ex"?"rgba(56,189,248,.25)":ti.key==="diet"?"rgba(52,211,153,.25)":"rgba(251,146,60,.25)";
+    return `<div id="tp-${ti.key}" style="display:${activeTab===ti.key?"block":"none"}">
+      <div class="plan-sum" style="background:${sumC};border:0.5px solid ${sumB}">
+        <span style="font-weight:600;color:${ti.col}">📌 ${t('sum')}</span>
+        <span style="color:rgba(255,255,255,.7)">${ti.sum}</span>
+      </div>
+      ${mkItems(ti.items,ti.col)}
+    </div>`;
+  }).join("");
+  h += `<div class="card">
+    <div class="sh"><span class="sh-icon">💪</span><span class="sh-title">${t('plan')}</span></div>
+    <div class="tab-row">${tabBtns}</div>
+    ${tabPanels}
+  </div>`;
+
+  const drugNames = data.pgx.slice(0,18).map(d=>`<span class="drug-tag">${d.drug_name}</span>`).join("");
+  h += `<div class="card">
+    <div class="sh"><span class="sh-icon">💊</span><span class="sh-title">${t('pgxTitle')}</span></div>
+    <div class="sh-sub">${t('pgxSub2')}</div>
+    <div class="pgx-grid">
+      <div class="pgx-card" style="background:rgba(248,113,113,.1);border:0.5px solid rgba(248,113,113,.3)">
+        <div class="pgx-num" style="color:var(--red)">${pgxGroups.ae.length}</div>
+        <div class="pgx-unit" style="color:var(--red)">${t('items')}</div>
+        <div class="pgx-lbl">${t('ae')}</div>
+      </div>
+      <div class="pgx-card" style="background:rgba(251,191,36,.1);border:0.5px solid rgba(251,191,36,.3)">
+        <div class="pgx-num" style="color:var(--amber)">${pgxGroups.eff.length}</div>
+        <div class="pgx-unit" style="color:var(--amber)">${t('items')}</div>
+        <div class="pgx-lbl">${t('eff')}</div>
+      </div>
+      <div class="pgx-card" style="background:rgba(56,189,248,.1);border:0.5px solid rgba(56,189,248,.3)">
+        <div class="pgx-num" style="color:var(--blue)">${pgxGroups.dose.length}</div>
+        <div class="pgx-unit" style="color:var(--blue)">${t('items')}</div>
+        <div class="pgx-lbl">${t('dose')}</div>
+      </div>
+    </div>
+    ${drugNames ? `<div class="drug-wrap"><div class="drug-lbl">${t('exampleDrugs')}</div><div class="drug-tags">${drugNames}</div></div>` : ""}
+  </div>`;
+
+  const fTags = data.food.filter(f=>f.item_type==='food').map(f=>`<span class="food-tag">${f.item_name}</span>`).join("") || `<span style="color:var(--muted);font-size:12px">${t('noData')}</span>`;
+  const eTags = data.food.filter(f=>f.item_type!=='food').map(f=>`<span class="exp-tag">${f.item_name}</span>`).join("") || `<span style="color:var(--muted);font-size:12px">${t('noData')}</span>`;
+  h += `<div class="card">
+    <div class="sh"><span class="sh-icon">🌿</span><span class="sh-title">${t('allergy')}</span></div>
+    <div class="allergy-grid">
+      <div><div class="al-lbl" style="color:var(--orange)">🍴 ${t('foodRisk')}</div><div class="tag-list">${fTags}</div></div>
+      <div><div class="al-lbl" style="color:var(--muted)">⚠️ ${t('envRisk')}</div><div class="tag-list">${eTags}</div></div>
+    </div>
+  </div>`;
+
+  h += `<div class="footer">
+    <div class="footer-txt">${t('footer')}</div>
+    <div class="fbadges">
+      <span class="fbadge" style="background:rgba(52,211,153,.1);border:0.5px solid rgba(52,211,153,.25);color:var(--green)">🔒 ${t('pdpa')}</span>
+      <span class="fbadge" style="background:rgba(167,139,250,.1);border:0.5px solid rgba(167,139,250,.25);color:var(--purple)">🧬 ${t('researchBadge')}</span>
+    </div>
+  </div>`;
+
+  document.getElementById('dash').innerHTML = h;
+  document.getElementById('dash').style.display = 'block';
+  document.getElementById('empty').style.display = 'none';
+}
+
+function toggleR(i){ openR = openR === i ? null : i; render(); }
+function switchTab(ti){ activeTab = ti; render(); }
+
+async function patientLogin() {
+  const participantNo = Number(document.getElementById('participant-no').value);
+  const password = document.getElementById('participant-password').value;
+  const status = document.getElementById('portal-status');
+  status.textContent = '...';
+  try {
+    await apiFetch('/api/patient/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ participantNo, password })
+    });
+    await loadPortalData();
+  } catch (error) {
+    status.textContent = error.message;
+  }
+}
+
+async function patientLogout() {
+  try {
+    await fetch('/api/patient/logout', { method: 'POST' });
+  } finally {
+    currentData = null;
+    openR = null;
+    activeTab = 'ex';
+    document.getElementById('dash').style.display = 'none';
+    document.getElementById('empty').style.display = 'flex';
+    document.getElementById('portal-status').textContent = t('notSigned');
+    document.getElementById('participant-password').value = '';
+  }
+}
+
+async function loadPortalData() {
+  const data = await apiFetch('/api/patient/data');
+  currentData = data;
+  document.getElementById('participant-no').value = data.participantNo;
+  document.getElementById('portal-status').textContent = `${t('signedIn')} ${data.participantNo}`;
+  render();
+}
+
+async function checkExistingSession() {
+  setStaticText();
+  const participant = queryParam('participant');
+  if (participant) document.getElementById('participant-no').value = participant;
+  document.getElementById('portal-status').textContent = t('notSigned');
+  document.getElementById('participant-password').addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') patientLogin();
+  });
+  try {
+    const session = await apiFetch('/api/patient/session');
+    if (session.authenticated) await loadPortalData();
+  } catch {}
+}
+
+window.onload = checkExistingSession;
+</script>
 </body>
 </html>
