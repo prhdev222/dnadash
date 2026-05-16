@@ -44,18 +44,28 @@ export async function tursoExecute(context, sql, args = []) {
 
   const data = await response.json();
   const result = data?.results?.[0];
+  const fallbackError =
+    data?.error?.message ||
+    data?.message ||
+    result?.error?.message ||
+    JSON.stringify(data).slice(0, 500) ||
+    "Database request failed.";
 
   if (!response.ok) {
     return {
       ok: false,
       status: response.status,
-      error: result?.error?.message || "Database request failed.",
+      error: fallbackError,
     };
   }
 
   if (!result) return { ok: true, rows: [] };
   if (result.type === "error") {
-    return { ok: false, status: 400, error: result.error.message };
+    return {
+      ok: false,
+      status: 400,
+      error: result.error?.message || fallbackError,
+    };
   }
 
   const cols = result.response?.result?.cols?.map((col) => col.name) || [];
