@@ -87,6 +87,7 @@ body{background:var(--bg);color:var(--text);font-family:'Sarabun',system-ui,sans
 .mini-stat-val{font-size:20px;font-weight:800;font-family:'DM Mono',monospace}
 .mini-stat-sub{font-size:11px;color:var(--muted);margin-top:4px}
 .drug-rank-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.drug-type-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:14px}
 .drug-rank-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);border-radius:10px;padding:12px}
 .drug-rank-title{font-size:12px;font-weight:700;margin-bottom:8px}
 .drug-rank-list{display:grid;gap:8px;max-height:260px;overflow:auto;padding-right:4px}
@@ -191,6 +192,7 @@ var(--bg)}
   .chart-grid{grid-template-columns:1fr}
   .mini-grid{grid-template-columns:1fr}
   .drug-rank-grid{grid-template-columns:1fr}
+  .drug-type-grid{grid-template-columns:1fr}
   .ov-card{padding:12px}
   .ov-val{font-size:20px}
   .tbl-wrap{overflow-x:auto}
@@ -607,14 +609,23 @@ function renderOverview() {
     dose_reduction: DB.pgx.filter(d => d.risk_type === 'dose_reduction').length
   };
   const totalPgxEntries = Object.values(pgxCounts).reduce((s,n)=>s+n,0) || 1;
-  const pgxDrugCounts = {};
+  const pgxDrugByType = {
+    adverse_effect: {},
+    insufficient_efficacy: {},
+    dose_reduction: {}
+  };
   DB.pgx.forEach(row => {
-    const key = String(row.drug_name || '').trim() || 'Unknown';
-    pgxDrugCounts[key] = (pgxDrugCounts[key] || 0) + 1;
+    const type = row.risk_type;
+    const name = String(row.drug_name || '').trim() || 'Unknown';
+    if (!pgxDrugByType[type]) return;
+    pgxDrugByType[type][name] = (pgxDrugByType[type][name] || 0) + 1;
   });
-  const pgxDrugSortedDesc = Object.entries(pgxDrugCounts).sort((a,b)=>b[1]-a[1] || a[0].localeCompare(b[0]));
-  const pgxDrugMost = pgxDrugSortedDesc.slice(0,8);
-  const pgxDrugLeast = [...pgxDrugSortedDesc].slice(-8).reverse();
+  const pgxDrugRankings = Object.fromEntries(
+    Object.entries(pgxDrugByType).map(([type, counts]) => [
+      type,
+      Object.entries(counts).sort((a,b)=>b[1]-a[1] || a[0].localeCompare(b[0]))
+    ])
+  );
 
   const nutritionCounts = {};
   DB.nutrition.forEach(n => {
@@ -710,35 +721,33 @@ function renderOverview() {
       }).join('')}
     </table>
 
-    <div class="drug-rank-grid">
-      <div class="drug-rank-card">
-        <div class="drug-rank-title">Most common drugs</div>
-        <div class="drug-rank-list">
-          ${pgxDrugMost.length ? pgxDrugMost.map(([name,count]) => `
-            <div>
-              <div class="drug-rank-item">
-                <div class="drug-rank-name">${name}</div>
-                <div class="drug-rank-count">${count}</div>
-              </div>
-              <div class="drug-rank-track"><div class="drug-rank-fill" style="width:${Math.round(count / (pgxDrugMost[0]?.[1] || 1) * 100)}%;background:var(--amber)"></div></div>
+    <div class="drug-type-grid">
+      ${[
+        ['adverse_effect', 'Most common adverse effect drugs', 'var(--red)'],
+        ['insufficient_efficacy', 'Most common insufficient efficacy drugs', 'var(--amber)'],
+        ['dose_reduction', 'Most common dose reduction drugs', 'var(--blue)'],
+      ].map(([rt, title, color]) => {
+        const ranking = (pgxDrugRankings[rt] || []).slice(0, 8);
+        const maxCount = ranking[0]?.[1] || 1;
+        const label = rt === 'adverse_effect' ? 'Adverse Effect' : rt === 'insufficient_efficacy' ? 'Insufficient Efficacy' : 'Dose Reduction';
+        const badgeCls = rt === 'adverse_effect' ? 'badge-ae' : rt === 'insufficient_efficacy' ? 'badge-eff' : 'badge-dose';
+        return `
+          <div class="drug-rank-card">
+            <div class="drug-rank-title"><span class="badge ${badgeCls}">${label}</span> ${title}</div>
+            <div class="drug-rank-list">
+              ${ranking.length ? ranking.map(([name,count]) => `
+                <div>
+                  <div class="drug-rank-item">
+                    <div class="drug-rank-name">${name}</div>
+                    <div class="drug-rank-count">${count}</div>
+                  </div>
+                  <div class="drug-rank-track"><div class="drug-rank-fill" style="width:${Math.round(count / maxCount * 100)}%;background:${color}"></div></div>
+                </div>
+              `).join('') : '<div style="color:var(--muted);font-size:12px">No data</div>'}
             </div>
-          `).join('') : '<div style="color:var(--muted);font-size:12px">No data</div>'}
-        </div>
-      </div>
-      <div class="drug-rank-card">
-        <div class="drug-rank-title">Least common drugs</div>
-        <div class="drug-rank-list">
-          ${pgxDrugLeast.length ? pgxDrugLeast.map(([name,count]) => `
-            <div>
-              <div class="drug-rank-item">
-                <div class="drug-rank-name">${name}</div>
-                <div class="drug-rank-count">${count}</div>
-              </div>
-              <div class="drug-rank-track"><div class="drug-rank-fill" style="width:${Math.round(count / (pgxDrugMost[0]?.[1] || 1) * 100)}%;background:var(--blue)"></div></div>
-            </div>
-          `).join('') : '<div style="color:var(--muted);font-size:12px">No data</div>'}
-        </div>
-      </div>
+          </div>
+        `;
+      }).join('')}
     </div>
   </div>
 
