@@ -106,6 +106,18 @@ body{background:var(--bg);color:var(--text);font-family:'Sarabun',system-ui,'Not
 .drug-lbl{font-size:11px;color:var(--muted);margin-bottom:6px}
 .drug-tags{display:flex;flex-wrap:wrap;gap:5px}
 .drug-tag{background:rgba(251,191,36,.1);border:0.5px solid rgba(251,191,36,.25);border-radius:20px;padding:3px 10px;font-size:11px;color:#fcd34d}
+.drug-groups{display:grid;gap:10px}
+.drug-group{border:0.5px solid var(--border);border-radius:12px;padding:12px 14px;background:rgba(255,255,255,.025)}
+.drug-group-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.drug-group-title{font-size:13px;font-weight:700;color:#f1f5f9}
+.drug-group-count{font-size:11px;color:var(--muted)}
+.drug-group-list{display:grid;gap:8px}
+.drug-item{border-radius:10px;padding:10px 12px;background:rgba(255,255,255,.03);border:0.5px solid rgba(255,255,255,.05)}
+.drug-item-name{font-size:13px;font-weight:700;color:#f8fafc;margin-bottom:4px}
+.drug-item-desc{font-size:12px;color:var(--muted);line-height:1.6}
+.drug-toggle{margin-top:8px}
+.link-btn{border:none;background:transparent;color:var(--blue);font:inherit;font-size:12px;font-weight:700;cursor:pointer;padding:0}
+.link-btn:hover{text-decoration:underline}
 .drug-lookup{display:grid;gap:10px;margin-bottom:14px}
 .lookup-card{background:rgba(255,255,255,.03);border:0.5px solid var(--border);border-radius:12px;padding:12px 14px}
 .lookup-name{font-size:14px;font-weight:700;color:#f1f5f9;margin-bottom:5px}
@@ -327,7 +339,9 @@ const TEXT = {
     eff:"ประสิทธิภาพลดลง",
     dose:"ปรับขนาดยา",
     items:"รายการ",
-    exampleDrugs:"ตัวอย่างยาที่มีข้อมูล PGx สำคัญ:",
+    allPgxDrugs:"ยาทั้งหมดจากข้อมูลผู้ป่วย",
+    showMore:"แสดงทั้งหมด",
+    showLess:"ซ่อนบางส่วน",
     allergy:"ภูมิแพ้และสิ่งแวดล้อมที่ควรระวัง",
     foodRisk:"อาหารที่อาจแพ้",
     envRisk:"สิ่งแวดล้อมที่ควรระวัง",
@@ -403,7 +417,9 @@ const TEXT = {
     eff:"Reduced Efficacy",
     dose:"Dose Adjustment",
     items:"items",
-    exampleDrugs:"Example drugs with key PGx data:",
+    allPgxDrugs:"All PGx drugs from this patient record",
+    showMore:"Show all",
+    showLess:"Show less",
     allergy:"Allergy & Environmental Risks",
     foodRisk:"Food Allergy Risk",
     envRisk:"Environmental Exposures",
@@ -420,6 +436,7 @@ let currentData = null;
 let openR = null;
 let activeTab = 'ex';
 let selectedDrug = '';
+let expandedDrugGroups = { ae: false, eff: false, dose: false };
 
 function t(key){ return TEXT[currentLang][key] || key; }
 function dn(name){ return (currentLang === 'TH' && DTH[name]) || name; }
@@ -474,13 +491,13 @@ function setLang(lang){
 
 function getTopRiskSummary(risks){
   const ordered = [...risks].sort((a,b)=>Number(a.rank_order)-Number(b.rank_order));
-  const top10 = ordered.slice(0,10).map(item => ({
+  const allRisks = ordered.map(item => ({
     name: item.disease_name,
     mult: Number(item.multiplier || 0)
   }));
   return {
-    top10,
-    topRisk: top10[0] || { name: '-', mult: 0 }
+    allRisks,
+    topRisk: allRisks[0] || { name: '-', mult: 0 }
   };
 }
 
@@ -491,16 +508,37 @@ function splitPgx(pgx){
   return { ae, eff, dose };
 }
 
+function getPatientDrugOptions(pgx){
+  const seen = new Set();
+  return pgx
+    .map(row => String(row.drug_name || '').trim())
+    .filter(Boolean)
+    .filter(name => {
+      const key = name.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .sort((a, b) => a.localeCompare(b));
+}
+
+function findPatientDrug(pgx, drugName){
+  const needle = String(drugName || '').trim().toLowerCase();
+  if (!needle) return null;
+  return pgx.find(row => String(row.drug_name || '').trim().toLowerCase() === needle) || null;
+}
+
 function render(){
   const data = currentData;
   const isTH = currentLang === 'TH';
   const riskInfo = getTopRiskSummary(data.risks || []);
-  const top10 = riskInfo.top10;
+  const allRisks = riskInfo.allRisks;
   const topRisk = riskInfo.topRisk;
-  const max = top10[0]?.mult || 1;
+  const max = allRisks[0]?.mult || 1;
   const tc = mc(topRisk.mult || 0);
   const pgxGroups = splitPgx(data.pgx || []);
   const totalPgx = pgxGroups.ae.length + pgxGroups.eff.length + pgxGroups.dose.length;
+  const patientDrugOptions = getPatientDrugOptions(data.pgx || []);
 
   let h = `<div class="hero-top">
     <div class="hero-greeting">${t('greeting')}</div>
@@ -524,10 +562,10 @@ function render(){
     <div class="stat-card"><div class="stat-lbl">${t('nutrition')}</div><div class="stat-val" style="color:var(--green)">${data.nutrition.length}</div><div class="stat-sub">${t('nutritionSub')}</div></div>
     <div class="stat-card"><div class="stat-lbl">${t('cancer')}</div><div class="stat-val" style="color:var(--red)">${data.cancer.length}</div><div class="stat-sub">${t('cancerSub')}</div></div>
     <div class="stat-card"><div class="stat-lbl">${t('pgx')}</div><div class="stat-val" style="color:var(--amber)">${totalPgx}</div><div class="stat-sub">${t('pgxSub')}</div></div>
-    <div class="stat-card"><div class="stat-lbl">${t('riskCount')}</div><div class="stat-val" style="color:var(--purple)">${top10.length}</div><div class="stat-sub">${t('riskCountSub')}</div></div>
+    <div class="stat-card"><div class="stat-lbl">${t('riskCount')}</div><div class="stat-val" style="color:var(--purple)">${allRisks.length}</div><div class="stat-sub">${t('riskCountSub')}</div></div>
   </div>`;
 
-  const riskRows = top10.map((item,i)=>{
+  const riskRows = allRisks.map((item,i)=>{
     const cat = getCat(item.name);
     const c = CATS[cat];
     const pct = Math.min(item.mult / max * 100, 100);
@@ -623,8 +661,12 @@ function render(){
     ${tabPanels}
   </div>`;
 
-  const drugNames = data.pgx.slice(0,18).map(d=>`<span class="drug-tag">${d.drug_name}</span>`).join("");
-  const matchedDrug = data.pgx.find(d => d.drug_name === selectedDrug);
+  const pgxSections = [
+    { key: 'ae', label: t('ae'), rows: pgxGroups.ae, style: 'rgba(248,113,113,.1)', border: 'rgba(248,113,113,.3)', text: '#fecaca' },
+    { key: 'eff', label: t('eff'), rows: pgxGroups.eff, style: 'rgba(251,191,36,.1)', border: 'rgba(251,191,36,.3)', text: '#fde68a' },
+    { key: 'dose', label: t('dose'), rows: pgxGroups.dose, style: 'rgba(56,189,248,.1)', border: 'rgba(56,189,248,.3)', text: '#bae6fd' }
+  ];
+  const matchedDrug = findPatientDrug(data.pgx || [], selectedDrug);
   const riskLabel = matchedDrug
     ? matchedDrug.risk_type === 'adverse_effect' ? t('ae')
       : matchedDrug.risk_type === 'insufficient_efficacy' ? t('eff')
@@ -635,13 +677,39 @@ function render(){
       : matchedDrug.risk_type === 'insufficient_efficacy' ? 'rgba(251,191,36,.16);color:#fde68a'
       : 'rgba(56,189,248,.16);color:#bae6fd'
     : '';
+  const pgxGroupHtml = pgxSections
+    .filter(section => section.rows.length)
+    .map(section => {
+      const isExpanded = expandedDrugGroups[section.key];
+      const visibleRows = isExpanded ? section.rows : section.rows.slice(0, 6);
+      const hiddenCount = Math.max(section.rows.length - visibleRows.length, 0);
+      const items = visibleRows.map(row => `
+        <div class="drug-item">
+          <div class="drug-item-name" style="color:${section.text}">${row.drug_name}</div>
+          <div class="drug-item-desc">${row.short_description || t('noData')}</div>
+        </div>
+      `).join("");
+      return `
+        <div class="drug-group" style="background:${section.style};border-color:${section.border}">
+          <div class="drug-group-head">
+            <div>
+              <div class="drug-group-title" style="color:${section.text}">${section.label}</div>
+              <div class="drug-group-count">${section.rows.length} ${t('items')}</div>
+            </div>
+          </div>
+          <div class="drug-group-list">${items}</div>
+          ${hiddenCount > 0 ? `<div class="drug-toggle"><button class="link-btn" onclick="toggleDrugGroup('${section.key}')">${t('showMore')} +${hiddenCount}</button></div>` : ''}
+          ${isExpanded && section.rows.length > 6 ? `<div class="drug-toggle"><button class="link-btn" onclick="toggleDrugGroup('${section.key}')">${t('showLess')}</button></div>` : ''}
+        </div>
+      `;
+    }).join("");
   h += `<div class="card">
     <div class="sh"><span class="sh-icon">💊</span><span class="sh-title">${t('pgxTitle')}</span></div>
     <div class="sh-sub">${t('pgxSub2')}</div>
     <div class="drug-lookup">
       <div class="drug-lbl">${t('drugLookupSub')}</div>
       <input class="input" id="drug-search" list="drug-options" placeholder="${t('drugLookupPlaceholder')}" value="${selectedDrug}" oninput="selectDrug(this.value)">
-      <datalist id="drug-options">${data.pgx.map(d => `<option value="${d.drug_name}"></option>`).join('')}</datalist>
+      <datalist id="drug-options">${patientDrugOptions.map(name => `<option value="${name}"></option>`).join('')}</datalist>
       <div class="lookup-card">
         ${matchedDrug ? `
           <div class="lookup-name">${matchedDrug.drug_name}</div>
@@ -670,7 +738,7 @@ function render(){
         <div class="pgx-lbl">${t('dose')}</div>
       </div>
     </div>
-    ${drugNames ? `<div class="drug-wrap"><div class="drug-lbl">${t('exampleDrugs')}</div><div class="drug-tags">${drugNames}</div></div>` : ""}
+    ${pgxGroupHtml ? `<div class="drug-wrap"><div class="drug-lbl">${t('allPgxDrugs')}</div><div class="drug-groups">${pgxGroupHtml}</div></div>` : ""}
   </div>`;
 
   const fTags = data.food.filter(f=>f.item_type==='food').map(f=>`<span class="food-tag">${f.item_name}</span>`).join("") || `<span style="color:var(--muted);font-size:12px">${t('noData')}</span>`;
@@ -699,6 +767,7 @@ function render(){
 function toggleR(i){ openR = openR === i ? null : i; render(); }
 function switchTab(ti){ activeTab = ti; render(); }
 function selectDrug(name){ selectedDrug = name; render(); }
+function toggleDrugGroup(key){ expandedDrugGroups[key] = !expandedDrugGroups[key]; render(); }
 
 async function patientLogin() {
   const participantNo = Number(document.getElementById('participant-no').value);
@@ -725,6 +794,7 @@ async function patientLogout() {
     openR = null;
     activeTab = 'ex';
     selectedDrug = '';
+    expandedDrugGroups = { ae: false, eff: false, dose: false };
     document.getElementById('dash').style.display = 'none';
     document.getElementById('empty').style.display = 'flex';
     document.getElementById('portal-status').textContent = t('notSigned');
@@ -735,7 +805,8 @@ async function patientLogout() {
 async function loadPortalData() {
   const data = await apiFetch('/api/patient/data');
   currentData = data;
-  selectedDrug = data.pgx?.[0]?.drug_name || '';
+  selectedDrug = getPatientDrugOptions(data.pgx || [])[0] || '';
+  expandedDrugGroups = { ae: false, eff: false, dose: false };
   document.getElementById('participant-no').value = data.participantNo;
   document.getElementById('portal-status').textContent = `${t('signedIn')} ${data.participantNo}`;
   render();
