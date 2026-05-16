@@ -71,14 +71,6 @@ export async function tursoExecute(context, sql, args = []) {
 
 export async function ensurePortalTables(context) {
   const statements = [
-    `CREATE TABLE IF NOT EXISTS portal_sessions (
-      session_id TEXT PRIMARY KEY,
-      session_type TEXT NOT NULL,
-      admin_username TEXT,
-      participant_no INTEGER,
-      expires_at TEXT NOT NULL,
-      created_at TEXT DEFAULT (datetime('now'))
-    )`,
     `CREATE TABLE IF NOT EXISTS patient_portal_access (
       participant_no INTEGER PRIMARY KEY,
       password_hash TEXT NOT NULL,
@@ -129,33 +121,82 @@ export function clearSessionCookie(request, sessionType) {
   return `${sessionCookieName(sessionType)}=; Path=/; HttpOnly; ${isHttps ? "Secure; " : ""}SameSite=Lax; Max-Age=0`;
 }
 
-export async function createSession(context, payload) {
-  const ensured = await ensurePortalTables(context);
-  if (!ensured.ok) return ensured;
-  const sessionId = crypto.randomUUID();
-  const expiresAt = new Date(Date.now() + SESSION_TTL_SECONDS * 1000).toISOString();
-  const args = [
-    { type: "text", value: sessionId },
-    { type: "text", value: payload.sessionType },
-    { type: "text", value: payload.adminUsername || "" },
-    { type: "integer", value: payload.participantNo || 0 },
-    { type: "text", value: expiresAt },
-  ];
-
-  const result = await tursoExecute(
-    context,
-    `INSERT INTO portal_sessions (session_id, session_type, admin_username, participant_no, expires_at)
-     VALUES (?, ?, ?, ?, ?)`,
-    args,
+function getSessionSecret(context) {
+  return (
+    context.env.SESSION_SECRET ||
+    context.env.ADMIN_PASSWORD ||
+    context.env.TURSO_AUTH_TOKEN
   );
+}
 
-  if (!result.ok) return result;
+function toBase64Url(value) {
+  return btoa(value).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
+
+function fromBase64Url(value) {
+  const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
+  const padding = "=".repeat((4 - (normalized.length % 4)) % 4);
+  return atob(normalized + padding);
+}
+
+async function signValue(secret, value) {
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const signature = await crypto.subtle.sign(
+    "HMAC",
+    key,
+    new TextEncoder().encode(value),
+  );
+  return [...new Uint8Array(signature)]
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+async function encodeSession(context, payload) {
+  const secret = getSessionSecret(context);
+  if (!secret) return null;
+  const body = toBase64Url(JSON.stringify(payload));
+  const signature = await signValue(secret, body);
+  return `${body}.${signature}`;
+}
+
+async function decodeSession(context, encoded) {
+  const secret = getSessionSecret(context);
+  if (!secret || !encoded || !encoded.includes(".")) return null;
+  const [body, signature] = encoded.split(".");
+  const expected = await signValue(secret, body);
+  if (signature !== expected) return null;
+  try {
+    const parsed = JSON.parse(fromBase64Url(body));
+    if (!parsed?.sessionType || !parsed?.expiresAt) return null;
+    if (Date.now() > Number(parsed.expiresAt)) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+export async function createSession(context, payload) {
+  const expiresAt = Date.now() + SESSION_TTL_SECONDS * 1000;
+  const encoded = await encodeSession(context, {
+    sessionType: payload.sessionType,
+    adminUsername: payload.adminUsername || null,
+    participantNo: payload.participantNo || null,
+    expiresAt,
+  });
+  if (!encoded) {
+    return { ok: false, status: 500, error: "Missing session signing secret." };
+  }
 
   return {
     ok: true,
-    headers: { "Set-Cookie": makeCookie(context.request, payload.sessionType, sessionId) },
+    headers: { "Set-Cookie": makeCookie(context.request, payload.sessionType, encoded) },
     session: {
-      sessionId,
       sessionType: payload.sessionType,
       adminUsername: payload.adminUsername || null,
       participantNo: payload.participantNo || null,
@@ -165,37 +206,21 @@ export async function createSession(context, payload) {
 }
 
 export async function getSession(context, expectedType) {
-  await ensurePortalTables(context);
   const cookies = parseCookies(context.request);
-  const sessionId = cookies[sessionCookieName(expectedType)];
-  if (!sessionId) return null;
-
-  const result = await tursoExecute(
-    context,
-    `SELECT session_id, session_type, admin_username, participant_no, expires_at
-     FROM portal_sessions
-     WHERE session_id = ? AND datetime(expires_at) > datetime('now')`,
-    [{ type: "text", value: sessionId }],
-  );
-
-  if (!result.ok || result.rows.length === 0) return null;
-  const session = result.rows[0];
-  if (expectedType && session.session_type !== expectedType) return null;
-  return session;
+  const encoded = cookies[sessionCookieName(expectedType)];
+  if (!encoded) return null;
+  const session = await decodeSession(context, encoded);
+  if (!session) return null;
+  if (expectedType && session.sessionType !== expectedType) return null;
+  return {
+    session_type: session.sessionType,
+    admin_username: session.adminUsername || null,
+    participant_no: session.participantNo || null,
+    expires_at: new Date(Number(session.expiresAt)).toISOString(),
+  };
 }
 
 export async function deleteCurrentSession(context, sessionType) {
-  const cookies = parseCookies(context.request);
-  const sessionId = cookies[sessionCookieName(sessionType)];
-  if (!sessionId) return { ok: true, headers: { "Set-Cookie": clearSessionCookie(context.request, sessionType) } };
-
-  const result = await tursoExecute(
-    context,
-    "DELETE FROM portal_sessions WHERE session_id = ?",
-    [{ type: "text", value: sessionId }],
-  );
-
-  if (!result.ok) return result;
   return { ok: true, headers: { "Set-Cookie": clearSessionCookie(context.request, sessionType) } };
 }
 
