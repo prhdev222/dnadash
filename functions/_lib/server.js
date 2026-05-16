@@ -31,6 +31,14 @@ export async function tursoExecute(context, sql, args = []) {
     };
   }
 
+  const normalizedArgs = args.map((arg) => {
+    if (!arg || typeof arg !== "object" || !("type" in arg)) return arg;
+    if (arg.type === "integer" || arg.type === "float") {
+      return { ...arg, value: String(arg.value) };
+    }
+    return arg;
+  });
+
   const response = await fetch(`${dbUrl}/v3/pipeline`, {
     method: "POST",
     headers: {
@@ -38,7 +46,7 @@ export async function tursoExecute(context, sql, args = []) {
       "content-type": "application/json",
     },
     body: JSON.stringify({
-      requests: [{ type: "execute", stmt: { sql, args } }],
+      requests: [{ type: "execute", stmt: { sql, args: normalizedArgs } }],
     }),
   });
 
