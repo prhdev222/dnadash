@@ -50,6 +50,12 @@ CREATE TABLE IF NOT EXISTS pgx_drugs (
   FOREIGN KEY (participant_no) REFERENCES patients(participant_no) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS pgx_drug_catalog (
+  drug_name TEXT PRIMARY KEY,
+  short_description TEXT,
+  updated_at TEXT DEFAULT (datetime('now'))
+);
+
 CREATE TABLE IF NOT EXISTS food_exposure (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   participant_no INTEGER NOT NULL,

@@ -146,6 +146,52 @@ var(--bg)}
 .qr-box{display:grid;gap:12px;justify-items:center;text-align:center}
 .qr-box img{width:220px;height:220px;border-radius:12px;background:#fff;padding:10px}
 .link-box{display:block;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg3);color:var(--blue);text-decoration:none;word-break:break-all;font-size:12px}
+@media(max-width:980px){
+  .layout{flex-direction:column;height:auto}
+  .sidebar{width:100%;min-width:0;border-right:none;border-bottom:1px solid var(--border);padding:10px 0}
+  .participant-list{max-height:none}
+  .content{padding:16px}
+}
+@media(max-width:720px){
+  body{font-size:13px}
+  .topbar{padding:12px 14px;align-items:flex-start}
+  .top-actions{width:100%;justify-content:space-between}
+  .logo{align-items:flex-start}
+  .logo-txt{font-size:13px}
+  .overview-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ov-card{padding:12px}
+  .ov-val{font-size:20px}
+  .tbl-wrap{overflow-x:auto}
+  table{min-width:720px}
+  .tbl-header{padding:12px}
+  .tbl-actions{width:100%}
+  .search-box{width:100%}
+  .tab-bar{overflow:auto;padding-bottom:4px}
+  .tab{white-space:nowrap}
+  .modal-overlay{padding:10px}
+  .modal{max-width:none;max-height:92vh;border-radius:14px}
+  .modal-head,.modal-body,.modal-foot{padding-left:14px;padding-right:14px}
+  .form-row{grid-template-columns:1fr;gap:10px}
+  .auth-shell{padding:16px}
+  .auth-card{padding:22px 18px;border-radius:16px}
+  .auth-title{font-size:22px}
+  .auth-actions{flex-direction:column;align-items:stretch}
+  .auth-actions .btn{width:100%;justify-content:center}
+  .qr-box img{width:min(220px,70vw);height:min(220px,70vw)}
+}
+@media(max-width:480px){
+  .content{padding:12px}
+  .topbar{padding:10px 12px}
+  .btn{padding:8px 12px;font-size:11px}
+  .sidebar-section{padding-left:12px;padding-right:12px}
+  .nav-item{padding:10px 12px;font-size:12px}
+  .overview-grid{grid-template-columns:1fr}
+  .page-title{font-size:16px}
+  .page-sub{font-size:11px}
+  .tbl-title{font-size:13px}
+  .badge{font-size:9px}
+  .toast{left:12px;right:12px;bottom:12px;min-width:0}
+}
 </style>
 </head>
 <body>
@@ -261,7 +307,7 @@ var(--bg)}
 <div class="toast" id="toast"></div>
 
 <script>
-let DB = {patients:[],risks:[],pgx:[],cancer:[],nutrition:[],food:[],access:[]};
+let DB = {patients:[],risks:[],pgx:[],cancer:[],nutrition:[],food:[],access:[],pgxCatalog:[]};
 let currentPage = 'overview';
 let modalSaveCallback = null;
 let currentAdmin = '';
@@ -340,7 +386,7 @@ function showAppShell() {
 }
 
 function hideAppShell() {
-  DB = {patients:[],risks:[],pgx:[],cancer:[],nutrition:[],food:[],access:[]};
+  DB = {patients:[],risks:[],pgx:[],cancer:[],nutrition:[],food:[],access:[],pgxCatalog:[]};
   currentAdmin = '';
   document.getElementById('app-shell').style.display = 'none';
   document.getElementById('auth-shell').style.display = 'flex';
@@ -365,13 +411,14 @@ async function testConnection(silent=false) {
 
 async function loadAll() {
   setMainContent('<div class="loading"><div class="spinner"></div> Loading data from database...</div>');
-  const [patients, risks, pgx, cancer, nutrition, food] = await Promise.all([
+  const [patients, risks, pgx, cancer, nutrition, food, pgxCatalog] = await Promise.all([
     tursoQuery('SELECT * FROM patients ORDER BY participant_no'),
     tursoQuery('SELECT * FROM health_risks ORDER BY participant_no, rank_order'),
     tursoQuery('SELECT * FROM pgx_drugs ORDER BY participant_no, risk_type, drug_name'),
     tursoQuery('SELECT * FROM wgs_cancer ORDER BY participant_no'),
     tursoQuery('SELECT * FROM nutrition_needs ORDER BY participant_no'),
     tursoQuery('SELECT * FROM food_exposure ORDER BY participant_no, item_type'),
+    tursoQuery('SELECT * FROM pgx_drug_catalog ORDER BY drug_name'),
   ]);
   if (!patients) {
     document.getElementById('conn-status').innerHTML = '<span class="status-dot dot-err"></span>Error';
@@ -392,6 +439,7 @@ async function loadAll() {
   DB.cancer = cancer || [];
   DB.nutrition = nutrition || [];
   DB.food = food || [];
+  DB.pgxCatalog = pgxCatalog || [];
   await loadPortalAccess();
   updateBadges();
   buildParticipantNav();
@@ -422,6 +470,31 @@ function buildParticipantNav() {
       <span class="nav-icon" style="font-size:12px">👤</span> P${p.participant_no}
     </div>`
   ).join('');
+}
+
+function getDrugDescription(drugName) {
+  return DB.pgxCatalog.find(row => row.drug_name === drugName)?.short_description || '';
+}
+
+async function saveDrugDescription(drugName, shortDescription) {
+  const existing = await tursoQuery(
+    'SELECT drug_name FROM pgx_drug_catalog WHERE drug_name = ?',
+    [{ type:'text', value: drugName }]
+  );
+  if (existing === null) return false;
+
+  const sql = existing.length
+    ? `UPDATE pgx_drug_catalog
+       SET short_description = ?, updated_at = datetime('now')
+       WHERE drug_name = ?`
+    : `INSERT INTO pgx_drug_catalog (short_description, updated_at, drug_name)
+       VALUES (?, datetime('now'), ?)`;
+
+  const result = await tursoQuery(sql, [
+    { type:'text', value: shortDescription },
+    { type:'text', value: drugName }
+  ]);
+  return result !== null;
 }
 
 // ─── NAVIGATION ─────────────────────────────────────────────
@@ -591,7 +664,10 @@ function renderPGx(filterPno) {
         ${rows.length === 0 ? '<tr class="empty-row"><td colspan="4">No data</td></tr>' :
           rows.map(d => `<tr>
             <td style="font-weight:700;color:var(--purple)">P${d.participant_no}</td>
-            <td style="font-weight:500">${d.drug_name}</td>
+            <td style="font-weight:500">
+              <div>${d.drug_name}</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:4px">${getDrugDescription(d.drug_name) || 'No short description yet'}</div>
+            </td>
             <td><span class="badge ${t.cls}">${t.label}</span></td>
             <td style="white-space:nowrap">
               <button class="td-edit" onclick="editPgx(${d.id})">✏️</button>
@@ -886,17 +962,34 @@ function editPgx(id) {
   document.getElementById('modal-foot').style.display = 'flex';
   document.getElementById('modal-body').innerHTML = `
 <div class="form-group" style="margin-bottom:10px"><label class="form-label">Drug Name</label><input class="form-control" id="ed-drug" value="${d.drug_name}"></div>
+<div class="form-group" style="margin-bottom:10px"><label class="form-label">Short Description / Use</label><textarea class="form-control" id="ed-desc" rows="3" placeholder="e.g. Pain reliever, blood thinner, cholesterol lowering drug">${getDrugDescription(d.drug_name)}</textarea></div>
 <div class="form-group"><label class="form-label">Risk Type</label>
 <select class="form-control" id="ed-rtype">
   <option value="adverse_effect" ${d.risk_type==='adverse_effect'?'selected':''}>Adverse Effect</option>
   <option value="insufficient_efficacy" ${d.risk_type==='insufficient_efficacy'?'selected':''}>Insufficient Efficacy</option>
   <option value="dose_reduction" ${d.risk_type==='dose_reduction'?'selected':''}>Dose Reduction</option>
-</select></div>`;
+  </select></div>`;
   modalSaveCallback = async () => {
+    const oldDrugName = d.drug_name;
+    const newDrugName = document.getElementById('ed-drug').value;
+    const shortDescription = document.getElementById('ed-desc').value.trim();
     const sql = 'UPDATE pgx_drugs SET drug_name=?, risk_type=? WHERE id=?';
-    const args = [{type:'text',value:document.getElementById('ed-drug').value},{type:'text',value:document.getElementById('ed-rtype').value},{type:'integer',value:id}];
+    const args = [{type:'text',value:newDrugName},{type:'text',value:document.getElementById('ed-rtype').value},{type:'integer',value:id}];
     const res = await tursoQuery(sql, args);
-    if (res !== null) { toast('บันทึกสำเร็จ', 'ok'); closeModal(); loadAll(); }
+    if (res !== null) {
+      if (oldDrugName !== newDrugName) {
+        await tursoQuery(
+          'UPDATE pgx_drug_catalog SET drug_name=?, updated_at=datetime(\'now\') WHERE drug_name=?',
+          [{type:'text',value:newDrugName},{type:'text',value:oldDrugName}]
+        );
+      }
+      const descSaved = await saveDrugDescription(newDrugName, shortDescription);
+      if (descSaved) {
+        toast('บันทึกสำเร็จ', 'ok');
+        closeModal();
+        loadAll();
+      }
+    }
   };
   document.getElementById('modal').style.display = 'flex';
 }
@@ -993,6 +1086,7 @@ function showAddPgx() {
   document.getElementById('modal-body').innerHTML = `
 <div class="form-group" style="margin-bottom:10px"><label class="form-label">Participant No</label><input class="form-control" id="ad-pno" type="number"></div>
 <div class="form-group" style="margin-bottom:10px"><label class="form-label">Drug Name</label><input class="form-control" id="ad-drug"></div>
+<div class="form-group" style="margin-bottom:10px"><label class="form-label">Short Description / Use</label><textarea class="form-control" id="ad-desc" rows="3" placeholder="e.g. Antibiotic, blood thinner, antidepressant"></textarea></div>
 <div class="form-group"><label class="form-label">Risk Type</label>
 <select class="form-control" id="ad-rt">
   <option value="adverse_effect">Adverse Effect</option>
@@ -1001,9 +1095,15 @@ function showAddPgx() {
 </select></div>`;
   modalSaveCallback = async () => {
     const sql = 'INSERT INTO pgx_drugs (participant_no,drug_name,risk_type) VALUES (?,?,?)';
-    const args = [{type:'integer',value:parseInt(document.getElementById('ad-pno').value)},{type:'text',value:document.getElementById('ad-drug').value},{type:'text',value:document.getElementById('ad-rt').value}];
+    const drugName = document.getElementById('ad-drug').value;
+    const args = [{type:'integer',value:parseInt(document.getElementById('ad-pno').value)},{type:'text',value:drugName},{type:'text',value:document.getElementById('ad-rt').value}];
     const res = await tursoQuery(sql, args);
-    if (res !== null) { toast('เพิ่มสำเร็จ', 'ok'); closeModal(); loadAll(); }
+    if (res !== null) {
+      await saveDrugDescription(drugName, document.getElementById('ad-desc').value.trim());
+      toast('เพิ่มสำเร็จ', 'ok');
+      closeModal();
+      loadAll();
+    }
   };
   document.getElementById('modal').style.display = 'flex';
 }

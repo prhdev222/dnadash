@@ -1,8 +1,10 @@
-import { getSession, json, tursoExecute } from "../_lib/server.js";
+import { ensurePortalTables, getSession, json, tursoExecute } from "../_lib/server.js";
 
 export async function onRequestPost(context) {
   const session = await getSession(context, "admin");
   if (!session) return json({ error: "Unauthorized." }, { status: 401 });
+  const ensured = await ensurePortalTables(context);
+  if (!ensured.ok) return json({ error: ensured.error }, { status: ensured.status || 500 });
 
   let payload;
   try {

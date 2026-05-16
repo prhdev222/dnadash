@@ -96,6 +96,11 @@ export async function ensurePortalTables(context) {
       updated_at TEXT DEFAULT (datetime('now')),
       FOREIGN KEY (participant_no) REFERENCES patients(participant_no) ON DELETE CASCADE
     )`,
+    `CREATE TABLE IF NOT EXISTS pgx_drug_catalog (
+      drug_name TEXT PRIMARY KEY,
+      short_description TEXT,
+      updated_at TEXT DEFAULT (datetime('now'))
+    )`,
   ];
 
   for (const sql of statements) {

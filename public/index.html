@@ -31,6 +31,23 @@
     .btn-admin{background:var(--purple);color:#fff}
     .btn-patient{background:var(--green);color:#06251c}
     .note{font-size:12px;color:var(--muted)}
+    @media(max-width:720px){
+      body{align-items:flex-start;padding:16px}
+      .shell{gap:14px}
+      .hero{padding:22px 18px;border-radius:20px}
+      .kicker{font-size:11px;margin-bottom:10px}
+      h1{font-size:clamp(28px,9vw,40px)}
+      .sub{font-size:14px}
+      .grid{grid-template-columns:1fr}
+      .card{padding:18px}
+      .btn{width:100%;justify-content:center}
+    }
+    @media(max-width:420px){
+      body{padding:12px}
+      .hero{padding:18px 14px}
+      .card h2{font-size:18px}
+      .card p,.note{font-size:13px}
+    }
   </style>
 </head>
 <body>
