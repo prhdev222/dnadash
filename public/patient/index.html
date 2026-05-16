@@ -241,7 +241,43 @@ const DTH = {
   "Type 2 Diabetes (T2D)":"เบาหวานชนิดที่ 2","Stroke":"โรคหลอดเลือดสมอง","Gout":"โรคเกาต์","Venous Thromboembolism (VTE)":"ลิ่มเลือดอุดตันในหลอดเลือดดำ",
   "Schizophrenia":"โรคจิตเภท","Chronic Obstructive Pulmonary Disease (COPD)":"โรคปอดอุดกั้นเรื้อรัง","Hypertension":"ความดันโลหิตสูง",
   "Parkinson's Disease (PD)":"โรคพาร์กินสัน","Depression":"ภาวะซึมเศร้า","Bipolar Disorder":"โรคอารมณ์สองขั้ว",
-  "Coronary Heart Disease (CHD)":"โรคหลอดเลือดหัวใจ","Celiac Disease":"โรคแพ้กลูเตน","Sarcoidosis":"โรคซาร์คอยโดซิส"
+  "Coronary Heart Disease (CHD)":"โรคหลอดเลือดหัวใจ","Celiac Disease":"โรคแพ้กลูเตน","Sarcoidosis":"โรคซาร์คอยโดซิส",
+  "Alzheimer's Disease (AD)":"โรคอัลไซเมอร์","Asthma":"โรคหอบหืด","Atrial Fibrillation":"หัวใจห้องบนสั่นพลิ้ว","Breast Cancer":"มะเร็งเต้านม",
+  "Colorectal Cancer":"มะเร็งลำไส้ใหญ่และทวารหนัก","Chronic Kidney Disease (CKD)":"โรคไตเรื้อรัง","Dyslipidemia":"ไขมันในเลือดผิดปกติ",
+  "Epilepsy":"โรคลมชัก","Gastric Cancer":"มะเร็งกระเพาะอาหาร","Glaucoma":"ต้อหิน","Heart Failure":"ภาวะหัวใจล้มเหลว",
+  "Hypothyroidism":"ภาวะไทรอยด์ต่ำ","Hyperthyroidism":"ภาวะไทรอยด์เป็นพิษ","Insomnia":"โรคนอนไม่หลับ","Lung Cancer":"มะเร็งปอด",
+  "Migraine":"ไมเกรน","Myocardial Infarction":"กล้ามเนื้อหัวใจตาย","Obesity":"ภาวะอ้วน","Osteoporosis":"โรคกระดูกพรุน",
+  "Psoriasis":"โรคสะเก็ดเงิน","Rheumatoid Arthritis":"โรคข้ออักเสบรูมาตอยด์","Systemic Lupus Erythematosus":"โรคเอสแอลอี",
+  "Ulcerative Colitis":"โรคลำไส้อักเสบเรื้อรังชนิดแผล","Crohn's Disease":"โรคโครห์น","Anxiety Disorder":"โรควิตกกังวล",
+  "Attention Deficit Hyperactivity Disorder (ADHD)":"ภาวะสมาธิสั้น","Autism Spectrum Disorder (ASD)":"ภาวะออทิสติกสเปกตรัม","Non-alcoholic Fatty Liver Disease (NAFLD)":"โรคไขมันพอกตับที่ไม่ได้เกิดจากแอลกอฮอล์"
+};
+
+const WGS_TH = {
+  "Breast Cancer":"มะเร็งเต้านม",
+  "Ovarian Cancer":"มะเร็งรังไข่",
+  "Colon Cancer":"มะเร็งลำไส้ใหญ่",
+  "Colorectal Cancer":"มะเร็งลำไส้ใหญ่และทวารหนัก",
+  "Gastric Cancer":"มะเร็งกระเพาะอาหาร",
+  "Lung Cancer":"มะเร็งปอด",
+  "Pancreatic Cancer":"มะเร็งตับอ่อน",
+  "Prostate Cancer":"มะเร็งต่อมลูกหมาก",
+  "Liver Cancer":"มะเร็งตับ",
+  "Leukemia":"มะเร็งเม็ดเลือดขาว",
+  "Lymphoma":"มะเร็งต่อมน้ำเหลือง",
+  "Melanoma":"มะเร็งผิวหนังเมลาโนมา"
+};
+
+const ITEM_TH = {
+  "Milk":"นม","Cow's Milk":"นมวัว","Egg":"ไข่","Egg White":"ไข่ขาว","Egg Yolk":"ไข่แดง","Soy":"ถั่วเหลือง","Soybean":"ถั่วเหลือง",
+  "Wheat":"ข้าวสาลี","Gluten":"กลูเตน","Peanut":"ถั่วลิสง","Tree Nut":"ถั่วเปลือกแข็ง","Almond":"อัลมอนด์","Walnut":"วอลนัต",
+  "Cashew":"เม็ดมะม่วงหิมพานต์","Hazelnut":"เฮเซลนัต","Pistachio":"พิสตาชิโอ","Sesame":"งา","Shrimp":"กุ้ง","Crab":"ปู",
+  "Shellfish":"สัตว์น้ำมีเปลือก","Fish":"ปลา","Salmon":"ปลาแซลมอน","Tuna":"ปลาทูน่า","Mackerel":"ปลาทู","Squid":"ปลาหมึก",
+  "Octopus":"หมึกยักษ์","Oyster":"หอยนางรม","Mussel":"หอยแมลงภู่","Clam":"หอยกาบ","Scallop":"หอยเชลล์","Prawn":"กุ้ง",
+  "Corn":"ข้าวโพด","Rice":"ข้าว","Tomato":"มะเขือเทศ","Potato":"มันฝรั่ง","Garlic":"กระเทียม","Onion":"หัวหอม",
+  "Mushroom":"เห็ด","Chocolate":"ช็อกโกแลต","Coffee":"กาแฟ","Tea":"ชา","Alcohol":"แอลกอฮอล์","Pork":"หมู","Beef":"เนื้อวัว",
+  "Chicken":"ไก่","Dust":"ฝุ่น","Dust Mite":"ไรฝุ่น","Pollen":"เกสรดอกไม้","Mold":"เชื้อรา","Pet Dander":"ขนสัตว์เลี้ยง",
+  "Cat Dander":"ขนแมว","Dog Dander":"ขนสุนัข","Smoke":"ควัน","Air Pollution":"มลพิษทางอากาศ","Latex":"ยางลาเท็กซ์",
+  "Cockroach":"แมลงสาบ","Grass":"หญ้า","Tree Pollen":"เกสรจากต้นไม้","Weed Pollen":"เกสรจากวัชพืช","Sunlight":"แสงแดด"
 };
 
 const EXP_TH = {
@@ -324,9 +360,9 @@ const TEXT = {
     ex:"ออกกำลังกาย",
     diet:"การกิน",
     mon:"ติดตาม",
-    exSum:"เน้น Cardio ปานกลาง + เสริมกล้ามเนื้อ ตามข้อมูลของคุณ",
-    dietSum:"อาหาร Mediterranean/DASH ลดแป้ง-หวาน-เค็ม",
-    monSum:"ตรวจสม่ำเสมอตามที่แพทย์แนะนำ",
+    exSum:"เน้นคาร์ดิโอระดับปานกลางร่วมกับการฝึกกล้ามเนื้ออย่างสม่ำเสมอ และค่อย ๆ เพิ่มความหนักตามความพร้อมของร่างกาย",
+    dietSum:"เน้นอาหารแนว Mediterranean/DASH เพิ่มผัก ผลไม้ โปรตีนคุณภาพดี และลดหวาน มัน เค็ม รวมถึงอาหารแปรรูป",
+    monSum:"ติดตามสุขภาพอย่างสม่ำเสมอ ดูค่าความดัน น้ำตาล ไขมัน และตรวจเพิ่มเติมตามความเสี่ยงเฉพาะของคุณ",
     pgxTitle:"ข้อมูลยีนที่เกี่ยวกับยา (PGx)",
     pgxSub2:"ยีนของคุณอาจส่งผลต่อการตอบสนองต่อยาบางชนิด — แจ้งแพทย์และเภสัชกรทุกครั้ง",
     drugLookup:"ค้นหาชื่อยา",
@@ -402,9 +438,9 @@ const TEXT = {
     ex:"Exercise",
     diet:"Diet",
     mon:"Monitoring",
-    exSum:"Moderate cardio + strength training based on your data",
-    dietSum:"Mediterranean/DASH — reduce refined carbs, sugar, and sodium",
-    monSum:"Regular check-ups as recommended",
+    exSum:"Focus on moderate cardio together with regular strength training, increasing intensity gradually as tolerated.",
+    dietSum:"Follow a Mediterranean/DASH-style pattern with more vegetables, fruit, quality protein, and less sugar, salt, and processed food.",
+    monSum:"Keep up regular health checks, including blood pressure, glucose, lipids, and any extra screening relevant to your individual risks.",
     pgxTitle:"Pharmacogenomics (PGx)",
     pgxSub2:"Your genes may affect drug response — always inform your doctor and pharmacist",
     drugLookup:"Drug Lookup",
@@ -439,7 +475,15 @@ let selectedDrug = '';
 let expandedDrugGroups = { ae: false, eff: false, dose: false };
 
 function t(key){ return TEXT[currentLang][key] || key; }
-function dn(name){ return (currentLang === 'TH' && DTH[name]) || name; }
+function dn(name){
+  if (currentLang === 'TH' && DTH[name]) return `${DTH[name]} (${name})`;
+  return name;
+}
+function wn(name){
+  if (currentLang === 'TH' && WGS_TH[name]) return `${WGS_TH[name]} (${name})`;
+  return name;
+}
+function iname(name){ return (currentLang === 'TH' && ITEM_TH[name]) || name; }
 function expl(name){ return currentLang === 'TH' ? (EXP_TH[name] || '') : (EXP_EN[name] || ''); }
 function mc(m){ return m>=10?"#f87171":m>=5?"#fb923c":m>=3?"#fbbf24":"#34d399"; }
 function getCat(n){
@@ -528,6 +572,117 @@ function findPatientDrug(pgx, drugName){
   return pgx.find(row => String(row.drug_name || '').trim().toLowerCase() === needle) || null;
 }
 
+function getDrugLookupMarkup(matchedDrug, query){
+  const riskLabel = matchedDrug
+    ? matchedDrug.risk_type === 'adverse_effect' ? t('ae')
+      : matchedDrug.risk_type === 'insufficient_efficacy' ? t('eff')
+      : t('dose')
+    : '';
+  const riskClass = matchedDrug
+    ? matchedDrug.risk_type === 'adverse_effect' ? 'rgba(248,113,113,.16);color:#fecaca'
+      : matchedDrug.risk_type === 'insufficient_efficacy' ? 'rgba(251,191,36,.16);color:#fde68a'
+      : 'rgba(56,189,248,.16);color:#bae6fd'
+    : '';
+  if (matchedDrug) {
+    return `
+      <div class="lookup-name">${matchedDrug.drug_name}</div>
+      <div class="lookup-desc"><strong>${t('shortUse')}:</strong> ${matchedDrug.short_description || t('noData')}</div>
+      <div class="lookup-badge" style="${riskClass}">${riskLabel}</div>
+    `;
+  }
+  return query
+    ? `<div class="lookup-empty">${t('noDrugMatch')}</div>`
+    : `<div class="lookup-empty">${t('noDrugSelected')}</div>`;
+}
+
+function replaceFromMap(text, replacements){
+  return replacements.reduce((out, [from, to]) => out.replaceAll(from, to), text);
+}
+
+function localizePlanLine(line){
+  let text = String(line || '').trim();
+  if (!text) return text;
+  if (currentLang === 'TH') {
+    return replaceFromMap(text, [
+      ['cardio/endurance', 'คาร์ดิโอและความอึด'],
+      ['cardio', 'คาร์ดิโอ'],
+      ['resistance training', 'การฝึกแรงต้านหรือเวทเทรนนิ่ง'],
+      ['strength training', 'การฝึกกล้ามเนื้อ'],
+      ['strength/power interval', 'การฝึกแรงและพลังแบบเป็นช่วง'],
+      ['aerobic 150–300 นาที/สัปดาห์', 'ออกกำลังกายแบบแอโรบิก 150–300 นาทีต่อสัปดาห์'],
+      ['vigorous 75–150 นาที/สัปดาห์', 'หรือออกกำลังกายหนัก 75–150 นาทีต่อสัปดาห์'],
+      ['ฝึกกล้ามเนื้อ 2 วัน/สัปดาห์', 'พร้อมฝึกกล้ามเนื้ออย่างน้อย 2 วันต่อสัปดาห์'],
+      ['moderate-intensity', 'ความหนักระดับปานกลาง'],
+      ['HIIT', 'HIIT (ออกกำลังกายหนักสลับเบา)'],
+      ['Mediterranean/DASH', 'แนวทางอาหาร Mediterranean/DASH'],
+      ['whole grains/legumes', 'ธัญพืชไม่ขัดสีและถั่วต่าง ๆ'],
+      ['โปรตีนไม่ติดมัน/ปลา', 'โปรตีนไม่ติดมันหรือปลา'],
+      ['refined carb', 'แป้งขัดสี'],
+      ['trans/saturated fat', 'ไขมันทรานส์และไขมันอิ่มตัว'],
+      ['processed meat', 'เนื้อแปรรูป'],
+      ['Alcohol metabolism=Moderate, hard to get dizzy and alcohol flush', 'การเผาผลาญแอลกอฮอล์ระดับปานกลางและอาจไม่ค่อยมีอาการหน้าแดงหรือมึนง่าย'],
+      ['Alcohol metabolism=Weak, but good at drinking with no alcohol flush', 'การเผาผลาญแอลกอฮอล์ค่อนข้างอ่อน แม้อาจดูเหมือนดื่มได้ดีและไม่หน้าแดง'],
+      ['Alcohol metabolism=Weak, slightly good at drinking', 'การเผาผลาญแอลกอฮอล์ค่อนข้างอ่อน แม้อาจดื่มได้บ้าง'],
+      ['Alcohol metabolism=Moderate, easy to get dizzy', 'การเผาผลาญแอลกอฮอล์ระดับปานกลาง แต่อาจมึนง่าย'],
+      ['Dietary sodium risk slightly high', 'ความไวต่อโซเดียมค่อนข้างสูง'],
+      ['low-sodium diet', 'อาหารโซเดียมต่ำ'],
+      ['plate method', 'การจัดจานแบบแบ่งครึ่งผัก 1/4 โปรตีน 1/4 คาร์โบไฮเดรต'],
+      ['fiber สูง', 'ใยอาหารสูง'],
+      ['glucose/lipid/liver enzyme', 'ระดับน้ำตาล ไขมัน และการทำงานของตับ'],
+      ['Supplement focus', 'สารอาหารที่ควรให้ความสำคัญ'],
+      ['Injury risk', 'ความเสี่ยงการบาดเจ็บ'],
+      ['low-impact cardio', 'คาร์ดิโอแรงกระแทกต่ำ เช่น เดินเร็ว จักรยาน หรือว่ายน้ำ'],
+      ['warm-up/mobility', 'การวอร์มอัปและขยับยืดข้อต่อ'],
+      ['strength technique', 'ท่าฝึกกล้ามเนื้อที่ถูกต้อง'],
+      ['พื้นฐานทุกปี', 'การติดตามพื้นฐานประจำปี'],
+      ['fasting lipid profile', 'ไขมันในเลือดขณะอดอาหาร'],
+      ['fasting glucose/HbA1c', 'น้ำตาลในเลือดและ HbA1c'],
+      ['liver/kidney function', 'การทำงานของตับและไต'],
+      ['ทบทวนยาโดยเภสัชกร/แพทย์พร้อม PGx', 'ทบทวนยากับแพทย์หรือเภสัชกรร่วมกับข้อมูล PGx'],
+      ['Cardiometabolic/ASCVD', 'ความเสี่ยงหัวใจ หลอดเลือด และเมตาบอลิก'],
+      ['ASCVD risk score', 'คะแนนประเมินความเสี่ยงโรคหัวใจและหลอดเลือด'],
+      ['ECG ตามอายุ/อาการ', 'ตรวจคลื่นไฟฟ้าหัวใจตามอายุหรืออาการ'],
+      ['Cancer: ทำ age-appropriate screening', 'การคัดกรองมะเร็งตามช่วงอายุที่เหมาะสม'],
+      ['Alzheimer/cognitive', 'การติดตามด้านความจำและการรู้คิด'],
+      ['baseline cognition', 'ประเมินความจำและการคิดตั้งต้น'],
+      ['sleep apnea/sleep quality', 'ภาวะหยุดหายใจขณะหลับและคุณภาพการนอน'],
+      ['smoking/alcohol', 'บุหรี่และแอลกอฮอล์'],
+      ['CBC/Hb typing/ferritin', 'ตรวจความสมบูรณ์เม็ดเลือด การแยกชนิดฮีโมโกลบิน และระดับเฟอร์ริติน'],
+      ['ให้คำปรึกษาคู่ครอง/ครอบครัวถ้าจะมีบุตร', 'ปรึกษาคู่ครองหรือครอบครัวหากวางแผนมีบุตร']
+    ]);
+  }
+  return replaceFromMap(text, [
+    ['โปรแกรมสมดุล', 'Balanced programme'],
+    ['เน้น cardio/endurance เป็นหลัก ร่วมกับเวทเทรนนิ่ง', 'Focus on cardio/endurance together with strength training'],
+    ['ทำแบบผสม โดยเพิ่ม strength/power interval ได้ แต่ยังต้องมี cardio เพื่อป้องกัน NCD', 'Use a mixed routine, adding strength/power intervals while keeping cardio for non-communicable disease prevention'],
+    ['เป้าหมายเริ่มต้น', 'Starting goal'],
+    ['หรือ', 'or'],
+    ['ฝึกกล้ามเนื้อ 2 วัน/สัปดาห์', 'strength training at least 2 days/week'],
+    ['ข้อควรระวัง', 'Precaution'],
+    ['มี cardiac/vascular risk', 'there is cardiac/vascular risk'],
+    ['เริ่มจาก moderate-intensity', 'start with moderate intensity'],
+    ['เพิ่มระดับช้า', 'increase intensity gradually'],
+    ['ควรตรวจ/ปรึกษาแพทย์ก่อน HIIT หรือการแข่งขันหนัก', 'seek medical review before HIIT or intense competition'],
+    ['ใช้แนวทาง Mediterranean/DASH', 'Use the Mediterranean/DASH approach'],
+    ['ผัก-ผลไม้หลากสี', 'a variety of vegetables and fruits'],
+    ['โปรตีนไม่ติดมัน/ปลา', 'lean protein/fish'],
+    ['ลดน้ำตาล/refined carb, trans/saturated fat, processed meat และโซเดียม', 'reduce sugar/refined carbs, trans/saturated fat, processed meat, and sodium'],
+    ['ควรงด/จำกัดแอลกอฮอล์', 'avoid or strictly limit alcohol'],
+    ['เน้น low-sodium diet และวัด BP', 'focus on a low-sodium diet and monitor blood pressure'],
+    ['จัด plate method, โปรตีนพอเหมาะ, fiber สูง, งดเครื่องดื่มหวาน; ติดตาม glucose/lipid/liver enzyme', 'use the plate method, keep protein appropriate, increase fibre, avoid sugary drinks, and track glucose/lipids/liver enzymes'],
+    ['สารอาหารที่ควรให้ความสำคัญ', 'Nutrients to focus on'],
+    ['พบ thalassemia ใน WGS', 'Thalassemia flagged in WGS'],
+    ['ตรวจ CBC/Hb typing/ferritin ก่อนเสริมธาตุเหล็ก', 'check CBC/Hb typing/ferritin before taking iron supplements'],
+    ['พื้นฐานทุกปี', 'Annual baseline checks'],
+    ['ทบทวนยาโดยเภสัชกร/แพทย์พร้อม PGx', 'review medicines with a pharmacist/doctor together with PGx'],
+    ['พิจารณา ASCVD risk score, ECG ตามอายุ/อาการ', 'consider ASCVD risk scoring and ECG based on age/symptoms'],
+    ['ประเมิน baseline cognition, sleep apnea/sleep quality, คุม BP/lipid/glucose และหลีกเลี่ยง smoking/alcohol', 'check baseline cognition and sleep quality, control BP/lipids/glucose, and avoid smoking/alcohol'],
+    ['ทำ age-appropriate screening', 'perform age-appropriate screening'],
+    ['ตามดุลยพินิจแพทย์', 'as advised by your doctor'],
+    ['ให้คำปรึกษาคู่ครอง/ครอบครัวถ้าจะมีบุตร', 'seek partner/family counselling if planning a pregnancy']
+  ]);
+}
+
 function render(){
   const data = currentData;
   const isTH = currentLang === 'TH';
@@ -604,7 +759,7 @@ function render(){
   </div>`;
 
   const cancerH = data.cancer.length
-    ? data.cancer.map(c=>`<div class="c-tag"><div class="c-name">${c.cancer_type}</div><div class="c-mult">${c.multiplier ? `${Number(c.multiplier).toFixed(2)}×` : ''}</div></div>`).join("")
+    ? data.cancer.map(c=>`<div class="c-tag"><div class="c-name">${wn(c.cancer_type)}</div><div class="c-mult">${c.multiplier ? `${Number(c.multiplier).toFixed(2)}×` : ''}</div></div>`).join("")
     : `<span style="font-size:13px;color:var(--muted)">${t('noCancer')}</span>`;
   h += `<div class="card">
     <div class="sh"><span class="sh-icon">🔬</span><span class="sh-title">${t('wgs')}</span></div>
@@ -637,7 +792,7 @@ function render(){
   const exL = parseLines(data.patient.exercise_plan);
   const dL = parseLines(data.patient.diet_plan);
   const mL = parseLines(data.patient.monitoring_plan);
-  const mkItems = (lines,dot)=>lines.map(l=>`<div class="plan-item"><div class="plan-dot" style="background:${dot}"></div><div class="plan-text">${l}</div></div>`).join("");
+  const mkItems = (lines,dot)=>lines.map(l=>`<div class="plan-item"><div class="plan-dot" style="background:${dot}"></div><div class="plan-text">${localizePlanLine(l)}</div></div>`).join("");
   const tabs = [
     {key:"ex",icon:"🏃",label:t('ex'),col:"var(--blue)",items:exL,sum:t('exSum')},
     {key:"diet",icon:"🥗",label:t('diet'),col:"var(--green)",items:dL,sum:t('dietSum')},
@@ -667,16 +822,6 @@ function render(){
     { key: 'dose', label: t('dose'), rows: pgxGroups.dose, style: 'rgba(56,189,248,.1)', border: 'rgba(56,189,248,.3)', text: '#bae6fd' }
   ];
   const matchedDrug = findPatientDrug(data.pgx || [], selectedDrug);
-  const riskLabel = matchedDrug
-    ? matchedDrug.risk_type === 'adverse_effect' ? t('ae')
-      : matchedDrug.risk_type === 'insufficient_efficacy' ? t('eff')
-      : t('dose')
-    : '';
-  const riskClass = matchedDrug
-    ? matchedDrug.risk_type === 'adverse_effect' ? 'rgba(248,113,113,.16);color:#fecaca'
-      : matchedDrug.risk_type === 'insufficient_efficacy' ? 'rgba(251,191,36,.16);color:#fde68a'
-      : 'rgba(56,189,248,.16);color:#bae6fd'
-    : '';
   const pgxGroupHtml = pgxSections
     .filter(section => section.rows.length)
     .map(section => {
@@ -708,18 +853,9 @@ function render(){
     <div class="sh-sub">${t('pgxSub2')}</div>
     <div class="drug-lookup">
       <div class="drug-lbl">${t('drugLookupSub')}</div>
-      <input class="input" id="drug-search" list="drug-options" placeholder="${t('drugLookupPlaceholder')}" value="${selectedDrug}" oninput="selectDrug(this.value)">
+      <input class="input" id="drug-search" list="drug-options" placeholder="${t('drugLookupPlaceholder')}" value="${selectedDrug}" oninput="updateDrugSearch(this.value)" onchange="selectDrug(this.value)">
       <datalist id="drug-options">${patientDrugOptions.map(name => `<option value="${name}"></option>`).join('')}</datalist>
-      <div class="lookup-card">
-        ${matchedDrug ? `
-          <div class="lookup-name">${matchedDrug.drug_name}</div>
-          <div class="lookup-desc"><strong>${t('shortUse')}:</strong> ${matchedDrug.short_description || t('noData')}</div>
-          <div class="lookup-badge" style="${riskClass}">${riskLabel}</div>
-        ` : selectedDrug
-          ? `<div class="lookup-empty">${t('noDrugMatch')}</div>`
-          : `<div class="lookup-empty">${t('noDrugSelected')}</div>`
-        }
-      </div>
+      <div class="lookup-card" id="drug-lookup-result">${getDrugLookupMarkup(matchedDrug, selectedDrug)}</div>
     </div>
     <div class="pgx-grid">
       <div class="pgx-card" style="background:rgba(248,113,113,.1);border:0.5px solid rgba(248,113,113,.3)">
@@ -741,8 +877,8 @@ function render(){
     ${pgxGroupHtml ? `<div class="drug-wrap"><div class="drug-lbl">${t('allPgxDrugs')}</div><div class="drug-groups">${pgxGroupHtml}</div></div>` : ""}
   </div>`;
 
-  const fTags = data.food.filter(f=>f.item_type==='food').map(f=>`<span class="food-tag">${f.item_name}</span>`).join("") || `<span style="color:var(--muted);font-size:12px">${t('noData')}</span>`;
-  const eTags = data.food.filter(f=>f.item_type!=='food').map(f=>`<span class="exp-tag">${f.item_name}</span>`).join("") || `<span style="color:var(--muted);font-size:12px">${t('noData')}</span>`;
+  const fTags = data.food.filter(f=>f.item_type==='food').map(f=>`<span class="food-tag">${iname(f.item_name)}</span>`).join("") || `<span style="color:var(--muted);font-size:12px">${t('noData')}</span>`;
+  const eTags = data.food.filter(f=>f.item_type!=='food').map(f=>`<span class="exp-tag">${iname(f.item_name)}</span>`).join("") || `<span style="color:var(--muted);font-size:12px">${t('noData')}</span>`;
   h += `<div class="card">
     <div class="sh"><span class="sh-icon">🌿</span><span class="sh-title">${t('allergy')}</span></div>
     <div class="allergy-grid">
@@ -766,7 +902,13 @@ function render(){
 
 function toggleR(i){ openR = openR === i ? null : i; render(); }
 function switchTab(ti){ activeTab = ti; render(); }
-function selectDrug(name){ selectedDrug = name; render(); }
+function updateDrugSearch(name){
+  selectedDrug = name;
+  const target = document.getElementById('drug-lookup-result');
+  if (!target || !currentData) return;
+  target.innerHTML = getDrugLookupMarkup(findPatientDrug(currentData.pgx || [], selectedDrug), selectedDrug);
+}
+function selectDrug(name){ updateDrugSearch(name); }
 function toggleDrugGroup(key){ expandedDrugGroups[key] = !expandedDrugGroups[key]; render(); }
 
 async function patientLogin() {
