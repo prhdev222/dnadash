@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DNA Dashboard Patient Portal</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#08101d;--bg2:#0f172a;--card:#13213a;--border:#2f3c58;
+      --text:#f8fafc;--muted:#94a3b8;--blue:#38bdf8;--green:#34d399;--red:#f87171;--amber:#fbbf24;
+    }
+    body{
+      min-height:100vh;padding:24px;font-family:'Sarabun',system-ui,sans-serif;color:var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(52,211,153,.14), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(56,189,248,.18), transparent 28%),
+        var(--bg);
+    }
+    .shell{width:min(1100px,100%);margin:0 auto;display:grid;gap:18px}
+    .card{background:rgba(15,23,42,.92);border:1px solid var(--border);border-radius:22px;padding:24px}
+    .hero{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+    .title{font-size:clamp(28px,5vw,42px);line-height:1.05;margin-bottom:8px}
+    .sub{color:var(--muted);line-height:1.6;font-size:14px;max-width:720px}
+    .btn{padding:10px 14px;border-radius:999px;border:1px solid var(--border);background:#1e293b;color:var(--text);cursor:pointer;font-weight:700}
+    .btn-primary{background:var(--green);color:#05231a;border-color:transparent}
+    .btn-link{display:inline-flex;text-decoration:none}
+    .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:18px}
+    .field{display:flex;flex-direction:column;gap:6px}
+    .label{font-size:12px;color:var(--muted);font-weight:700}
+    .input{padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:#0b1323;color:var(--text);font:inherit}
+    .status{font-size:13px;color:var(--muted)}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+    .panel{background:rgba(19,33,58,.88);border:1px solid var(--border);border-radius:18px;padding:18px}
+    .panel h3{font-size:16px;margin-bottom:12px}
+    .list{display:grid;gap:8px}
+    .item{padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.03);font-size:13px;line-height:1.5}
+    .metric{display:grid;gap:4px}
+    .metric-label{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+    .metric-value{font-size:14px;line-height:1.6}
+    .badge{display:inline-block;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:700}
+    .badge-red{background:rgba(248,113,113,.15);color:#fecaca}
+    .badge-amber{background:rgba(251,191,36,.15);color:#fde68a}
+    .badge-blue{background:rgba(56,189,248,.15);color:#bae6fd}
+    .empty{color:var(--muted);font-size:13px}
+    pre{white-space:pre-wrap;font-family:inherit;font-size:13px;line-height:1.6;color:var(--text)}
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="card">
+      <div class="hero">
+        <div>
+          <div style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--green);margin-bottom:10px">Patient Portal</div>
+          <div class="title">View your own DNA dashboard.</div>
+          <div class="sub">Sign in using your participant number and the password provided by the admin. This portal shows only your own record.</div>
+        </div>
+        <a class="btn btn-link" href="/">Back to home</a>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label class="label">Participant Number</label>
+          <input class="input" id="participant-no" type="number" min="1">
+        </div>
+        <div class="field">
+          <label class="label">Password</label>
+          <input class="input" id="participant-password" type="password" autocomplete="current-password">
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:18px">
+        <button class="btn btn-primary" onclick="patientLogin()">Sign In</button>
+        <button class="btn" onclick="patientLogout()">Logout</button>
+        <span id="portal-status" class="status">Not signed in</span>
+      </div>
+    </section>
+
+    <div id="portal-content" style="display:none;gap:18px">
+      <section class="grid">
+        <div class="panel">
+          <h3>Basic Information</h3>
+          <div class="list" id="basic-info"></div>
+        </div>
+        <div class="panel">
+          <h3>Plans</h3>
+          <div class="list" id="plans"></div>
+        </div>
+      </section>
+
+      <section class="grid">
+        <div class="panel">
+          <h3>Top Health Risks</h3>
+          <div class="list" id="risks-list"></div>
+        </div>
+        <div class="panel">
+          <h3>WGS Cancer</h3>
+          <div class="list" id="cancer-list"></div>
+        </div>
+      </section>
+
+      <section class="grid">
+        <div class="panel">
+          <h3>Nutrition Needs</h3>
+          <div class="list" id="nutrition-list"></div>
+        </div>
+        <div class="panel">
+          <h3>Food / Exposure</h3>
+          <div class="list" id="food-list"></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h3>PGx Drug Notes</h3>
+        <div class="list" id="pgx-list"></div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    function queryParam(name) {
+      return new URLSearchParams(location.search).get(name);
+    }
+
+    async function apiFetch(url, options={}) {
+      const res = await fetch(url, options);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Request failed');
+      return data;
+    }
+
+    function itemHtml(label, value) {
+      return `<div class="item"><div class="metric"><div class="metric-label">${label}</div><div class="metric-value">${value || '—'}</div></div></div>`;
+    }
+
+    function badgeForRisk(type) {
+      if (type === 'adverse_effect') return '<span class="badge badge-red">Adverse effect</span>';
+      if (type === 'insufficient_efficacy') return '<span class="badge badge-amber">Insufficient efficacy</span>';
+      return '<span class="badge badge-blue">Dose reduction</span>';
+    }
+
+    async function patientLogin() {
+      const participantNo = Number(document.getElementById('participant-no').value);
+      const password = document.getElementById('participant-password').value;
+      const status = document.getElementById('portal-status');
+      status.textContent = 'Signing in...';
+      try {
+        await apiFetch('/api/patient/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ participantNo, password })
+        });
+        await loadPortalData();
+      } catch (error) {
+        status.textContent = error.message;
+      }
+    }
+
+    async function patientLogout() {
+      try {
+        await fetch('/api/patient/logout', { method: 'POST' });
+      } finally {
+        document.getElementById('portal-content').style.display = 'none';
+        document.getElementById('portal-status').textContent = 'Not signed in';
+        document.getElementById('participant-password').value = '';
+      }
+    }
+
+    async function loadPortalData() {
+      const data = await apiFetch('/api/patient/data');
+      document.getElementById('participant-no').value = data.participantNo;
+      document.getElementById('portal-status').textContent = `Signed in as participant ${data.participantNo}`;
+      document.getElementById('portal-content').style.display = 'grid';
+
+      document.getElementById('basic-info').innerHTML = [
+        itemHtml('APOE', data.patient.apoe_genotype),
+        itemHtml('Genetic diseases', data.patient.genetic_diseases),
+        itemHtml('WGS heart', data.patient.wgs_heart),
+        itemHtml('WGS other', data.patient.wgs_other),
+      ].join('');
+
+      document.getElementById('plans').innerHTML = [
+        itemHtml('Exercise plan', `<pre>${data.patient.exercise_plan || '—'}</pre>`),
+        itemHtml('Diet plan', `<pre>${data.patient.diet_plan || '—'}</pre>`),
+        itemHtml('Monitoring plan', `<pre>${data.patient.monitoring_plan || '—'}</pre>`),
+      ].join('');
+
+      document.getElementById('risks-list').innerHTML = data.risks.length
+        ? data.risks.map((risk) => `<div class="item"><strong>#${risk.rank_order}</strong> ${risk.disease_name}<div class="status">${Number(risk.multiplier).toFixed(2)}x</div></div>`).join('')
+        : '<div class="empty">No risk records</div>';
+
+      document.getElementById('cancer-list').innerHTML = data.cancer.length
+        ? data.cancer.map((row) => `<div class="item">${row.cancer_type}<div class="status">${row.carrier_status || '—'} ${row.multiplier ? `• ${Number(row.multiplier).toFixed(2)}x` : ''}</div></div>`).join('')
+        : '<div class="empty">No WGS cancer records</div>';
+
+      document.getElementById('nutrition-list').innerHTML = data.nutrition.length
+        ? data.nutrition.map((row) => `<div class="item">${row.nutrient}<div class="status">${row.need_level}</div></div>`).join('')
+        : '<div class="empty">No nutrition records</div>';
+
+      document.getElementById('food-list').innerHTML = data.food.length
+        ? data.food.map((row) => `<div class="item">${row.item_name}<div class="status">${row.item_type} • ${row.risk_level}</div></div>`).join('')
+        : '<div class="empty">No food or exposure records</div>';
+
+      document.getElementById('pgx-list').innerHTML = data.pgx.length
+        ? data.pgx.map((row) => `<div class="item">${row.drug_name}<div class="status">${badgeForRisk(row.risk_type)}</div></div>`).join('')
+        : '<div class="empty">No PGx records</div>';
+    }
+
+    async function checkExistingSession() {
+      const participant = queryParam('participant');
+      if (participant) document.getElementById('participant-no').value = participant;
+      try {
+        const session = await apiFetch('/api/patient/session');
+        if (session.authenticated) await loadPortalData();
+      } catch {
+        document.getElementById('portal-status').textContent = 'Not signed in';
+      }
+    }
+
+    window.onload = checkExistingSession;
+  </script>
+</body>
+</html>

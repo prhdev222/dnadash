@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🧬 DNA Dashboard — Admin</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0f1e;--bg2:#111827;--bg3:#1f2937;--border:#374151;
+  --text:#f1f5f9;--muted:#94a3b8;--dim:#64748b;
+  --purple:#a78bfa;--blue:#38bdf8;--green:#34d399;
+  --amber:#fbbf24;--red:#f87171;--orange:#fb923c;
+  --success:#10b981;--danger:#ef4444;
+}
+body{background:var(--bg);color:var(--text);font-family:'Sarabun',system-ui,sans-serif;font-size:14px}
+
+/* TOPBAR */
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;position:sticky;top:0;z-index:200}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#a78bfa,#38bdf8);display:flex;align-items:center;justify-content:center;font-size:15px}
+.logo-txt{font-size:14px;font-weight:700;color:#fff}
+.logo-sub{font-size:10px;color:var(--dim)}
+.top-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn{padding:7px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;transition:all .2s;white-space:nowrap}
+.btn:hover{background:#374151}
+.btn-primary{background:var(--purple);border-color:var(--purple);color:#fff}
+.btn-primary:hover{background:#8b5cf6}
+.btn-danger{background:var(--danger);border-color:var(--danger);color:#fff}
+.btn-sm{padding:4px 10px;font-size:11px}
+.btn-success{background:var(--success);border-color:var(--success);color:#fff}
+
+/* LAYOUT */
+.layout{display:flex;height:calc(100vh - 57px)}
+
+/* SIDEBAR */
+.sidebar{width:220px;min-width:220px;background:var(--bg2);border-right:1px solid var(--border);overflow-y:auto;padding:12px 0}
+.sidebar-section{padding:6px 16px 2px;font-size:9px;font-weight:700;color:var(--dim);letter-spacing:.12em;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:8px;padding:9px 16px;cursor:pointer;transition:background .15s;font-size:13px;color:var(--muted);border-left:2px solid transparent}
+.nav-item:hover{background:rgba(255,255,255,.04);color:var(--text)}
+.nav-item.active{background:rgba(167,139,250,.1);color:var(--purple);border-left-color:var(--purple)}
+.nav-icon{font-size:15px;width:18px;text-align:center}
+.nav-badge{margin-left:auto;background:var(--bg3);border-radius:10px;padding:1px 7px;font-size:10px;color:var(--muted)}
+.participant-list{max-height:300px;overflow-y:auto}
+
+/* MAIN CONTENT */
+.content{flex:1;overflow-y:auto;padding:20px}
+
+/* CONFIG PANEL */
+.config-panel{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px}
+.config-title{font-size:14px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.config-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field-group{display:flex;flex-direction:column;gap:4px}
+.field-label{font-size:11px;color:var(--dim);font-weight:600}
+.field-input{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 10px;color:var(--text);font-size:12px;font-family:inherit;width:100%;outline:none}
+.field-input:focus{border-color:var(--purple)}
+.field-input::placeholder{color:var(--dim)}
+.status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px}
+.dot-ok{background:var(--success)}
+.dot-err{background:var(--danger)}
+.dot-wait{background:var(--amber)}
+
+/* OVERVIEW CARDS */
+.overview-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:20px}
+.ov-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.ov-label{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:4px}
+.ov-val{font-size:24px;font-weight:800;font-family:'DM Mono',monospace}
+.ov-sub{font-size:10px;color:var(--dim);margin-top:2px}
+
+/* TABLE */
+.tbl-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px}
+.tbl-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.tbl-title{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px}
+.tbl-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.search-box{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:6px 10px;color:var(--text);font-size:12px;font-family:inherit;width:180px;outline:none}
+.search-box:focus{border-color:var(--purple)}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:var(--bg3);padding:10px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--dim);letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid rgba(55,65,81,.5);vertical-align:top;line-height:1.5}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+.td-edit{background:transparent;border:none;color:var(--blue);cursor:pointer;font-size:11px;padding:2px 6px;border-radius:4px}
+.td-edit:hover{background:rgba(56,189,248,.1)}
+.td-del{background:transparent;border:none;color:var(--red);cursor:pointer;font-size:11px;padding:2px 6px;border-radius:4px}
+.td-del:hover{background:rgba(239,68,68,.1)}
+
+/* BADGES */
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;white-space:nowrap}
+.badge-ae{background:rgba(239,68,68,.15);color:#fca5a5;border:0.5px solid rgba(239,68,68,.3)}
+.badge-eff{background:rgba(251,191,36,.15);color:#fcd34d;border:0.5px solid rgba(251,191,36,.3)}
+.badge-dose{background:rgba(56,189,248,.15);color:#7dd3fc;border:0.5px solid rgba(56,189,248,.3)}
+.badge-high{background:rgba(239,68,68,.15);color:#fca5a5;border:0.5px solid rgba(239,68,68,.3)}
+.badge-slightly{background:rgba(251,191,36,.15);color:#fcd34d;border:0.5px solid rgba(251,191,36,.3)}
+.badge-food{background:rgba(251,146,60,.15);color:#fdba74;border:0.5px solid rgba(251,146,60,.3)}
+.badge-exp{background:rgba(148,163,184,.1);color:#cbd5e1;border:0.5px solid rgba(148,163,184,.2)}
+.badge-auto{background:rgba(167,139,250,.15);color:#c4b5fd;border:0.5px solid rgba(167,139,250,.3)}
+.badge-neuro{background:rgba(52,211,153,.12);color:#6ee7b7;border:0.5px solid rgba(52,211,153,.3)}
+.badge-vasc{background:rgba(56,189,248,.12);color:#7dd3fc;border:0.5px solid rgba(56,189,248,.3)}
+.mult-high{color:#f87171;font-weight:700;font-family:monospace}
+.mult-med{color:#fb923c;font-weight:700;font-family:monospace}
+.mult-low{color:#34d399;font-weight:700;font-family:monospace}
+
+/* INLINE EDIT */
+.inline-input{background:var(--bg3);border:1px solid var(--purple);border-radius:4px;padding:3px 6px;color:var(--text);font-size:12px;font-family:inherit;width:100%}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:16px;width:100%;max-width:600px;max-height:85vh;overflow-y:auto}
+.modal-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.modal-title{font-size:15px;font-weight:700}
+.modal-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;line-height:1}
+.modal-body{padding:20px}
+.modal-foot{padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.form-group{display:flex;flex-direction:column;gap:4px}
+.form-label{font-size:11px;color:var(--dim);font-weight:600}
+.form-control{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 10px;color:var(--text);font-size:12px;font-family:inherit;width:100%;outline:none;resize:vertical}
+.form-control:focus{border-color:var(--purple)}
+textarea.form-control{min-height:80px}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 16px;font-size:13px;z-index:2000;transform:translateY(80px);opacity:0;transition:all .3s;min-width:200px}
+.toast.show{transform:translateY(0);opacity:1}
+.toast-ok{border-color:var(--success);background:rgba(16,185,129,.1)}
+.toast-err{border-color:var(--danger);background:rgba(239,68,68,.1)}
+
+/* LOADING */
+.loading{display:flex;align-items:center;gap:8px;color:var(--muted);padding:24px}
+.spinner{width:20px;height:20px;border:2px solid rgba(167,139,250,.2);border-top-color:var(--purple);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.empty-row td{text-align:center;padding:32px;color:var(--dim)}
+.page-title{font-size:18px;font-weight:700;margin-bottom:4px}
+.page-sub{font-size:12px;color:var(--muted);margin-bottom:16px}
+.tab-bar{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:16px}
+.tab{padding:8px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;transition:all .2s}
+.tab.active{color:var(--purple);border-bottom-color:var(--purple)}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-icon">🧬</div>
+    <div>
+      <div class="logo-txt">DNA Dashboard — Admin</div>
+      <div class="logo-sub">Research Data Management</div>
+    </div>
+  </div>
+  <div class="top-actions">
+    <span id="conn-status" style="font-size:11px;color:var(--muted)"><span class="status-dot dot-wait"></span>Not connected</span>
+    <button class="btn btn-primary" onclick="showPage('config')">⚙️ Connection</button>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="sidebar-section">Navigation</div>
+    <div class="nav-item active" onclick="showPage('overview')" id="nav-overview">
+      <span class="nav-icon">📊</span> Overview
+    </div>
+    <div class="nav-item" onclick="showPage('patients')" id="nav-patients">
+      <span class="nav-icon">👤</span> Patients
+      <span class="nav-badge" id="badge-patients">—</span>
+    </div>
+    <div class="nav-item" onclick="showPage('risks')" id="nav-risks">
+      <span class="nav-icon">⚠️</span> Health Risks
+      <span class="nav-badge" id="badge-risks">—</span>
+    </div>
+    <div class="nav-item" onclick="showPage('pgx')" id="nav-pgx">
+      <span class="nav-icon">💊</span> PGx Drugs
+      <span class="nav-badge" id="badge-pgx">—</span>
+    </div>
+    <div class="nav-item" onclick="showPage('cancer')" id="nav-cancer">
+      <span class="nav-icon">🔬</span> WGS Cancer
+      <span class="nav-badge" id="badge-cancer">—</span>
+    </div>
+    <div class="nav-item" onclick="showPage('nutrition')" id="nav-nutrition">
+      <span class="nav-icon">🥗</span> Nutrition
+      <span class="nav-badge" id="badge-nutrition">—</span>
+    </div>
+    <div class="nav-item" onclick="showPage('food')" id="nav-food">
+      <span class="nav-icon">🌿</span> Food/Exposure
+      <span class="nav-badge" id="badge-food">—</span>
+    </div>
+    <div class="sidebar-section" style="margin-top:12px">Quick Jump</div>
+    <div id="participant-nav" class="participant-list"></div>
+  </div>
+
+  <div class="content" id="content">
+    <div class="config-panel" id="config-section">
+      <div class="config-title">⚙️ Turso Connection Settings</div>
+      <div class="config-grid">
+        <div class="field-group">
+          <div class="field-label">TURSO DATABASE URL</div>
+          <input class="field-input" id="turso-url" type="text" placeholder="libsql://your-db.turso.io" />
+        </div>
+        <div class="field-group">
+          <div class="field-label">AUTH TOKEN</div>
+          <input class="field-input" id="turso-token" type="password" placeholder="eyJ..." />
+        </div>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="testConnection()">🔌 Test Connection</button>
+        <button class="btn btn-success" onclick="loadAll()">🔄 Load All Data</button>
+        <span id="conn-msg" style="font-size:12px;color:var(--muted);align-self:center"></span>
+      </div>
+    </div>
+    <div id="main-content">
+      <div style="text-align:center;padding:60px 20px;color:var(--muted)">
+        <div style="font-size:40px;margin-bottom:12px">🧬</div>
+        <div style="font-size:16px;font-weight:600;margin-bottom:6px">ยังไม่ได้เชื่อมต่อ Turso</div>
+        <div style="font-size:12px">กรอก Database URL และ Auth Token แล้วกด Load All Data</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" style="display:none" onclick="closeModal(event)">
+  <div class="modal" id="modal-box">
+    <div class="modal-head">
+      <span class="modal-title" id="modal-title">Edit</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-foot" id="modal-foot">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" id="modal-save" onclick="saveModal()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+let DB_URL = '', DB_TOKEN = '';
+let DB = {patients:[],risks:[],pgx:[],cancer:[],nutrition:[],food:[]};
+let currentPage = 'overview';
+let modalSaveCallback = null;
+
+// ─── TURSO API ─────────────────────────────────────────────
+async function tursoQuery(sql, args=[]) {
+  if (!DB_URL || !DB_TOKEN) { toast('ยังไม่ได้ตั้งค่า Connection', 'err'); return null; }
+  const url = DB_URL.replace('libsql://', 'https://') + '/v3/pipeline';
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + DB_TOKEN, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ requests: [{ type: 'execute', stmt: { sql, args } }] })
+    });
+    const data = await res.json();
+    if (data.results && data.results[0]) {
+      const r = data.results[0];
+      if (r.type === 'error') { toast('DB Error: ' + r.error.message, 'err'); return null; }
+      const cols = r.response?.result?.cols?.map(c => c.name) || [];
+      const rows = r.response?.result?.rows || [];
+      return rows.map(row => Object.fromEntries(cols.map((c, i) => [c, row[i]?.value ?? row[i]])));
+    }
+    return [];
+  } catch(e) { toast('Connection failed: ' + e.message, 'err'); return null; }
+}
+
+async function tursoExec(sql) {
+  return tursoQuery(sql);
+}
+
+// ─── CONNECTION ─────────────────────────────────────────────
+async function testConnection() {
+  DB_URL = document.getElementById('turso-url').value.trim();
+  DB_TOKEN = document.getElementById('turso-token').value.trim();
+  localStorage.setItem('dna_url', DB_URL);
+  localStorage.setItem('dna_token', DB_TOKEN);
+  const msg = document.getElementById('conn-msg');
+  msg.textContent = 'Testing...';
+  const rows = await tursoQuery('SELECT COUNT(*) as n FROM patients');
+  if (rows !== null) {
+    const n = rows[0]?.n ?? '?';
+    msg.textContent = '✅ Connected — ' + n + ' patients';
+    document.getElementById('conn-status').innerHTML = '<span class="status-dot dot-ok"></span>Connected';
+    toast('เชื่อมต่อสำเร็จ! พบ ' + n + ' patients', 'ok');
+  } else {
+    msg.textContent = '❌ Connection failed';
+    document.getElementById('conn-status').innerHTML = '<span class="status-dot dot-err"></span>Error';
+  }
+}
+
+async function loadAll() {
+  DB_URL = document.getElementById('turso-url').value.trim();
+  DB_TOKEN = document.getElementById('turso-token').value.trim();
+  localStorage.setItem('dna_url', DB_URL);
+  localStorage.setItem('dna_token', DB_TOKEN);
+  setMainContent('<div class="loading"><div class="spinner"></div> Loading data from Turso...</div>');
+  const [patients, risks, pgx, cancer, nutrition, food] = await Promise.all([
+    tursoQuery('SELECT * FROM patients ORDER BY participant_no'),
+    tursoQuery('SELECT * FROM health_risks ORDER BY participant_no, rank_order'),
+    tursoQuery('SELECT * FROM pgx_drugs ORDER BY participant_no, risk_type, drug_name'),
+    tursoQuery('SELECT * FROM wgs_cancer ORDER BY participant_no'),
+    tursoQuery('SELECT * FROM nutrition_needs ORDER BY participant_no'),
+    tursoQuery('SELECT * FROM food_exposure ORDER BY participant_no, item_type'),
+  ]);
+  if (!patients) return;
+  DB.patients = patients || [];
+  DB.risks = risks || [];
+  DB.pgx = pgx || [];
+  DB.cancer = cancer || [];
+  DB.nutrition = nutrition || [];
+  DB.food = food || [];
+  updateBadges();
+  buildParticipantNav();
+  document.getElementById('conn-status').innerHTML = '<span class="status-dot dot-ok"></span>Connected';
+  toast('โหลดข้อมูลสำเร็จ', 'ok');
+  showPage('overview');
+}
+
+function updateBadges() {
+  document.getElementById('badge-patients').textContent = DB.patients.length;
+  document.getElementById('badge-risks').textContent = DB.risks.length;
+  document.getElementById('badge-pgx').textContent = DB.pgx.length;
+  document.getElementById('badge-cancer').textContent = DB.cancer.length;
+  document.getElementById('badge-nutrition').textContent = DB.nutrition.length;
+  document.getElementById('badge-food').textContent = DB.food.length;
+}
+
+function buildParticipantNav() {
+  const el = document.getElementById('participant-nav');
+  el.innerHTML = DB.patients.map(p =>
+    `<div class="nav-item" onclick="jumpToParticipant(${p.participant_no})" style="font-size:12px">
+      <span class="nav-icon" style="font-size:12px">👤</span> P${p.participant_no}
+    </div>`
+  ).join('');
+}
+
+// ─── NAVIGATION ─────────────────────────────────────────────
+function showPage(page) {
+  currentPage = page;
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  const nav = document.getElementById('nav-' + page);
+  if (nav) nav.classList.add('active');
+  if (DB.patients.length === 0 && page !== 'config') {
+    setMainContent('<div class="loading">⚠️ กรุณาโหลดข้อมูลก่อน — กด Load All Data</div>');
+    return;
+  }
+  const pages = {
+    overview: renderOverview,
+    patients: renderPatients,
+    risks: renderRisks,
+    pgx: renderPGx,
+    cancer: renderCancer,
+    nutrition: renderNutrition,
+    food: renderFood,
+  };
+  if (pages[page]) setMainContent(pages[page]());
+}
+
+function setMainContent(html) {
+  document.getElementById('main-content').innerHTML = html;
+}
+
+// ─── OVERVIEW ───────────────────────────────────────────────
+function renderOverview() {
+  const topRisks = {};
+  DB.risks.filter(r => r.rank_order == 1).forEach(r => {
+    const d = r.disease_name;
+    topRisks[d] = (topRisks[d] || 0) + 1;
+  });
+  const sorted = Object.entries(topRisks).sort((a,b) => b[1]-a[1]).slice(0,5);
+
+  const maxMult = Math.max(...DB.risks.filter(r => r.rank_order == 1).map(r => parseFloat(r.multiplier)||0));
+  const avgMult = (DB.risks.filter(r=>r.rank_order==1).reduce((s,r)=>s+parseFloat(r.multiplier||0),0) / DB.patients.length).toFixed(1);
+
+  return `
+<div class="page-title">📊 Research Overview</div>
+<div class="page-sub">ข้อมูลรวม DNALL 30-subject workbook</div>
+<div class="overview-grid">
+  <div class="ov-card"><div class="ov-label">Participants</div><div class="ov-val" style="color:var(--purple)">${DB.patients.length}</div><div class="ov-sub">คนไข้ทั้งหมด</div></div>
+  <div class="ov-card"><div class="ov-label">Disease Risks</div><div class="ov-val" style="color:var(--red)">${DB.risks.length}</div><div class="ov-sub">รายการทั้งหมด</div></div>
+  <div class="ov-card"><div class="ov-label">PGx Drugs</div><div class="ov-val" style="color:var(--amber)">${DB.pgx.length}</div><div class="ov-sub">รายการยา</div></div>
+  <div class="ov-card"><div class="ov-label">Cancer WGS</div><div class="ov-val" style="color:var(--orange)">${DB.cancer.length}</div><div class="ov-sub">cancer flags</div></div>
+  <div class="ov-card"><div class="ov-label">Max Multiplier</div><div class="ov-val" style="color:var(--red)">${maxMult.toFixed(1)}×</div><div class="ov-sub">สูงสุดในกลุ่ม</div></div>
+  <div class="ov-card"><div class="ov-label">Avg Top Risk</div><div class="ov-val" style="color:var(--blue)">${avgMult}×</div><div class="ov-sub">เฉลี่ยความเสี่ยงสูงสุด</div></div>
+</div>
+
+<div class="tbl-wrap">
+  <div class="tbl-header"><div class="tbl-title">🏆 Top 5 Most Common #1 Risks</div></div>
+  <table>
+    <tr><th>#</th><th>Disease</th><th>Count</th><th>% of cohort</th></tr>
+    ${sorted.map((([d,n],i) => `<tr><td style="color:var(--muted)">${i+1}</td><td>${d}</td><td style="font-weight:700;color:var(--red)">${n}</td><td><div style="display:flex;align-items:center;gap:6px"><div style="width:${Math.round(n/DB.patients.length*120)}px;height:6px;background:var(--red);border-radius:3px;opacity:.7"></div>${Math.round(n/DB.patients.length*100)}%</div></td></tr>`)).join('')}
+  </table>
+</div>
+
+<div class="tbl-wrap">
+  <div class="tbl-header"><div class="tbl-title">💊 PGx Drug Risk Distribution</div></div>
+  <table>
+    <tr><th>Risk Type</th><th>Total Entries</th><th>Avg per Patient</th></tr>
+    ${['adverse_effect','insufficient_efficacy','dose_reduction'].map(rt => {
+      const n = DB.pgx.filter(d => d.risk_type === rt).length;
+      const label = rt === 'adverse_effect' ? 'Adverse Effect' : rt === 'insufficient_efficacy' ? 'Insufficient Efficacy' : 'Dose Reduction';
+      const cls = rt === 'adverse_effect' ? 'badge-ae' : rt === 'insufficient_efficacy' ? 'badge-eff' : 'badge-dose';
+      return `<tr><td><span class="badge ${cls}">${label}</span></td><td style="font-weight:700">${n}</td><td>${(n/DB.patients.length).toFixed(1)}</td></tr>`;
+    }).join('')}
+  </table>
+</div>`;
+}
+
+// ─── PATIENTS ───────────────────────────────────────────────
+function renderPatients(filterPno) {
+  let data = DB.patients;
+  if (filterPno) data = data.filter(p => p.participant_no == filterPno);
+  return `
+<div class="page-title">👤 Patients</div>
+<div class="page-sub">ข้อมูลหลักผู้เข้าร่วมวิจัย — คลิก Edit เพื่อแก้ไข</div>
+<div class="tbl-wrap">
+  <div class="tbl-header">
+    <div class="tbl-title">👤 Patient Records (${data.length})</div>
+    <div class="tbl-actions">
+      <input class="search-box" placeholder="Search..." oninput="filterTable('pt-tbl',this.value)">
+      <button class="btn btn-primary btn-sm" onclick="showAddPatient()">+ Add</button>
+    </div>
+  </div>
+  <table id="pt-tbl">
+    <tr><th>Participant</th><th>APOE</th><th>Genetic Disease</th><th>WGS Heart</th><th>WGS Other</th><th>Actions</th></tr>
+    ${data.length === 0 ? '<tr class="empty-row"><td colspan="6">No data</td></tr>' :
+      data.map(p => `<tr>
+        <td style="font-weight:700;color:var(--purple)">P${p.participant_no}</td>
+        <td><code style="color:var(--purple)">${p.apoe_genotype||'—'}</code></td>
+        <td style="max-width:180px;font-size:11px">${p.genetic_diseases||'—'}</td>
+        <td style="max-width:160px;font-size:11px">${p.wgs_heart||'—'}</td>
+        <td style="max-width:160px;font-size:11px">${p.wgs_other||'—'}</td>
+        <td style="white-space:nowrap">
+          <button class="td-edit" onclick="editPatient(${p.participant_no})">✏️ Edit</button>
+          <button class="td-edit" onclick="viewPatientDetail(${p.participant_no})">👁 View</button>
+        </td>
+      </tr>`).join('')}
+  </table>
+</div>`;
+}
+
+// ─── RISKS ──────────────────────────────────────────────────
+function renderRisks(filterPno) {
+  let data = DB.risks;
+  if (filterPno) data = data.filter(r => r.participant_no == filterPno);
+  return `
+<div class="page-title">⚠️ Health Risks</div>
+<div class="page-sub">ความเสี่ยงโรคจากการวิเคราะห์ยีน (${data.length} รายการ)</div>
+<div class="tbl-wrap">
+  <div class="tbl-header">
+    <div class="tbl-title">⚠️ All Health Risks</div>
+    <div class="tbl-actions">
+      <input class="search-box" placeholder="Search disease..." oninput="filterTable('risk-tbl',this.value)">
+      <button class="btn btn-primary btn-sm" onclick="showAddRisk()">+ Add</button>
+    </div>
+  </div>
+  <table id="risk-tbl">
+    <tr><th>Participant</th><th>Rank</th><th>Disease</th><th>Multiplier</th><th>Actions</th></tr>
+    ${data.length === 0 ? '<tr class="empty-row"><td colspan="5">No data</td></tr>' :
+      data.map(r => {
+        const m = parseFloat(r.multiplier)||0;
+        const cls = m>=10?'mult-high':m>=3?'mult-med':'mult-low';
+        return `<tr>
+          <td style="font-weight:700;color:var(--purple)">P${r.participant_no}</td>
+          <td style="color:var(--muted)">#${r.rank_order}</td>
+          <td>${r.disease_name}</td>
+          <td class="${cls}">${m.toFixed(2)}×</td>
+          <td style="white-space:nowrap">
+            <button class="td-edit" onclick="editRisk(${r.id})">✏️</button>
+            <button class="td-del" onclick="deleteRow('health_risks',${r.id},'Risk')">🗑</button>
+          </td>
+        </tr>`;
+      }).join('')}
+  </table>
+</div>`;
+}
+
+// ─── PGX ────────────────────────────────────────────────────
+function renderPGx(filterPno) {
+  let data = DB.pgx;
+  if (filterPno) data = data.filter(d => d.participant_no == filterPno);
+
+  const tabs = [
+    {key:'adverse_effect', label:'Adverse Effect', cls:'badge-ae'},
+    {key:'insufficient_efficacy', label:'Insufficient Efficacy', cls:'badge-eff'},
+    {key:'dose_reduction', label:'Dose Reduction', cls:'badge-dose'},
+  ];
+
+  const tabHtml = tabs.map(t => {
+    const n = data.filter(d => d.risk_type === t.key).length;
+    return `<div class="tab" onclick="showPgxTab('${t.key}')" id="pgxtab-${t.key}">${t.label} (${n})</div>`;
+  }).join('');
+
+  const tableHtml = tabs.map(t => {
+    const rows = data.filter(d => d.risk_type === t.key);
+    return `<div id="pgxpanel-${t.key}" style="display:none">
+      <table>
+        <tr><th>Participant</th><th>Drug Name</th><th>Risk Type</th><th>Actions</th></tr>
+        ${rows.length === 0 ? '<tr class="empty-row"><td colspan="4">No data</td></tr>' :
+          rows.map(d => `<tr>
+            <td style="font-weight:700;color:var(--purple)">P${d.participant_no}</td>
+            <td style="font-weight:500">${d.drug_name}</td>
+            <td><span class="badge ${t.cls}">${t.label}</span></td>
+            <td style="white-space:nowrap">
+              <button class="td-edit" onclick="editPgx(${d.id})">✏️</button>
+              <button class="td-del" onclick="deleteRow('pgx_drugs',${d.id},'Drug')">🗑</button>
+            </td>
+          </tr>`).join('')}
+      </table>
+    </div>`;
+  }).join('');
+
+  return `
+<div class="page-title">💊 PGx Drugs</div>
+<div class="page-sub">ยาที่มีข้อมูลยีนสำคัญ (${data.length} รายการ)</div>
+<div class="tbl-wrap">
+  <div class="tbl-header">
+    <div class="tbl-title">💊 PGx Drug Entries</div>
+    <div class="tbl-actions">
+      <input class="search-box" placeholder="Search drug..." oninput="filterTable('pgx-all',this.value)">
+      <button class="btn btn-primary btn-sm" onclick="showAddPgx()">+ Add Drug</button>
+    </div>
+  </div>
+  <div class="tab-bar">${tabHtml}</div>
+  ${tableHtml}
+  <table id="pgx-all" style="display:none">${data.map(d=>`<tr><td>${d.participant_no}</td><td>${d.drug_name}</td><td>${d.risk_type}</td></tr>`).join('')}</table>
+</div>`;
+}
+
+function showPgxTab(key) {
+  ['adverse_effect','insufficient_efficacy','dose_reduction'].forEach(k => {
+    const p = document.getElementById('pgxpanel-'+k);
+    const t = document.getElementById('pgxtab-'+k);
+    if(p) p.style.display = k===key ? 'block':'none';
+    if(t) t.classList.toggle('active', k===key);
+  });
+}
+
+// ─── CANCER ─────────────────────────────────────────────────
+function renderCancer(filterPno) {
+  let data = DB.cancer;
+  if (filterPno) data = data.filter(r => r.participant_no == filterPno);
+  return `
+<div class="page-title">🔬 WGS Cancer Flags</div>
+<div class="page-sub">ยีนที่เกี่ยวข้องกับมะเร็งจาก WGS (${data.length} รายการ)</div>
+<div class="tbl-wrap">
+  <div class="tbl-header">
+    <div class="tbl-title">🔬 Cancer Gene Findings</div>
+    <div class="tbl-actions">
+      <input class="search-box" placeholder="Search..." oninput="filterTable('cancer-tbl',this.value)">
+      <button class="btn btn-primary btn-sm" onclick="showAddCancer()">+ Add</button>
+    </div>
+  </div>
+  <table id="cancer-tbl">
+    <tr><th>Participant</th><th>Cancer Type</th><th>Carrier Status</th><th>Multiplier</th><th>Actions</th></tr>
+    ${data.length === 0 ? '<tr class="empty-row"><td colspan="5">No data</td></tr>' :
+      data.map(r => `<tr>
+        <td style="font-weight:700;color:var(--purple)">P${r.participant_no}</td>
+        <td style="font-weight:500">${r.cancer_type}</td>
+        <td style="font-size:11px;color:var(--muted)">${r.carrier_status||'—'}</td>
+        <td class="mult-high">${r.multiplier ? parseFloat(r.multiplier).toFixed(2)+'×' : '—'}</td>
+        <td style="white-space:nowrap">
+          <button class="td-edit" onclick="editCancer(${r.id})">✏️</button>
+          <button class="td-del" onclick="deleteRow('wgs_cancer',${r.id},'Cancer entry')">🗑</button>
+        </td>
+      </tr>`).join('')}
+  </table>
+</div>`;
+}
+
+// ─── NUTRITION ──────────────────────────────────────────────
+function renderNutrition(filterPno) {
+  let data = DB.nutrition;
+  if (filterPno) data = data.filter(r => r.participant_no == filterPno);
+  return `
+<div class="page-title">🥗 Nutrition Needs</div>
+<div class="page-sub">สารอาหารที่ต้องการพิเศษ (${data.length} รายการ)</div>
+<div class="tbl-wrap">
+  <div class="tbl-header">
+    <div class="tbl-title">🥗 Nutrition Data</div>
+    <div class="tbl-actions">
+      <input class="search-box" placeholder="Search nutrient..." oninput="filterTable('nutr-tbl',this.value)">
+      <button class="btn btn-primary btn-sm" onclick="showAddNutrition()">+ Add</button>
+    </div>
+  </div>
+  <table id="nutr-tbl">
+    <tr><th>Participant</th><th>Nutrient</th><th>Need Level</th><th>Actions</th></tr>
+    ${data.length === 0 ? '<tr class="empty-row"><td colspan="4">No data</td></tr>' :
+      data.map(r => `<tr>
+        <td style="font-weight:700;color:var(--purple)">P${r.participant_no}</td>
+        <td style="font-weight:500">${r.nutrient}</td>
+        <td><span class="badge ${r.need_level==='High'?'badge-high':'badge-slightly'}">${r.need_level}</span></td>
+        <td style="white-space:nowrap">
+          <button class="td-edit" onclick="editNutrition(${r.id})">✏️</button>
+          <button class="td-del" onclick="deleteRow('nutrition_needs',${r.id},'Nutrition entry')">🗑</button>
+        </td>
+      </tr>`).join('')}
+  </table>
+</div>`;
+}
+
+// ─── FOOD/EXPOSURE ──────────────────────────────────────────
+function renderFood(filterPno) {
+  let data = DB.food;
+  if (filterPno) data = data.filter(r => r.participant_no == filterPno);
+  return `
+<div class="page-title">🌿 Food Allergy & Exposure</div>
+<div class="page-sub">ความเสี่ยงอาหารและสิ่งแวดล้อม (${data.length} รายการ)</div>
+<div class="tbl-wrap">
+  <div class="tbl-header">
+    <div class="tbl-title">🌿 Food & Exposure Data</div>
+    <div class="tbl-actions">
+      <input class="search-box" placeholder="Search..." oninput="filterTable('food-tbl',this.value)">
+      <button class="btn btn-primary btn-sm" onclick="showAddFood()">+ Add</button>
+    </div>
+  </div>
+  <table id="food-tbl">
+    <tr><th>Participant</th><th>Item</th><th>Type</th><th>Risk Level</th><th>Actions</th></tr>
+    ${data.length === 0 ? '<tr class="empty-row"><td colspan="5">No data</td></tr>' :
+      data.map(r => `<tr>
+        <td style="font-weight:700;color:var(--purple)">P${r.participant_no}</td>
+        <td style="font-weight:500">${r.item_name}</td>
+        <td><span class="badge ${r.item_type==='food'?'badge-food':'badge-exp'}">${r.item_type}</span></td>
+        <td><span class="badge ${r.risk_level==='slightly_high'?'badge-slightly':'badge-high'}">${r.risk_level}</span></td>
+        <td style="white-space:nowrap">
+          <button class="td-edit" onclick="editFood(${r.id})">✏️</button>
+          <button class="td-del" onclick="deleteRow('food_exposure',${r.id},'Entry')">🗑</button>
+        </td>
+      </tr>`).join('')}
+  </table>
+</div>`;
+}
+
+// ─── PARTICIPANT DETAIL VIEW ─────────────────────────────────
+function viewPatientDetail(pno) {
+  const p = DB.patients.find(x => x.participant_no == pno);
+  const risks = DB.risks.filter(r => r.participant_no == pno);
+  const pgx = DB.pgx.filter(d => d.participant_no == pno);
+  const cancer = DB.cancer.filter(c => c.participant_no == pno);
+  const nutr = DB.nutrition.filter(n => n.participant_no == pno);
+  const food = DB.food.filter(f => f.participant_no == pno);
+
+  const pgxAE = pgx.filter(d=>d.risk_type==='adverse_effect');
+  const pgxEff = pgx.filter(d=>d.risk_type==='insufficient_efficacy');
+  const pgxDose = pgx.filter(d=>d.risk_type==='dose_reduction');
+
+  document.getElementById('modal-title').textContent = 'Participant ' + pno + ' — Full Detail';
+  document.getElementById('modal-foot').style.display = 'none';
+  document.getElementById('modal-body').innerHTML = `
+<div style="display:grid;gap:14px">
+
+  <div><b style="color:var(--purple)">🧬 Basic Info</b>
+    <table style="margin-top:8px;font-size:12px;width:100%">
+      <tr><td style="color:var(--muted);width:140px">APOE</td><td><code>${p.apoe_genotype}</code></td></tr>
+      <tr><td style="color:var(--muted)">Genetic diseases</td><td>${p.genetic_diseases||'—'}</td></tr>
+      <tr><td style="color:var(--muted)">WGS Heart</td><td>${p.wgs_heart||'—'}</td></tr>
+      <tr><td style="color:var(--muted)">WGS Other</td><td>${p.wgs_other||'—'}</td></tr>
+    </table>
+  </div>
+
+  <div><b style="color:var(--red)">⚠️ Top ${risks.length} Health Risks</b>
+    <table style="margin-top:8px;font-size:12px;width:100%">
+      ${risks.map(r=>{const m=parseFloat(r.multiplier);return`<tr><td style="color:var(--muted);width:30px">#${r.rank_order}</td><td>${r.disease_name}</td><td class="${m>=10?'mult-high':m>=3?'mult-med':'mult-low'}" style="white-space:nowrap">${m.toFixed(2)}×</td></tr>`}).join('')}
+    </table>
+  </div>
+
+  ${cancer.length?`<div><b style="color:var(--orange)">🔬 WGS Cancer (${cancer.length})</b>
+    <table style="margin-top:8px;font-size:12px;width:100%">
+      ${cancer.map(c=>`<tr><td>${c.cancer_type}</td><td style="color:var(--muted)">${c.carrier_status||''}</td><td class="mult-high">${c.multiplier?parseFloat(c.multiplier).toFixed(2)+'×':''}</td></tr>`).join('')}
+    </table>
+  </div>`:''}
+
+  <div><b style="color:var(--green)">🥗 Nutrition Needs (${nutr.length})</b>
+    <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px">
+      ${nutr.map(n=>`<span class="badge ${n.need_level==='High'?'badge-high':'badge-slightly'}">${n.nutrient} — ${n.need_level}</span>`).join('')}
+    </div>
+  </div>
+
+  <div><b style="color:var(--amber)">💊 PGx Drugs</b>
+    <div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-size:11px">
+      <div><div style="color:var(--red);font-weight:700;margin-bottom:4px">Adverse Effect (${pgxAE.length})</div>${pgxAE.map(d=>`<div style="padding:2px 0;border-bottom:0.5px solid var(--border)">${d.drug_name}</div>`).join('')}</div>
+      <div><div style="color:var(--amber);font-weight:700;margin-bottom:4px">Insuff. Efficacy (${pgxEff.length})</div>${pgxEff.map(d=>`<div style="padding:2px 0;border-bottom:0.5px solid var(--border)">${d.drug_name}</div>`).join('')}</div>
+      <div><div style="color:var(--blue);font-weight:700;margin-bottom:4px">Dose Reduction (${pgxDose.length})</div>${pgxDose.map(d=>`<div style="padding:2px 0;border-bottom:0.5px solid var(--border)">${d.drug_name}</div>`).join('')}</div>
+    </div>
+  </div>
+
+  ${food.length?`<div><b style="color:var(--orange)">🌿 Food/Exposure (${food.length})</b>
+    <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px">
+      ${food.map(f=>`<span class="badge ${f.item_type==='food'?'badge-food':'badge-exp'}">${f.item_name} (${f.risk_level})</span>`).join('')}
+    </div>
+  </div>`:''}
+
+  <div style="padding-top:8px;border-top:1px solid var(--border)"><b style="color:var(--muted)">💪 Action Plans</b>
+    <details style="margin-top:8px"><summary style="cursor:pointer;color:var(--blue);font-size:12px">Exercise Plan</summary><pre style="font-size:11px;white-space:pre-wrap;margin-top:6px;color:var(--muted)">${p.exercise_plan||'—'}</pre></details>
+    <details style="margin-top:4px"><summary style="cursor:pointer;color:var(--green);font-size:12px">Diet Plan</summary><pre style="font-size:11px;white-space:pre-wrap;margin-top:6px;color:var(--muted)">${p.diet_plan||'—'}</pre></details>
+    <details style="margin-top:4px"><summary style="cursor:pointer;color:var(--orange);font-size:12px">Monitoring Plan</summary><pre style="font-size:11px;white-space:pre-wrap;margin-top:6px;color:var(--muted)">${p.monitoring_plan||'—'}</pre></details>
+  </div>
+</div>`;
+  document.getElementById('modal').style.display = 'flex';
+}
+
+// ─── EDIT FUNCTIONS ──────────────────────────────────────────
+function editPatient(pno) {
+  const p = DB.patients.find(x => x.participant_no == pno);
+  document.getElementById('modal-title').textContent = 'Edit Participant ' + pno;
+  document.getElementById('modal-foot').style.display = 'flex';
+  document.getElementById('modal-body').innerHTML = `
+<div class="form-row">
+  <div class="form-group"><label class="form-label">APOE Genotype</label><input class="form-control" id="ed-apoe" value="${p.apoe_genotype||''}"></div>
+  <div class="form-group"><label class="form-label">Genetic Diseases</label><input class="form-control" id="ed-gd" value="${p.genetic_diseases||''}"></div>
+</div>
+<div class="form-row">
+  <div class="form-group"><label class="form-label">WGS Heart</label><input class="form-control" id="ed-heart" value="${p.wgs_heart||''}"></div>
+  <div class="form-group"><label class="form-label">WGS Other</label><input class="form-control" id="ed-other" value="${p.wgs_other||''}"></div>
+</div>
+<div class="form-group" style="margin-bottom:10px"><label class="form-label">Exercise Plan</label><textarea class="form-control" id="ed-ex" rows="3">${p.exercise_plan||''}</textarea></div>
+<div class="form-group" style="margin-bottom:10px"><label class="form-label">Diet Plan</label><textarea class="form-control" id="ed-diet" rows="3">${p.diet_plan||''}</textarea></div>
+<div class="form-group"><label class="form-label">Monitoring Plan</label><textarea class="form-control" id="ed-mon" rows="3">${p.monitoring_plan||''}</textarea></div>`;
+  modalSaveCallback = async () => {
+    const sql = `UPDATE patients SET apoe_genotype=?, genetic_diseases=?, wgs_heart=?, wgs_other=?, exercise_plan=?, diet_plan=?, monitoring_plan=?, updated_at=datetime('now') WHERE participant_no=?`;
+    const args = ['ed-apoe','ed-gd','ed-heart','ed-other','ed-ex','ed-diet','ed-mon'].map(id => ({type:'text',value:document.getElementById(id).value}));
+    args.push({type:'integer',value:pno});
+    const r = await tursoQuery(sql, args);
+    if (r !== null) { toast('บันทึกสำเร็จ', 'ok'); closeModal(); loadAll(); }
+  };
+  document.getElementById('modal').style.display = 'flex';
+}
+
+function editRisk(id) {
+  const r = DB.risks.find(x => x.id == id);
+  document.getElementById('modal-title').textContent = 'Edit Health Risk';
+  document.getElementById('modal-foot').style.display = 'flex';
+  document.getElementById('modal-body').innerHTML = `
+<div class="form-row">
+  <div class="form-group"><label class="form-label">Disease Name</label><input class="form-control" id="ed-dis" value="${r.disease_name}"></div>
+  <div class="form-group"><label class="form-label">Multiplier (×)</label><input class="form-control" id="ed-mult" type="number" step="0.01" value="${r.multiplier}"></div>
+</div>
+<div class="form-row">
+  <div class="form-group"><label class="form-label">Participant No</label><input class="form-control" id="ed-pno" type="number" value="${r.participant_no}"></div>
+  <div class="form-group"><label class="form-label">Rank Order</label><input class="form-control" id="ed-rank" type="number" value="${r.rank_order}"></div>
+</div>`;
+  modalSaveCallback = async () => {
+    const sql = 'UPDATE health_risks SET disease_name=?, multiplier=?, rank_order=? WHERE id=?';
+    const args = [{type:'text',value:document.getElementById('ed-dis').value},{type:'float',value:parseFloat(document.getElementById('ed-mult').value)},{type:'integer',value:parseInt(document.getElementById('ed-rank').value)},{type:'integer',value:id}];
+    const res = await tursoQuery(sql, args);
+    if (res !== null) { toast('บันทึกสำเร็จ', 'ok'); closeModal(); loadAll(); }
+  };
+  document.getElementById('modal').style.display = 'flex';
+}
+
+function editPgx(id) {
+  const d = DB.pgx.find(x => x.id == id);
+  document.getElementById('modal-title').textContent = 'Edit PGx Drug';
+  document.getElementById('modal-foot').style.display = 'flex';
+  document.getElementById('modal-body').innerHTML = `
+<div class="form-group" style="margin-bottom:10px"><label class="form-label">Drug Name</label><input class="form-control" id="ed-drug" value="${d.drug_name}"></div>
+<div class="form-group"><label class="form-label">Risk Type</label>
+<select class="form-control" id="ed-rtype">
+  <option value="adverse_effect" ${d.risk_type==='adverse_effect'?'selected':''}>Adverse Effect</option>
+  <option value="insufficient_efficacy" ${d.risk_type==='insufficient_efficacy'?'selected':''}>Insufficient Efficacy</option>
+  <option value="dose_reduction" ${d.risk_type==='dose_reduction'?'selected':''}>Dose Reduction</option>
+</select></div>`;
+  modalSaveCallback = async () => {
+    const sql = 'UPDATE pgx_drugs SET drug_name=?, risk_type=? WHERE id=?';
+    const args = [{type:'text',value:document.getElementById('ed-drug').value},{type:'text',value:document.getElementById('ed-rtype').value},{type:'integer',value:id}];
+    const res = await tursoQuery(sql, args);
+    if (res !== null) { toast('บันทึกสำเร็จ', 'ok'); closeModal(); loadAll(); }
+  };
+  document.getElementById('modal').style.display = 'flex';
+}
+
+function editCancer(id) {
+  const c = DB.cancer.find(x => x.id == id);
+  document.getElementById('modal-title').textContent = 'Edit WGS Cancer';
+  document.getElementById('modal-foot').style.display = 'flex';
+  document.getElementById('modal-body').innerHTML = `
+<div class="form-group" style="margin-bottom:10px"><label class="form-label">Cancer Type</label><input class="form-control" id="ed-ct" value="${c.cancer_type}"></div>
+<div class="form-row">
+  <div class="form-group"><label class="form-label">Carrier Status</label><input class="form-control" id="ed-cs" value="${c.carrier_status||''}"></div>
+  <div class="form-group"><label class="form-label">Multiplier (×)</label><input class="form-control" id="ed-cm" type="number" step="0.01" value="${c.multiplier||''}"></div>
+</div>`;
+  modalSaveCallback = async () => {
+    const sql = 'UPDATE wgs_cancer SET cancer_type=?, carrier_status=?, multiplier=? WHERE id=?';
+    const args = [{type:'text',value:document.getElementById('ed-ct').value},{type:'text',value:document.getElementById('ed-cs').value},{type:'float',value:parseFloat(document.getElementById('ed-cm').value)||0},{type:'integer',value:id}];
+    const res = await tursoQuery(sql, args);
+    if (res !== null) { toast('บันทึกสำเร็จ', 'ok'); closeModal(); loadAll(); }
+  };
+  document.getElementById('modal').style.display = 'flex';
+}
+
+function editNutrition(id) {
+  const n = DB.nutrition.find(x => x.id == id);
+  document.getElementById('modal-title').textContent = 'Edit Nutrition';
+  document.getElementById('modal-foot').style.display = 'flex';
+  document.getElementById('modal-body').innerHTML = `
+<div class="form-group" style="margin-bottom:10px"><label class="form-label">Nutrient</label><input class="form-control" id="ed-nut" value="${n.nutrient}"></div>
+<div class="form-group"><label class="form-label">Need Level</label>
+<select class="form-control" id="ed-lv">
+  <option value="High" ${n.need_level==='High'?'selected':''}>High</option>
+  <option value="Slightly High" ${n.need_level==='Slightly High'?'selected':''}>Slightly High</option>
+</select></div>`;
+  modalSaveCallback = async () => {
+    const sql = 'UPDATE nutrition_needs SET nutrient=?, need_level=? WHERE id=?';
+    const args = [{type:'text',value:document.getElementById('ed-nut').value},{type:'text',value:document.getElementById('ed-lv').value},{type:'integer',value:id}];
+    const res = await tursoQuery(sql, args);
+    if (res !== null) { toast('บันทึกสำเร็จ', 'ok'); closeModal(); loadAll(); }
+  };
+  document.getElementById('modal').style.display = 'flex';
+}
+
+function editFood(id) {
+  const f = DB.food.find(x => x.id == id);
+  document.getElementById('modal-title').textContent = 'Edit Food/Exposure';
+  document.getElementById('modal-foot').style.display = 'flex';
+  document.getElementById('modal-body').innerHTML = `
+<div class="form-group" style="margin-bottom:10px"><label class="form-label">Item Name</label><input class="form-control" id="ed-fn" value="${f.item_name}"></div>
+<div class="form-row">
+  <div class="form-group"><label class="form-label">Type</label>
+  <select class="form-control" id="ed-ft"><option value="food" ${f.item_type==='food'?'selected':''}>food</option><option value="exposure" ${f.item_type==='exposure'?'selected':''}>exposure</option></select></div>
+  <div class="form-group"><label class="form-label">Risk Level</label>
+  <select class="form-control" id="ed-fl">
+    <option value="slightly_high" ${f.risk_level==='slightly_high'?'selected':''}>slightly_high</option>
+    <option value="moderate" ${f.risk_level==='moderate'?'selected':''}>moderate</option>
+    <option value="high" ${f.risk_level==='high'?'selected':''}>high</option>
+  </select></div>
+</div>`;
+  modalSaveCallback = async () => {
+    const sql = 'UPDATE food_exposure SET item_name=?, item_type=?, risk_level=? WHERE id=?';
+    const args = [{type:'text',value:document.getElementById('ed-fn').value},{type:'text',value:document.getElementById('ed-ft').value},{type:'text',value:document.getElementById('ed-fl').value},{type:'integer',value:id}];
+    const res = await tursoQuery(sql, args);
+    if (res !== null) { toast('บันทึกสำเร็จ', 'ok'); closeModal(); loadAll(); }
+  };
+  document.getElementById('modal').style.display = 'flex';
+}
+
+// ─── ADD FUNCTIONS ───────────────────────────────────────────
+function showAddRisk() {
+  document.getElementById('modal-title').textContent = 'Add Health Risk';
+  document.getElementById('modal-foot').style.display = 'flex';
+  document.getElementById('modal-body').innerHTML = `
+<div class="form-row">
+  <div class="form-group"><label class="form-label">Participant No</label><input class="form-control" id="ad-pno" type="number"></div>
+  <div class="form-group"><label class="form-label">Rank Order</label><input class="form-control" id="ad-rank" type="number" value="11"></div>
+</div>
+<div class="form-row">
+  <div class="form-group"><label class="form-label">Disease Name</label><input class="form-control" id="ad-dis"></div>
+  <div class="form-group"><label class="form-label">Multiplier</label><input class="form-control" id="ad-mult" type="number" step="0.01"></div>
+</div>`;
+  modalSaveCallback = async () => {
+    const sql = 'INSERT INTO health_risks (participant_no,rank_order,disease_name,multiplier) VALUES (?,?,?,?)';
+    const args = [{type:'integer',value:parseInt(document.getElementById('ad-pno').value)},{type:'integer',value:parseInt(document.getElementById('ad-rank').value)},{type:'text',value:document.getElementById('ad-dis').value},{type:'float',value:parseFloat(document.getElementById('ad-mult').value)}];
+    const res = await tursoQuery(sql, args);
+    if (res !== null) { toast('เพิ่มสำเร็จ', 'ok'); closeModal(); loadAll(); }
+  };
+  document.getElementById('modal').style.display = 'flex';
+}
+
+function showAddPgx() {
+  document.getElementById('modal-title').textContent = 'Add PGx Drug';
+  document.getElementById('modal-foot').style.display = 'flex';
+  document.getElementById('modal-body').innerHTML = `
+<div class="form-group" style="margin-bottom:10px"><label class="form-label">Participant No</label><input class="form-control" id="ad-pno" type="number"></div>
+<div class="form-group" style="margin-bottom:10px"><label class="form-label">Drug Name</label><input class="form-control" id="ad-drug"></div>
+<div class="form-group"><label class="form-label">Risk Type</label>
+<select class="form-control" id="ad-rt">
+  <option value="adverse_effect">Adverse Effect</option>
+  <option value="insufficient_efficacy">Insufficient Efficacy</option>
+  <option value="dose_reduction">Dose Reduction</option>
+</select></div>`;
+  modalSaveCallback = async () => {
+    const sql = 'INSERT INTO pgx_drugs (participant_no,drug_name,risk_type) VALUES (?,?,?)';
+    const args = [{type:'integer',value:parseInt(document.getElementById('ad-pno').value)},{type:'text',value:document.getElementById('ad-drug').value},{type:'text',value:document.getElementById('ad-rt').value}];
+    const res = await tursoQuery(sql, args);
+    if (res !== null) { toast('เพิ่มสำเร็จ', 'ok'); closeModal(); loadAll(); }
+  };
+  document.getElementById('modal').style.display = 'flex';
+}
+
+function showAddPatient() {
+  document.getElementById('modal-title').textContent = 'Add New Participant';
+  document.getElementById('modal-foot').style.display = 'flex';
+  document.getElementById('modal-body').innerHTML = `
+<div class="form-row">
+  <div class="form-group"><label class="form-label">Participant No *</label><input class="form-control" id="ad-pno" type="number"></div>
+  <div class="form-group"><label class="form-label">APOE Genotype</label><input class="form-control" id="ad-apoe" value="ε3/ε3"></div>
+</div>
+<div class="form-group" style="margin-bottom:10px"><label class="form-label">Genetic Diseases</label><input class="form-control" id="ad-gd" placeholder="e.g. ไม่พบ carrier"></div>`;
+  modalSaveCallback = async () => {
+    const sql = 'INSERT INTO patients (participant_no,apoe_genotype,genetic_diseases) VALUES (?,?,?)';
+    const args = [{type:'integer',value:parseInt(document.getElementById('ad-pno').value)},{type:'text',value:document.getElementById('ad-apoe').value},{type:'text',value:document.getElementById('ad-gd').value}];
+    const res = await tursoQuery(sql, args);
+    if (res !== null) { toast('เพิ่มผู้เข้าร่วมสำเร็จ', 'ok'); closeModal(); loadAll(); }
+  };
+  document.getElementById('modal').style.display = 'flex';
+}
+
+function showAddCancer() {
+  document.getElementById('modal-title').textContent = 'Add WGS Cancer Flag';
+  document.getElementById('modal-foot').style.display = 'flex';
+  document.getElementById('modal-body').innerHTML = `
+<div class="form-row">
+  <div class="form-group"><label class="form-label">Participant No</label><input class="form-control" id="ad-pno" type="number"></div>
+  <div class="form-group"><label class="form-label">Cancer Type</label><input class="form-control" id="ad-ct"></div>
+</div>
+<div class="form-row">
+  <div class="form-group"><label class="form-label">Carrier Status</label><input class="form-control" id="ad-cs" value="Non-carrier"></div>
+  <div class="form-group"><label class="form-label">Multiplier</label><input class="form-control" id="ad-cm" type="number" step="0.01"></div>
+</div>`;
+  modalSaveCallback = async () => {
+    const sql = 'INSERT INTO wgs_cancer (participant_no,cancer_type,carrier_status,multiplier) VALUES (?,?,?,?)';
+    const args = [{type:'integer',value:parseInt(document.getElementById('ad-pno').value)},{type:'text',value:document.getElementById('ad-ct').value},{type:'text',value:document.getElementById('ad-cs').value},{type:'float',value:parseFloat(document.getElementById('ad-cm').value)||0}];
+    const res = await tursoQuery(sql, args);
+    if (res !== null) { toast('เพิ่มสำเร็จ', 'ok'); closeModal(); loadAll(); }
+  };
+  document.getElementById('modal').style.display = 'flex';
+}
+
+function showAddNutrition() {
+  document.getElementById('modal-title').textContent = 'Add Nutrition Need';
+  document.getElementById('modal-foot').style.display = 'flex';
+  document.getElementById('modal-body').innerHTML = `
+<div class="form-row">
+  <div class="form-group"><label class="form-label">Participant No</label><input class="form-control" id="ad-pno" type="number"></div>
+  <div class="form-group"><label class="form-label">Nutrient</label><input class="form-control" id="ad-nut"></div>
+</div>
+<div class="form-group"><label class="form-label">Need Level</label>
+<select class="form-control" id="ad-lv"><option value="High">High</option><option value="Slightly High">Slightly High</option></select></div>`;
+  modalSaveCallback = async () => {
+    const sql = 'INSERT INTO nutrition_needs (participant_no,nutrient,need_level) VALUES (?,?,?)';
+    const args = [{type:'integer',value:parseInt(document.getElementById('ad-pno').value)},{type:'text',value:document.getElementById('ad-nut').value},{type:'text',value:document.getElementById('ad-lv').value}];
+    const res = await tursoQuery(sql, args);
+    if (res !== null) { toast('เพิ่มสำเร็จ', 'ok'); closeModal(); loadAll(); }
+  };
+  document.getElementById('modal').style.display = 'flex';
+}
+
+function showAddFood() {
+  document.getElementById('modal-title').textContent = 'Add Food/Exposure';
+  document.getElementById('modal-foot').style.display = 'flex';
+  document.getElementById('modal-body').innerHTML = `
+<div class="form-row">
+  <div class="form-group"><label class="form-label">Participant No</label><input class="form-control" id="ad-pno" type="number"></div>
+  <div class="form-group"><label class="form-label">Item Name</label><input class="form-control" id="ad-fn"></div>
+</div>
+<div class="form-row">
+  <div class="form-group"><label class="form-label">Type</label><select class="form-control" id="ad-ft"><option value="food">food</option><option value="exposure">exposure</option></select></div>
+  <div class="form-group"><label class="form-label">Risk Level</label><select class="form-control" id="ad-fl"><option value="slightly_high">slightly_high</option><option value="moderate">moderate</option><option value="high">high</option></select></div>
+</div>`;
+  modalSaveCallback = async () => {
+    const sql = 'INSERT INTO food_exposure (participant_no,item_name,item_type,risk_level) VALUES (?,?,?,?)';
+    const args = [{type:'integer',value:parseInt(document.getElementById('ad-pno').value)},{type:'text',value:document.getElementById('ad-fn').value},{type:'text',value:document.getElementById('ad-ft').value},{type:'text',value:document.getElementById('ad-fl').value}];
+    const res = await tursoQuery(sql, args);
+    if (res !== null) { toast('เพิ่มสำเร็จ', 'ok'); closeModal(); loadAll(); }
+  };
+  document.getElementById('modal').style.display = 'flex';
+}
+
+// ─── DELETE ──────────────────────────────────────────────────
+async function deleteRow(table, id, label) {
+  if (!confirm(`ลบ ${label} (id=${id}) จริงหรือไม่?`)) return;
+  const res = await tursoQuery(`DELETE FROM ${table} WHERE id=?`, [{type:'integer',value:id}]);
+  if (res !== null) { toast('ลบสำเร็จ', 'ok'); loadAll(); }
+}
+
+// ─── JUMP TO PARTICIPANT ─────────────────────────────────────
+function jumpToParticipant(pno) {
+  viewPatientDetail(pno);
+}
+
+// ─── SEARCH / FILTER ─────────────────────────────────────────
+function filterTable(tblId, q) {
+  const tbl = document.getElementById(tblId);
+  if (!tbl) return;
+  const rows = tbl.querySelectorAll('tr:not(:first-child)');
+  q = q.toLowerCase();
+  rows.forEach(row => {
+    row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+// ─── MODAL ───────────────────────────────────────────────────
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modal')) return;
+  document.getElementById('modal').style.display = 'none';
+  document.getElementById('modal-foot').style.display = 'flex';
+  modalSaveCallback = null;
+}
+
+function saveModal() {
+  if (modalSaveCallback) modalSaveCallback();
+}
+
+// ─── TOAST ───────────────────────────────────────────────────
+function toast(msg, type='ok') {
+  const el = document.getElementById('toast');
+  el.textContent = (type==='ok'?'✅ ':'❌ ') + msg;
+  el.className = 'toast show toast-' + type;
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// ─── INIT ─────────────────────────────────────────────────────
+window.onload = function() {
+  const url = localStorage.getItem('dna_url') || '';
+  const tok = localStorage.getItem('dna_token') || '';
+  if (url) document.getElementById('turso-url').value = url;
+  if (tok) document.getElementById('turso-token').value = tok;
+  showPage('overview');
+  // auto-init tab for PGx
+  setTimeout(() => {
+    const t = document.getElementById('pgxtab-adverse_effect');
+    if (t) showPgxTab('adverse_effect');
+  }, 100);
+};
+</script>
+</body>
+</html>
