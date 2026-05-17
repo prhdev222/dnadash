@@ -27,7 +27,7 @@ export async function onRequestGet(context) {
     const result = await tursoExecute(
       context,
       sql,
-      key === "pgxCatalog" ? [] : args,
+      key === "pgxCatalog" || key === "pgxNameMap" ? [] : args,
     );
     if (!result.ok) return json({ error: result.error }, { status: result.status || 500 });
     results[key] = result.rows;
