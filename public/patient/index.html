@@ -214,8 +214,8 @@ body{background:var(--bg);color:var(--text);font-family:'Sarabun',system-ui,'Not
   .print-pgx .print-pgx-card{border:1px solid #d1d5db;border-radius:10px;padding:8px;background:#fff}
   .print-pgx .print-pgx-title{font-size:11px;font-weight:700;margin-bottom:4px;color:#0f172a}
   .print-pgx .print-pgx-count{font-size:10px;color:#475569;margin-bottom:5px}
-  .print-pgx .print-pgx-list{display:grid;gap:3px}
-  .print-pgx .print-pgx-item{font-size:10px;color:#334155;line-height:1.35;border-top:1px dashed #e5e7eb;padding-top:3px}
+  .print-pgx .print-pgx-list{column-count:3;column-gap:8px}
+  .print-pgx .print-pgx-item{display:inline-block;width:100%;font-size:9px;color:#334155;line-height:1.3;border-top:1px dashed #e5e7eb;padding-top:3px;margin:0 0 4px;break-inside:avoid;page-break-inside:avoid;word-break:break-word}
 }
 </style>
 </head>
@@ -811,9 +811,9 @@ function render(){
     <div class="print-pgx-head">${t('pgxTitle')}</div>
     <div class="print-pgx-grid">
       ${[
-        { key: 'ae', label: t('ae'), color: '#991b1b', border: '#fecaca', rows: pgxGroups.ae.slice(0,4) },
-        { key: 'eff', label: t('eff'), color: '#92400e', border: '#fcd34d', rows: pgxGroups.eff.slice(0,4) },
-        { key: 'dose', label: t('dose'), color: '#075985', border: '#7dd3fc', rows: pgxGroups.dose.slice(0,4) }
+        { key: 'ae', label: t('ae'), color: '#991b1b', border: '#fecaca', rows: pgxGroups.ae },
+        { key: 'eff', label: t('eff'), color: '#92400e', border: '#fcd34d', rows: pgxGroups.eff },
+        { key: 'dose', label: t('dose'), color: '#075985', border: '#7dd3fc', rows: pgxGroups.dose }
       ].map(group => `
         <div class="print-pgx-card">
           <div class="print-pgx-title" style="color:${group.color}">${group.label}</div>
