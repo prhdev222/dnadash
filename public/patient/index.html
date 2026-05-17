@@ -50,6 +50,7 @@ body{background:var(--bg);color:var(--text);font-family:'Sarabun',system-ui,'Not
 .apoe-label{font-size:10px;color:var(--dim);margin-bottom:5px;text-align:right}
 .apoe-badge{background:rgba(167,139,250,.15);border:0.5px solid rgba(167,139,250,.4);border-radius:8px;padding:7px 16px;font-size:15px;font-weight:800;color:var(--purple);font-family:'DM Mono',monospace;display:inline-block}
 .carrier{font-size:11px;color:var(--muted);margin-top:5px;text-align:right}
+.gene-note{font-size:11px;color:var(--muted);line-height:1.55;margin-top:5px;max-width:320px}
 .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:18px}
 .stat-card{background:rgba(255,255,255,.04);border:0.5px solid var(--border);border-radius:12px;padding:12px 14px}
 .stat-lbl{font-size:9px;letter-spacing:.09em;text-transform:uppercase;color:var(--dim);font-weight:500;margin-bottom:4px}
@@ -154,7 +155,7 @@ body{background:var(--bg);color:var(--text);font-family:'Sarabun',system-ui,'Not
   .login-actions{flex-direction:column;align-items:stretch}
   .login-actions .btn{width:100%}
   .hero-risk{flex-direction:column}
-  .apoe-label,.carrier{text-align:left}
+  .apoe-label,.carrier,.gene-note{text-align:left}
   .hero-top{padding-top:10px}
   .hero-id{font-size:22px}
   .risk-big{font-size:38px}
@@ -208,6 +209,7 @@ body{background:var(--bg);color:var(--text);font-family:'Sarabun',system-ui,'Not
   .print-only .print-sub{font-size:11px;color:#475569}
   .print-only .print-meta{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:11px;color:#334155}
   .print-only .print-meta span{color:#334155 !important}
+  .print-only .print-gene-note{font-size:10px;color:#475569;line-height:1.5;margin-top:6px}
   .print-pgx{display:block !important}
   .print-pgx .print-pgx-head{font-size:12px;font-weight:800;color:#0f172a;margin:10px 0 6px}
   .print-pgx .print-pgx-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
@@ -422,6 +424,9 @@ const TEXT = {
     highestRisk:"ความเสี่ยงสูงสุดที่พบ",
     apoe:"ยีน APOE (ความเสี่ยงสมองเสื่อม)",
     noCarrier:"ไม่พบข้อมูลยีนโรคทางพันธุกรรม",
+    apoeNote:"ไม่ใช่โรค แต่เป็นข้อมูลความเสี่ยงที่ใช้ร่วมกับอายุ ประวัติครอบครัว และสุขภาพโดยรวม",
+    carrierNote:"โดยทั่วไปไม่ทำให้ป่วย แต่สำคัญต่อการวางแผนมีบุตรและประวัติครอบครัว",
+    wgsNote:"เป็นข้อมูลความเสี่ยงทางพันธุกรรม ไม่ได้หมายความว่าเป็นโรคอยู่ตอนนี้",
     nutrition:"สารอาหาร",
     nutritionSub:"รายการที่ต้องเสริม",
     cancer:"ยีนมะเร็ง",
@@ -501,6 +506,9 @@ const TEXT = {
     highestRisk:"Highest Risk Found",
     apoe:"APOE Genotype",
     noCarrier:"No genetic disease carrier noted",
+    apoeNote:"Not a disease; it is a risk marker used together with age, family history, and overall health.",
+    carrierNote:"Usually not an active disease, but important for family planning and family history.",
+    wgsNote:"This is a genetic risk clue, not a definite current disease.",
     nutrition:"Nutrition",
     nutritionSub:"items to supplement",
     cancer:"Cancer WGS",
@@ -575,6 +583,11 @@ function dn(name){
   if (currentLang === 'TH' && DTH[name]) return `${DTH[name]} (${name})`;
   return name;
 }
+function rawDiseaseLabel(name){
+  const text = String(name || '').trim();
+  if (!text) return '';
+  return currentLang === 'TH' && DTH[text] ? `${DTH[text]} (${text})` : text;
+}
 function wn(name){
   if (currentLang === 'TH' && WGS_TH[name]) return `${WGS_TH[name]} (${name})`;
   return name;
@@ -591,6 +604,32 @@ function iname(name){
   return name;
 }
 function expl(name){ return currentLang === 'TH' ? (EXP_TH[name] || '') : (EXP_EN[name] || ''); }
+function apoeSummary(genotype){
+  const gt = String(genotype || '').trim() || 'ε3/ε3';
+  if (currentLang === 'TH') return `${gt} ไม่ใช่โรค ${t('apoeNote')}`;
+  return `${gt} is not a disease. ${t('apoeNote')}`;
+}
+function carrierSummary(raw){
+  const text = String(raw || '').trim();
+  if (!text) return t('noCarrier');
+  const [diseaseRaw] = text.split(':');
+  const disease = String(diseaseRaw || '').trim() || text;
+  const label = rawDiseaseLabel(disease);
+  const lower = text.toLowerCase();
+  const isCarrier = /carrier|พาหะ|risk alleles/.test(lower);
+  if (currentLang === 'TH') {
+    if (isCarrier) return `พบว่าเป็นพาหะของ ${label} โดยทั่วไปไม่ทำให้ป่วย ${t('carrierNote')}`;
+    return `พบข้อมูลยีน ${label} ${t('wgsNote')}`;
+  }
+  if (isCarrier) return `Carrier of ${label}. ${t('carrierNote')}`;
+  return `Genetic finding: ${label}. ${t('wgsNote')}`;
+}
+function findingSummary(raw){
+  const text = String(raw || '').trim();
+  if (!text) return t('noData');
+  if (currentLang === 'TH') return `${text} ${t('wgsNote')}`;
+  return `${text}. ${t('wgsNote')}`;
+}
 function mc(m){ return m>=10?"#f87171":m>=5?"#fb923c":m>=3?"#fbbf24":"#34d399"; }
 function getCat(n){
   const l = String(n || '').toLowerCase();
@@ -805,6 +844,8 @@ function render(){
         <span>${data.patient.apoe_genotype || 'ε3/ε3'}</span>
         <span>${t('highestRisk')} ${dn(topRisk.name || '-')} ${Number(topRisk.mult || 0).toFixed(2)}×</span>
       </div>
+      <div class="print-gene-note">${apoeSummary(data.patient.apoe_genotype || 'ε3/ε3')}</div>
+      <div class="print-gene-note">${carrierSummary(data.patient.genetic_diseases)}</div>
     </div>
   </div>
   <div class="print-pgx">
@@ -834,7 +875,9 @@ function render(){
     <div>
       <div class="apoe-label">${t('apoe')}</div>
       <div class="apoe-badge">${data.patient.apoe_genotype || "ε3/ε3"}</div>
+      <div class="gene-note">${apoeSummary(data.patient.apoe_genotype || 'ε3/ε3')}</div>
       <div class="carrier">🧬 ${data.patient.genetic_diseases || t('noCarrier')}</div>
+      <div class="gene-note">${carrierSummary(data.patient.genetic_diseases)}</div>
     </div>
   </div>`;
 
@@ -897,10 +940,12 @@ function render(){
     <div class="wgs-block" style="background:rgba(56,189,248,.07);border:0.5px solid rgba(56,189,248,.2)">
       <div class="wgs-title" style="color:#7dd3fc">❤️ ${t('heartFlags')}</div>
       <div style="font-size:13px;color:var(--text)">${data.patient.wgs_heart || t('noHeart')}</div>
+      ${data.patient.wgs_heart ? `<div class="gene-note">${findingSummary(data.patient.wgs_heart)}</div>` : ""}
     </div>
     ${data.patient.wgs_other ? `<div class="wgs-block" style="background:rgba(148,163,184,.07);border:0.5px solid rgba(148,163,184,.15)">
       <div class="wgs-title" style="color:#cbd5e1">🧬 ${t('other')}</div>
       <div style="font-size:13px;color:rgba(255,255,255,.6);line-height:1.6">${data.patient.wgs_other}</div>
+      <div class="gene-note">${findingSummary(data.patient.wgs_other)}</div>
     </div>` : ""}
   </div>`;
 
