@@ -26,6 +26,7 @@ body{background:var(--bg);color:var(--text);font-family:'Sarabun',system-ui,'Not
 .lang-btn.active{background:rgba(167,139,250,0.2);color:var(--purple)}
 .btn{background:rgba(255,255,255,0.06);border:0.5px solid var(--border);border-radius:8px;color:var(--text);padding:8px 12px;font-size:13px;font-family:inherit;cursor:pointer;text-decoration:none}
 .btn:hover{border-color:rgba(255,255,255,.2)}
+.btn-print{background:rgba(56,189,248,.14);border-color:rgba(56,189,248,.28);color:#bae6fd}
 .main{max-width:860px;margin:0 auto;padding:24px 16px 48px}
 .login-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:18px;padding:22px;margin-bottom:18px}
 .login-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:12px}
@@ -134,6 +135,7 @@ body{background:var(--bg);color:var(--text);font-family:'Sarabun',system-ui,'Not
 .fbadge{border-radius:20px;padding:3px 12px;font-size:10px;font-weight:600}
 .glow{position:fixed;top:-300px;left:50%;transform:translateX(-50%);width:700px;height:600px;background:radial-gradient(ellipse,rgba(167,139,250,.06) 0%,transparent 65%);pointer-events:none;z-index:0}
 .wrap{position:relative;z-index:1}
+.print-only{display:none}
 @media(max-width:820px){
   .main{padding:18px 14px 36px}
   .hero-risk{align-items:flex-start}
@@ -179,6 +181,30 @@ body{background:var(--bg);color:var(--text);font-family:'Sarabun',system-ui,'Not
   .nutr-grid,.stat-grid{grid-template-columns:1fr}
   .c-tag,.food-tag,.exp-tag,.drug-tag{font-size:10px}
 }
+@media print{
+  @page{size:auto;margin:10mm}
+  :root{--bg:#ffffff;--bg2:#ffffff;--border:#dbe2ea;--text:#111827;--muted:#4b5563;--dim:#6b7280}
+  *{box-shadow:none !important; text-shadow:none !important; -webkit-print-color-adjust:exact; print-color-adjust:exact}
+  body{background:#fff !important;color:#111827 !important;font-size:11px;line-height:1.45}
+  .glow,.topbar,.login-card,.disclaimer,.footer,.btn-print,#logout-btn{display:none !important}
+  .main{max-width:none;padding:0 0 8mm}
+  .wrap{z-index:auto}
+  .card,.hero-risk,.stat-card,.nutr-card,.pgx-card,.lookup-card,.wgs-block,.drug-group,.c-tag,.food-tag,.exp-tag{background:#fff !important;border-color:#d1d5db !important;color:#111827 !important}
+  .card,.hero-risk{break-inside:avoid-page;page-break-inside:avoid}
+  .risk-item,.drug-group,.stat-card,.nutr-card,.pgx-card{break-inside:avoid-page;page-break-inside:avoid}
+  .risk-big{font-size:34px;color:#0f172a !important}
+  .hero-id{font-size:20px;color:#0f172a !important}
+  .hero-sub,.sh-sub,.stat-sub,.lookup-desc,.nutr-level,.ri-explain,.ri-advice,.c-mult,.footer-txt{color:#4b5563 !important}
+  .sh-title,.risk-name,.lookup-name,.nutr-name,.drug-item-name,.c-name{color:#0f172a !important}
+  .tab-btn{border-color:#d1d5db !important;color:#111827 !important;background:#fff !important}
+  .tab-btn.act-ex,.tab-btn.act-diet,.tab-btn.act-mon{border-color:#94a3b8 !important;color:#111827 !important;background:#f8fafc !important}
+  .plan-sum,.lookup-card,.drug-group,.wgs-block,.stat-card,.nutr-card{break-inside:avoid}
+  .print-only{display:block !important}
+  .print-only .print-head{border:1px solid #d1d5db;border-radius:12px;padding:12px 14px;margin-bottom:12px;background:#f8fafc}
+  .print-only .print-title{font-size:16px;font-weight:800;color:#0f172a;margin-bottom:2px}
+  .print-only .print-sub{font-size:11px;color:#475569}
+  .print-only .print-meta{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:11px;color:#334155}
+}
 </style>
 </head>
 <body>
@@ -200,6 +226,7 @@ body{background:var(--bg);color:var(--text);font-family:'Sarabun',system-ui,'Not
       <button class="lang-btn active" id="btnTH" onclick="setLang('TH')">🇹🇭 TH</button>
       <button class="lang-btn" id="btnEN" onclick="setLang('EN')">🇬🇧 EN</button>
     </div>
+    <button class="btn btn-print" onclick="printPatient()" id="print-btn"></button>
     <button class="btn" onclick="patientLogout()" id="logout-btn"></button>
   </div>
 </div>
@@ -279,6 +306,34 @@ const ITEM_TH = {
   "Cockroach":"แมลงสาบ","Grass":"หญ้า","Tree Pollen":"เกสรจากต้นไม้","Weed Pollen":"เกสรจากวัชพืช","Sunlight":"แสงแดด"
 };
 
+const FOOD_TH = {
+  "Nuts":"ถั่วและเมล็ดพืช",
+  "Peanuts":"ถั่วลิสง",
+  "Hen's Eggs":"ไข่ไก่",
+  "Eggs":"ไข่",
+  "Eggs and Egg Products":"ไข่และผลิตภัณฑ์จากไข่",
+  "Cow's Milk":"นมวัว",
+  "Milk":"นม",
+  "Wheat Products":"ผลิตภัณฑ์จากข้าวสาลี",
+  "Wheat":"ข้าวสาลี",
+  "Peaches":"ลูกพีช",
+  "Soy":"ถั่วเหลือง",
+  "Soybean":"ถั่วเหลือง",
+  "Corn":"ข้าวโพด",
+  "Seafood":"อาหารทะเล",
+  "Shellfish":"อาหารทะเลมีเปลือก",
+  "Fish":"ปลา",
+  "Shrimp":"กุ้ง",
+  "Crab":"ปู",
+  "Rice":"ข้าว",
+  "Tree Nuts":"ถั่วเปลือกแข็ง",
+  "Sesame":"งา",
+  "Chocolate":"ช็อกโกแลต",
+  "Coffee":"กาแฟ",
+  "Tea":"ชา",
+  "Alcohol":"แอลกอฮอล์"
+};
+
 const NUTRIENT_TH = {
   "Vitamin A":"วิตามินเอ",
   "Vitamin B2":"วิตามินบี 2",
@@ -345,6 +400,7 @@ const TEXT = {
     pno:"หมายเลขผู้เข้าร่วม",
     pass:"รหัสผ่าน",
     login:"เข้าสู่ระบบ",
+    print:"พิมพ์ / PDF",
     notSigned:"ยังไม่ได้เข้าสู่ระบบ",
     emptyText:"กรุณาเข้าสู่ระบบเพื่อดูรายงานของคุณ",
     emptyHint:"ระบบจะแสดงเฉพาะข้อมูลของผู้เข้าร่วมที่ล็อกอินอยู่เท่านั้น",
@@ -423,6 +479,7 @@ const TEXT = {
     pno:"Participant Number",
     pass:"Password",
     login:"Sign In",
+    print:"Print / PDF",
     notSigned:"Not signed in",
     emptyText:"Please sign in to view your report",
     emptyHint:"Only the currently authenticated participant record is shown here",
@@ -514,7 +571,13 @@ function nn(name){
   if (currentLang === 'TH' && NUTRIENT_TH[name]) return `${NUTRIENT_TH[name]} (${name})`;
   return name;
 }
-function iname(name){ return (currentLang === 'TH' && ITEM_TH[name]) || name; }
+function iname(name){
+  if (currentLang === 'TH') {
+    const translated = ITEM_TH[name] || FOOD_TH[name];
+    if (translated) return `${translated} (${name})`;
+  }
+  return name;
+}
 function expl(name){ return currentLang === 'TH' ? (EXP_TH[name] || '') : (EXP_EN[name] || ''); }
 function mc(m){ return m>=10?"#f87171":m>=5?"#fb923c":m>=3?"#fbbf24":"#34d399"; }
 function getCat(n){
@@ -546,6 +609,7 @@ async function apiFetch(url, options={}) {
 function setStaticText(){
   document.getElementById('disclaimer').innerHTML = t('disclaimer');
   document.getElementById('logo-sub').textContent = t('logoSub');
+  document.getElementById('print-btn').textContent = t('print');
   document.getElementById('logout-btn').textContent = t('logout');
   document.getElementById('login-title').textContent = t('loginTitle');
   document.getElementById('login-sub').textContent = t('loginSub');
@@ -719,6 +783,17 @@ function render(){
     <div class="hero-greeting">${t('greeting')}</div>
     <div class="hero-id">${t('participant')} ${data.participantNo}</div>
     <div class="hero-sub">${t('researchOnly')}</div>
+  </div>
+  <div class="print-only">
+    <div class="print-head">
+      <div class="print-title">DNA Personal Risk Dashboard</div>
+      <div class="print-sub">${currentLang === 'TH' ? 'รายงานสำหรับผู้ป่วยแบบพิมพ์อ่านง่าย' : 'Printable patient summary'}</div>
+      <div class="print-meta">
+        <span>${t('participant')} ${data.participantNo}</span>
+        <span>${data.patient.apoe_genotype || 'ε3/ε3'}</span>
+        <span>${t('highestRisk')} ${dn(topRisk.name || '-')} ${Number(topRisk.mult || 0).toFixed(2)}×</span>
+      </div>
+    </div>
   </div>
   <div class="hero-risk">
     <div>
@@ -921,6 +996,7 @@ function render(){
 
 function toggleR(i){ openR = openR === i ? null : i; render(); }
 function switchTab(ti){ activeTab = ti; render(); }
+function printPatient(){ window.print(); }
 function updateDrugSearch(name){
   selectedDrug = name;
   const target = document.getElementById('drug-lookup-result');
