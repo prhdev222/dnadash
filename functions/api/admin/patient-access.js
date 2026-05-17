@@ -31,7 +31,7 @@ export async function onRequestGet(context) {
   return json({
     rows: result.rows.map((row) => ({
       ...row,
-      portal_url: `${root}/patient/search/?participant=${row.participant_no}`,
+      portal_url: `${root}/patient/?participant=${row.participant_no}`,
     })),
   });
 }
@@ -102,6 +102,6 @@ export async function onRequestPost(context) {
   return json({
     ok: true,
     participantNo,
-    portalUrl: `${baseUrl(context.request)}/patient/search/?participant=${participantNo}`,
+    portalUrl: `${baseUrl(context.request)}/patient/?participant=${participantNo}`,
   });
 }
