@@ -279,6 +279,34 @@ const ITEM_TH = {
   "Cockroach":"แมลงสาบ","Grass":"หญ้า","Tree Pollen":"เกสรจากต้นไม้","Weed Pollen":"เกสรจากวัชพืช","Sunlight":"แสงแดด"
 };
 
+const NUTRIENT_TH = {
+  "Vitamin A":"วิตามินเอ",
+  "Vitamin B2":"วิตามินบี 2",
+  "Vitamin B6":"วิตามินบี 6",
+  "Vitamin B12":"วิตามินบี 12",
+  "Vitamin C":"วิตามินซี",
+  "Vitamin D":"วิตามินดี",
+  "Vitamin E":"วิตามินอี",
+  "Vitamin K":"วิตามินเค",
+  "Folate":"โฟเลต",
+  "Iron":"ธาตุเหล็ก",
+  "Calcium":"แคลเซียม",
+  "Magnesium":"แมกนีเซียม",
+  "Zinc":"สังกะสี",
+  "Copper":"ทองแดง",
+  "Selenium":"ซีลีเนียม",
+  "Potassium":"โพแทสเซียม",
+  "Sodium":"โซเดียม",
+  "Phosphorus":"ฟอสฟอรัส",
+  "Manganese":"แมงกานีส",
+  "Iodine":"ไอโอดีน",
+  "Choline":"โคลีน",
+  "Biotin":"ไบโอติน",
+  "Niacin":"ไนอะซิน",
+  "Thiamine":"ไทอะมีน",
+  "Pantothenic Acid":"กรดแพนโทเทนิก"
+};
+
 const EXP_TH = {
   "Type 2 Diabetes (T2D)":"ร่างกายควบคุมน้ำตาลในเลือดได้ไม่ดี ส่งผลต่อไต ตา และหัวใจในระยะยาว",
   "Stroke":"เลือดไปเลี้ยงสมองไม่พอ เสี่ยงอัมพฤกษ์ อัมพาต หรือเสียชีวิตเฉียบพลัน",
@@ -480,6 +508,10 @@ function dn(name){
 }
 function wn(name){
   if (currentLang === 'TH' && WGS_TH[name]) return `${WGS_TH[name]} (${name})`;
+  return name;
+}
+function nn(name){
+  if (currentLang === 'TH' && NUTRIENT_TH[name]) return `${NUTRIENT_TH[name]} (${name})`;
   return name;
 }
 function iname(name){ return (currentLang === 'TH' && ITEM_TH[name]) || name; }
@@ -768,7 +800,7 @@ function render(){
   </div>`;
 
   const nCards = data.nutrition.map(n=>`<div class="nutr-card">
-    <div class="nutr-name">${n.nutrient}</div>
+    <div class="nutr-name">${nn(n.nutrient)}</div>
     <div class="nutr-level">${n.need_level === "High" ? t('highNeed') : t('slightNeed')}</div>
   </div>`).join("");
   h += `<div class="card">
