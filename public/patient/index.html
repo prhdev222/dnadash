@@ -701,7 +701,7 @@ function splitPgx(pgx){
 function getPatientDrugOptions(pgx){
   const seen = new Set();
   return pgx
-    .map(row => String(row.drug_name || '').trim())
+    .map(row => String(row.display_name || row.drug_name || '').trim())
     .filter(Boolean)
     .filter(name => {
       const key = name.toLowerCase();
@@ -715,13 +715,17 @@ function getPatientDrugOptions(pgx){
 function findPatientDrug(pgx, drugName){
   const needle = String(drugName || '').trim().toLowerCase();
   if (!needle) return null;
-  return pgx.find(row => String(row.drug_name || '').trim().toLowerCase() === needle) || null;
+  return pgx.find(row => {
+    const raw = String(row.drug_name || '').trim().toLowerCase();
+    const display = String(row.display_name || '').trim().toLowerCase();
+    return raw === needle || display === needle;
+  }) || null;
 }
 
 function getDrugLookupMarkup(matchedDrug, query){
   if (matchedDrug) {
     return `
-      <div class="lookup-name">${matchedDrug.drug_name}</div>
+      <div class="lookup-name">${matchedDrug.display_name || matchedDrug.drug_name}</div>
       <div class="lookup-desc"><strong>${t('shortUse')}:</strong> ${matchedDrug.short_description || t('noData')}</div>
     `;
   }
@@ -829,10 +833,14 @@ function render(){
   const pgxGroups = splitPgx(data.pgx || []);
   const totalPgx = pgxGroups.ae.length + pgxGroups.eff.length + pgxGroups.dose.length;
   const patientDrugOptions = getPatientDrugOptions(data.pgx || []);
+  const patientLabel = data.patient.display_name || '';
+  const patientNote = data.patient.portal_note || '';
 
   let h = `<div class="hero-top">
     <div class="hero-greeting">${t('greeting')}</div>
     <div class="hero-id">${t('participant')} ${data.participantNo}</div>
+    ${patientLabel ? `<div class="hero-sub" style="color:#cbd5e1;font-weight:700">${patientLabel}</div>` : ""}
+    ${patientNote ? `<div class="hero-sub">${patientNote}</div>` : ""}
     <div class="hero-sub">${t('researchOnly')}</div>
   </div>
   <div class="print-only">
@@ -860,7 +868,7 @@ function render(){
           <div class="print-pgx-title" style="color:${group.color}">${group.label}</div>
           <div class="print-pgx-count">${group.rows.length} ${t('items')}</div>
           <div class="print-pgx-list">
-            ${group.rows.length ? group.rows.map(row => `<div class="print-pgx-item">${row.drug_name}${row.short_description ? ` - ${row.short_description}` : ''}</div>`).join('') : `<div class="print-pgx-item">${t('noData')}</div>`}
+            ${group.rows.length ? group.rows.map(row => `<div class="print-pgx-item">${row.display_name || row.drug_name}${row.short_description ? ` - ${row.short_description}` : ''}</div>`).join('') : `<div class="print-pgx-item">${t('noData')}</div>`}
           </div>
         </div>
       `).join('')}
@@ -875,6 +883,8 @@ function render(){
     <div>
       <div class="apoe-label">${t('apoe')}</div>
       <div class="apoe-badge">${data.patient.apoe_genotype || "ε3/ε3"}</div>
+      ${patientLabel ? `<div class="gene-note">${patientLabel}</div>` : ""}
+      ${patientNote ? `<div class="gene-note">${patientNote}</div>` : ""}
       <div class="gene-note">${apoeSummary(data.patient.apoe_genotype || 'ε3/ε3')}</div>
       <div class="carrier">🧬 ${data.patient.genetic_diseases || t('noCarrier')}</div>
       <div class="gene-note">${carrierSummary(data.patient.genetic_diseases)}</div>
@@ -1000,7 +1010,7 @@ function render(){
       const hiddenCount = Math.max(section.rows.length - visibleRows.length, 0);
       const items = visibleRows.map(row => `
         <div class="drug-item">
-          <div class="drug-item-name" style="color:${section.text}">${row.drug_name}</div>
+          <div class="drug-item-name" style="color:${section.text}">${row.display_name || row.drug_name}</div>
         </div>
       `).join("");
       return `

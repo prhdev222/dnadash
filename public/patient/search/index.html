@@ -281,7 +281,7 @@ function splitPgx(pgx){
 function getDrugOptions(pgx){
   const seen = new Set();
   return pgx
-    .map(row => String(row.drug_name || '').trim())
+    .map(row => String(row.display_name || row.drug_name || '').trim())
     .filter(Boolean)
     .filter(name => {
       const key = name.toLowerCase();
@@ -294,7 +294,11 @@ function getDrugOptions(pgx){
 function findDrug(pgx, drugName){
   const needle = String(drugName || '').trim().toLowerCase();
   if (!needle) return null;
-  return pgx.find(row => String(row.drug_name || '').trim().toLowerCase() === needle) || null;
+  return pgx.find(row => {
+    const raw = String(row.drug_name || '').trim().toLowerCase();
+    const display = String(row.display_name || '').trim().toLowerCase();
+    return raw === needle || display === needle;
+  }) || null;
 }
 function setStaticText(){
   document.getElementById('brand-title').textContent = currentLang === 'TH' ? 'ค้นหายาสำหรับผู้ป่วย' : 'Patient Drug Search';
@@ -334,7 +338,7 @@ function drugLookupMarkup(matchedDrug, query){
   if (matchedDrug) {
     const tag = riskLabel(matchedDrug.risk_type);
     return `
-      <div class="lookup-name">${matchedDrug.drug_name}</div>
+      <div class="lookup-name">${matchedDrug.display_name || matchedDrug.drug_name}</div>
       <div class="lookup-desc"><strong>${t('shortUse')}:</strong> ${matchedDrug.short_description || t('noData')}</div>
       <div class="lookup-badge-row">
         <span class="badge" style="background:rgba(56,189,248,.12);border:0.5px solid rgba(56,189,248,.26);color:#bae6fd">${tag}</span>
@@ -348,13 +352,14 @@ function renderDrugList(pgx, query){
   const rows = pgx.filter(row => {
     if (!needle) return true;
     return String(row.drug_name || '').toLowerCase().includes(needle) ||
+      String(row.display_name || '').toLowerCase().includes(needle) ||
       String(row.short_description || '').toLowerCase().includes(needle);
   });
   if (!rows.length) return `<div class="empty">${needle ? t('noMatch') : t('noData')}</div>`;
   return rows.map(row => `
-    <div class="drug-item" onclick="selectDrug(${JSON.stringify(row.drug_name)})">
+    <div class="drug-item" onclick="selectDrug(${JSON.stringify(row.display_name || row.drug_name)})">
       <div class="drug-item-head">
-        <div class="drug-item-name">${row.drug_name}</div>
+        <div class="drug-item-name">${row.display_name || row.drug_name}</div>
         <div class="drug-item-tags">
           <span class="tag ${row.risk_type === 'adverse_effect' ? 'tag-ae' : row.risk_type === 'insufficient_efficacy' ? 'tag-eff' : row.risk_type === 'dose_reduction' ? 'tag-dose' : 'tag-none'}">${riskLabel(row.risk_type)}</span>
         </div>
@@ -375,6 +380,8 @@ function render(){
     return;
   }
   const pgx = currentData.pgx || [];
+  const patientLabel = currentData.patient?.display_name || '';
+  const patientNote = currentData.patient?.portal_note || '';
   const options = getDrugOptions(pgx);
   const matched = findDrug(pgx, selectedDrug);
   document.getElementById('drug-options').innerHTML = options.map(name => `<option value="${name}"></option>`).join('');
@@ -382,6 +389,9 @@ function render(){
   document.getElementById('drug-result').innerHTML = drugLookupMarkup(matched, searchQuery);
   document.getElementById('drug-list').innerHTML = renderDrugList(pgx, searchQuery);
   document.getElementById('drug-search').value = searchQuery;
+  if (patientLabel || patientNote) {
+    document.getElementById('hero-sub').textContent = [patientLabel, patientNote].filter(Boolean).join(' · ');
+  }
   root.style.display = 'grid';
   document.getElementById('portal-status').textContent = `${t('signedIn')}${currentData.participantNo}`;
 }
@@ -445,8 +455,11 @@ async function checkExistingSession(){
   document.getElementById('drug-search').addEventListener('keydown', (event) => {
     if (event.key === 'Enter') {
       const value = event.target.value || '';
-      const match = (currentData?.pgx || []).find(row => String(row.drug_name || '').toLowerCase() === value.trim().toLowerCase());
-      if (match) selectDrug(match.drug_name);
+      const match = (currentData?.pgx || []).find(row => {
+        const needle = value.trim().toLowerCase();
+        return String(row.drug_name || '').toLowerCase() === needle || String(row.display_name || '').toLowerCase() === needle;
+      });
+      if (match) selectDrug(match.display_name || match.drug_name);
     }
   });
   try {

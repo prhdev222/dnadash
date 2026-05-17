@@ -341,7 +341,7 @@ var(--bg)}
 <div class="toast" id="toast"></div>
 
 <script>
-let DB = {patients:[],risks:[],pgx:[],cancer:[],nutrition:[],food:[],access:[],pgxCatalog:[]};
+let DB = {patients:[],risks:[],pgx:[],cancer:[],nutrition:[],food:[],access:[],pgxCatalog:[],patientProfiles:[],pgxNameMap:[]};
 let currentPage = 'overview';
 let modalSaveCallback = null;
 let currentAdmin = '';
@@ -420,7 +420,7 @@ function showAppShell() {
 }
 
 function hideAppShell() {
-  DB = {patients:[],risks:[],pgx:[],cancer:[],nutrition:[],food:[],access:[],pgxCatalog:[]};
+  DB = {patients:[],risks:[],pgx:[],cancer:[],nutrition:[],food:[],access:[],pgxCatalog:[],patientProfiles:[],pgxNameMap:[]};
   currentAdmin = '';
   document.getElementById('app-shell').style.display = 'none';
   document.getElementById('auth-shell').style.display = 'flex';
@@ -445,7 +445,7 @@ async function testConnection(silent=false) {
 
 async function loadAll() {
   setMainContent('<div class="loading"><div class="spinner"></div> Loading data from database...</div>');
-  const [patients, risks, pgx, cancer, nutrition, food, pgxCatalog] = await Promise.all([
+  const [patients, risks, pgx, cancer, nutrition, food, pgxCatalog, patientProfiles, pgxNameMap] = await Promise.all([
     tursoQuery('SELECT * FROM patients ORDER BY participant_no'),
     tursoQuery('SELECT * FROM health_risks ORDER BY participant_no, rank_order'),
     tursoQuery('SELECT * FROM pgx_drugs ORDER BY participant_no, risk_type, drug_name'),
@@ -453,6 +453,8 @@ async function loadAll() {
     tursoQuery('SELECT * FROM nutrition_needs ORDER BY participant_no'),
     tursoQuery('SELECT * FROM food_exposure ORDER BY participant_no, item_type'),
     tursoQuery('SELECT * FROM pgx_drug_catalog ORDER BY drug_name'),
+    tursoQuery('SELECT * FROM patient_portal_profile ORDER BY participant_no'),
+    tursoQuery('SELECT * FROM pgx_drug_name_map ORDER BY drug_name'),
   ]);
   if (!patients) {
     document.getElementById('conn-status').innerHTML = '<span class="status-dot dot-err"></span>Error';
@@ -474,6 +476,8 @@ async function loadAll() {
   DB.nutrition = nutrition || [];
   DB.food = food || [];
   DB.pgxCatalog = pgxCatalog || [];
+  DB.patientProfiles = patientProfiles || [];
+  DB.pgxNameMap = pgxNameMap || [];
   await loadPortalAccess();
   updateBadges();
   buildParticipantNav();
@@ -510,6 +514,14 @@ function getDrugDescription(drugName) {
   return DB.pgxCatalog.find(row => row.drug_name === drugName)?.short_description || '';
 }
 
+function getDrugDisplayName(drugName) {
+  return DB.pgxNameMap.find(row => row.drug_name === drugName)?.display_name || drugName;
+}
+
+function getPatientProfile(pno) {
+  return DB.patientProfiles.find(row => Number(row.participant_no) === Number(pno)) || {};
+}
+
 async function saveDrugDescription(drugName, shortDescription) {
   const existing = await tursoQuery(
     'SELECT drug_name FROM pgx_drug_catalog WHERE drug_name = ?',
@@ -527,6 +539,49 @@ async function saveDrugDescription(drugName, shortDescription) {
   const result = await tursoQuery(sql, [
     { type:'text', value: shortDescription },
     { type:'text', value: drugName }
+  ]);
+  return result !== null;
+}
+
+async function saveDrugDisplayName(drugName, displayName) {
+  const existing = await tursoQuery(
+    'SELECT drug_name FROM pgx_drug_name_map WHERE drug_name = ?',
+    [{ type:'text', value: drugName }]
+  );
+  if (existing === null) return false;
+
+  const sql = existing.length
+    ? `UPDATE pgx_drug_name_map
+       SET display_name = ?, updated_at = datetime('now')
+       WHERE drug_name = ?`
+    : `INSERT INTO pgx_drug_name_map (display_name, updated_at, drug_name)
+       VALUES (?, datetime('now'), ?)`;
+
+  const result = await tursoQuery(sql, [
+    { type:'text', value: displayName },
+    { type:'text', value: drugName }
+  ]);
+  return result !== null;
+}
+
+async function savePatientProfile(participantNo, displayName, portalNote) {
+  const existing = await tursoQuery(
+    'SELECT participant_no FROM patient_portal_profile WHERE participant_no = ?',
+    [{ type:'integer', value: participantNo }]
+  );
+  if (existing === null) return false;
+
+  const sql = existing.length
+    ? `UPDATE patient_portal_profile
+       SET display_name = ?, portal_note = ?, updated_at = datetime('now')
+       WHERE participant_no = ?`
+    : `INSERT INTO patient_portal_profile (display_name, portal_note, updated_at, participant_no)
+       VALUES (?, ?, datetime('now'), ?)`;
+
+  const result = await tursoQuery(sql, [
+    { type:'text', value: displayName },
+    { type:'text', value: portalNote },
+    { type:'integer', value: participantNo }
   ]);
   return result !== null;
 }
@@ -864,7 +919,8 @@ function renderPGx(filterPno) {
           rows.map(d => `<tr>
             <td style="font-weight:700;color:var(--purple)">P${d.participant_no}</td>
             <td style="font-weight:500">
-              <div>${d.drug_name}</div>
+              <div>${getDrugDisplayName(d.drug_name)}</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:4px">Raw: ${d.drug_name}</div>
               <div style="font-size:11px;color:var(--muted);margin-top:4px">${getDrugDescription(d.drug_name) || 'No short description yet'}</div>
             </td>
             <td><span class="badge ${t.cls}">${t.label}</span></td>
@@ -1006,13 +1062,13 @@ function renderPortalAccess() {
       has_access: access ? Number(access.has_access) === 1 : false,
       enabled: access ? Number(access.enabled) === 1 : false,
       updated_at: access?.updated_at || '',
-      portal_url: access?.portal_url || `${location.origin}/patient/?participant=${patient.participant_no}`
+      portal_url: access?.portal_url || `${location.origin}/patient/search/?participant=${patient.participant_no}`
     };
   });
 
   return `
 <div class="page-title">🔐 Patient Portal Access</div>
-<div class="page-sub">ตั้งรหัสผ่านให้ผู้ป่วยแต่ละคน และสร้าง QR code สำหรับหน้า patient portal</div>
+<div class="page-sub">ตั้งรหัสผ่านให้ผู้ป่วยแต่ละคน และสร้าง QR code สำหรับหน้า patient search</div>
 <div class="tbl-wrap">
   <div class="tbl-header">
     <div class="tbl-title">🔐 Portal Credentials (${rows.length})</div>
@@ -1041,6 +1097,7 @@ function renderPortalAccess() {
 // ─── PARTICIPANT DETAIL VIEW ─────────────────────────────────
 function viewPatientDetail(pno) {
   const p = DB.patients.find(x => x.participant_no == pno);
+  const profile = getPatientProfile(pno);
   const risks = DB.risks.filter(r => r.participant_no == pno);
   const pgx = DB.pgx.filter(d => d.participant_no == pno);
   const cancer = DB.cancer.filter(c => c.participant_no == pno);
@@ -1055,6 +1112,13 @@ function viewPatientDetail(pno) {
   document.getElementById('modal-foot').style.display = 'none';
   document.getElementById('modal-body').innerHTML = `
 <div style="display:grid;gap:14px">
+
+  <div><b style="color:var(--blue)">🪪 Patient Display Info</b>
+    <table style="margin-top:8px;font-size:12px;width:100%">
+      <tr><td style="color:var(--muted);width:140px">Display Name</td><td>${profile.display_name || '—'}</td></tr>
+      <tr><td style="color:var(--muted)">Portal Note</td><td>${profile.portal_note || '—'}</td></tr>
+    </table>
+  </div>
 
   <div><b style="color:var(--purple)">🧬 Basic Info</b>
     <table style="margin-top:8px;font-size:12px;width:100%">
@@ -1085,9 +1149,9 @@ function viewPatientDetail(pno) {
 
   <div><b style="color:var(--amber)">💊 PGx Drugs</b>
     <div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-size:11px">
-      <div><div style="color:var(--red);font-weight:700;margin-bottom:4px">Adverse Effect (${pgxAE.length})</div>${pgxAE.map(d=>`<div style="padding:2px 0;border-bottom:0.5px solid var(--border)">${d.drug_name}</div>`).join('')}</div>
-      <div><div style="color:var(--amber);font-weight:700;margin-bottom:4px">Insuff. Efficacy (${pgxEff.length})</div>${pgxEff.map(d=>`<div style="padding:2px 0;border-bottom:0.5px solid var(--border)">${d.drug_name}</div>`).join('')}</div>
-      <div><div style="color:var(--blue);font-weight:700;margin-bottom:4px">Dose Reduction (${pgxDose.length})</div>${pgxDose.map(d=>`<div style="padding:2px 0;border-bottom:0.5px solid var(--border)">${d.drug_name}</div>`).join('')}</div>
+      <div><div style="color:var(--red);font-weight:700;margin-bottom:4px">Adverse Effect (${pgxAE.length})</div>${pgxAE.map(d=>`<div style="padding:2px 0;border-bottom:0.5px solid var(--border)">${getDrugDisplayName(d.drug_name)}</div>`).join('')}</div>
+      <div><div style="color:var(--amber);font-weight:700;margin-bottom:4px">Insuff. Efficacy (${pgxEff.length})</div>${pgxEff.map(d=>`<div style="padding:2px 0;border-bottom:0.5px solid var(--border)">${getDrugDisplayName(d.drug_name)}</div>`).join('')}</div>
+      <div><div style="color:var(--blue);font-weight:700;margin-bottom:4px">Dose Reduction (${pgxDose.length})</div>${pgxDose.map(d=>`<div style="padding:2px 0;border-bottom:0.5px solid var(--border)">${getDrugDisplayName(d.drug_name)}</div>`).join('')}</div>
     </div>
   </div>
 
@@ -1109,28 +1173,39 @@ function viewPatientDetail(pno) {
 // ─── EDIT FUNCTIONS ──────────────────────────────────────────
 function editPatient(pno) {
   const p = DB.patients.find(x => x.participant_no == pno);
+  const profile = getPatientProfile(pno);
   document.getElementById('modal-title').textContent = 'Edit Participant ' + pno;
   document.getElementById('modal-foot').style.display = 'flex';
   document.getElementById('modal-body').innerHTML = `
-<div class="form-row">
-  <div class="form-group"><label class="form-label">APOE Genotype</label><input class="form-control" id="ed-apoe" value="${p.apoe_genotype||''}"></div>
-  <div class="form-group"><label class="form-label">Genetic Diseases</label><input class="form-control" id="ed-gd" value="${p.genetic_diseases||''}"></div>
+<div style="margin-bottom:12px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:rgba(56,189,248,.06);font-size:12px;color:var(--muted)">
+  <div style="font-weight:700;color:var(--text);margin-bottom:4px">Patient Display Profile</div>
+  <div>ฟอร์มนี้แก้เฉพาะข้อมูลที่แสดงผลต่อผู้ป่วย ไม่แตะ raw genetic data</div>
 </div>
 <div class="form-row">
-  <div class="form-group"><label class="form-label">WGS Heart</label><input class="form-control" id="ed-heart" value="${p.wgs_heart||''}"></div>
-  <div class="form-group"><label class="form-label">WGS Other</label><input class="form-control" id="ed-other" value="${p.wgs_other||''}"></div>
+  <div class="form-group"><label class="form-label">Display Name</label><input class="form-control" id="ed-display-name" value="${profile.display_name||''}" placeholder="เช่น คุณสมชาย / Patient A"></div>
+  <div class="form-group"><label class="form-label">Portal Note</label><input class="form-control" id="ed-portal-note" value="${profile.portal_note||''}" placeholder="ข้อความสั้นสำหรับแสดงบนหน้า patient"></div>
 </div>
-<div style="margin:14px 0 10px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:rgba(56,189,248,.06);font-size:12px;color:var(--muted)">
-  <div style="font-weight:700;color:var(--text);margin-bottom:4px">แผนการดูแลสำหรับผู้ป่วย P${pno}</div>
-  <div>แก้ 3 ส่วนนี้ได้โดยตรง: แผนออกกำลังกาย, แผนอาหาร, และแผนติดตามผล จากนั้น patient portal ของผู้ป่วยจะใช้ข้อมูลล่าสุดทันที</div>
-  <div style="margin-top:8px"><a class="link-box" href="${location.origin}/patient/?participant=${pno}" target="_blank">เปิดหน้า patient ของ P${pno}</a></div>
+<div style="margin-bottom:12px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:rgba(148,163,184,.05);font-size:12px;color:var(--muted)">
+  <div style="font-weight:700;color:var(--text);margin-bottom:4px">Raw reference (read-only)</div>
+  <div>APOE: <code>${p.apoe_genotype||'—'}</code></div>
+  <div>Genetic diseases: ${p.genetic_diseases||'—'}</div>
+  <div>WGS Heart: ${p.wgs_heart||'—'}</div>
+  <div>WGS Other: ${p.wgs_other||'—'}</div>
 </div>
+<div style="margin:0 0 12px"><a class="link-box" href="${location.origin}/patient/search/?participant=${pno}" target="_blank">เปิดหน้า patient search ของ P${pno}</a></div>
 <div class="form-group" style="margin-bottom:10px"><label class="form-label">แผนออกกำลังกาย / Exercise Plan</label><textarea class="form-control" id="ed-ex" rows="5" placeholder="เช่น เดินเร็ว 30 นาที 5 วัน/สัปดาห์, ฝึกกล้ามเนื้อ 2 วัน/สัปดาห์, เริ่มระดับปานกลางและเพิ่มช้า ๆ">${p.exercise_plan||''}</textarea></div>
 <div class="form-group" style="margin-bottom:10px"><label class="form-label">แผนอาหาร / Diet Plan</label><textarea class="form-control" id="ed-diet" rows="5" placeholder="เช่น เน้นผัก ผลไม้ โปรตีนไม่ติดมัน ลดหวาน มัน เค็ม และอาหารแปรรูป">${p.diet_plan||''}</textarea></div>
 <div class="form-group"><label class="form-label">แผนติดตามผล / Monitoring Plan</label><textarea class="form-control" id="ed-mon" rows="5" placeholder="เช่น ตรวจความดัน น้ำตาล ไขมัน และพบแพทย์ตามความเสี่ยงเฉพาะของผู้ป่วย">${p.monitoring_plan||''}</textarea></div>`;
   modalSaveCallback = async () => {
-    const sql = `UPDATE patients SET apoe_genotype=?, genetic_diseases=?, wgs_heart=?, wgs_other=?, exercise_plan=?, diet_plan=?, monitoring_plan=?, updated_at=datetime('now') WHERE participant_no=?`;
-    const args = ['ed-apoe','ed-gd','ed-heart','ed-other','ed-ex','ed-diet','ed-mon'].map(id => ({type:'text',value:document.getElementById(id).value}));
+    const profileOk = await savePatientProfile(
+      pno,
+      document.getElementById('ed-display-name').value.trim(),
+      document.getElementById('ed-portal-note').value.trim()
+    );
+    if (!profileOk) return;
+
+    const sql = `UPDATE patients SET exercise_plan=?, diet_plan=?, monitoring_plan=?, updated_at=datetime('now') WHERE participant_no=?`;
+    const args = ['ed-ex','ed-diet','ed-mon'].map(id => ({type:'text',value:document.getElementById(id).value}));
     args.push({type:'integer',value:pno});
     const r = await tursoQuery(sql, args);
     if (r !== null) { toast('บันทึกสำเร็จ', 'ok'); closeModal(); loadAll(); }
@@ -1165,34 +1240,24 @@ function editPgx(id) {
   document.getElementById('modal-title').textContent = 'Edit PGx Drug';
   document.getElementById('modal-foot').style.display = 'flex';
   document.getElementById('modal-body').innerHTML = `
-<div class="form-group" style="margin-bottom:10px"><label class="form-label">Drug Name</label><input class="form-control" id="ed-drug" value="${d.drug_name}"></div>
+<div style="margin-bottom:12px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:rgba(56,189,248,.06);font-size:12px;color:var(--muted)">
+  <div style="font-weight:700;color:var(--text);margin-bottom:4px">Raw drug name is preserved</div>
+  <div>ข้อมูลดิบของยาจะไม่ถูกแก้ไข ชื่อนี้จะเปลี่ยนเฉพาะที่แสดงผลใน patient pages</div>
+</div>
+<div class="form-group" style="margin-bottom:10px"><label class="form-label">Raw Drug Name</label><input class="form-control" value="${d.drug_name}" readonly></div>
+<div class="form-group" style="margin-bottom:10px"><label class="form-label">Displayed Drug Name</label><input class="form-control" id="ed-display-drug" value="${getDrugDisplayName(d.drug_name)}" placeholder="ชื่อที่ผู้ป่วยจะเห็น"></div>
 <div class="form-group" style="margin-bottom:10px"><label class="form-label">สรรพคุณยาแบบย่อ / Short Drug Use</label><textarea class="form-control" id="ed-desc" rows="3" placeholder="เช่น ยาแก้ปวด, ยาละลายลิ่มเลือด, ยาลดคอเลสเตอรอล">${getDrugDescription(d.drug_name)}</textarea></div>
-<div class="form-group"><label class="form-label">Risk Type</label>
-<select class="form-control" id="ed-rtype">
-  <option value="adverse_effect" ${d.risk_type==='adverse_effect'?'selected':''}>Adverse Effect</option>
-  <option value="insufficient_efficacy" ${d.risk_type==='insufficient_efficacy'?'selected':''}>Insufficient Efficacy</option>
-  <option value="dose_reduction" ${d.risk_type==='dose_reduction'?'selected':''}>Dose Reduction</option>
-  </select></div>`;
+<div class="form-group"><label class="form-label">Risk Type</label><input class="form-control" value="${d.risk_type}" readonly></div>`;
   modalSaveCallback = async () => {
-    const oldDrugName = d.drug_name;
-    const newDrugName = document.getElementById('ed-drug').value;
+    const displayName = document.getElementById('ed-display-drug').value.trim();
     const shortDescription = document.getElementById('ed-desc').value.trim();
-    const sql = 'UPDATE pgx_drugs SET drug_name=?, risk_type=? WHERE id=?';
-    const args = [{type:'text',value:newDrugName},{type:'text',value:document.getElementById('ed-rtype').value},{type:'integer',value:id}];
-    const res = await tursoQuery(sql, args);
-    if (res !== null) {
-      if (oldDrugName !== newDrugName) {
-        await tursoQuery(
-          'UPDATE pgx_drug_catalog SET drug_name=?, updated_at=datetime(\'now\') WHERE drug_name=?',
-          [{type:'text',value:newDrugName},{type:'text',value:oldDrugName}]
-        );
-      }
-      const descSaved = await saveDrugDescription(newDrugName, shortDescription);
-      if (descSaved) {
-        toast('บันทึกสำเร็จ', 'ok');
-        closeModal();
-        loadAll();
-      }
+    const displaySaved = await saveDrugDisplayName(d.drug_name, displayName);
+    if (!displaySaved) return;
+    const descSaved = await saveDrugDescription(d.drug_name, shortDescription);
+    if (descSaved) {
+      toast('บันทึกสำเร็จ', 'ok');
+      closeModal();
+      loadAll();
     }
   };
   document.getElementById('modal').style.display = 'flex';
@@ -1432,14 +1497,14 @@ function openPortalPasswordModal(participantNo) {
 
 function showPortalQr(participantNo) {
   const row = DB.access.find(item => Number(item.participant_no) === Number(participantNo));
-  const portalUrl = row?.portal_url || `${location.origin}/patient/?participant=${participantNo}`;
+  const portalUrl = row?.portal_url || `${location.origin}/patient/search/?participant=${participantNo}`;
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(portalUrl)}`;
   document.getElementById('modal-title').textContent = `Patient Portal QR — P${participantNo}`;
   document.getElementById('modal-foot').style.display = 'none';
   document.getElementById('modal-body').innerHTML = `
 <div class="qr-box">
   <img src="${qrUrl}" alt="QR code for patient portal">
-  <div style="font-size:12px;color:var(--muted)">This QR sends the patient to their portal page with the participant number in the URL.</div>
+  <div style="font-size:12px;color:var(--muted)">This QR sends the patient to the search-only portal page with the participant number in the URL.</div>
   <a class="link-box" href="${portalUrl}" target="_blank">${portalUrl}</a>
 </div>`;
   document.getElementById('modal').style.display = 'flex';
