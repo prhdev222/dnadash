@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🧬 Demo Patient</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080d18;--card:rgba(255,255,255,.04);--card2:rgba(255,255,255,.06);--border:rgba(255,255,255,.09);
+  --text:#e2e8f0;--muted:rgba(255,255,255,.5);--dim:rgba(255,255,255,.28);
+  --purple:#a78bfa;--blue:#38bdf8;--green:#34d399;--amber:#fbbf24;--red:#f87171;--orange:#fb923c;
+}
+body{
+  min-height:100vh;background:
+    radial-gradient(circle at top left, rgba(56,189,248,.12), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(167,139,250,.12), transparent 32%),
+    linear-gradient(180deg,#070c16,#0b1222 50%,#070c16);
+  color:var(--text);font-family:'Sarabun',system-ui,'Noto Sans Thai',sans-serif;font-size:15px;line-height:1.6
+}
+.topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:14px 18px;background:rgba(8,13,24,.9);backdrop-filter:blur(14px);border-bottom:0.5px solid var(--border)}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#38bdf8,#a78bfa);font-size:16px;flex-shrink:0}
+.brand-text{display:grid;gap:1px}
+.brand-title{font-size:14px;font-weight:800;color:#fff}
+.brand-sub{font-size:10px;color:var(--dim);letter-spacing:.08em;text-transform:uppercase}
+.controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn{border:none;border-radius:10px;padding:9px 12px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;color:var(--text);background:rgba(255,255,255,.06);border:0.5px solid var(--border);text-decoration:none}
+.btn:hover{border-color:rgba(255,255,255,.2)}
+.btn-primary{background:rgba(56,189,248,.14);border-color:rgba(56,189,248,.26);color:#bae6fd}
+.btn-ghost{background:rgba(255,255,255,.03)}
+.btn-print{background:rgba(167,139,250,.14);border-color:rgba(167,139,250,.26);color:#e9d5ff}
+.main{max-width:1120px;margin:0 auto;padding:22px 16px 44px}
+.demo-banner{border:1px solid rgba(56,189,248,.3);background:linear-gradient(135deg,rgba(56,189,248,.12),rgba(167,139,250,.08));border-radius:18px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:#cdefff;font-weight:700;letter-spacing:.03em}
+.hero{background:var(--card);border:0.5px solid var(--border);border-radius:22px;padding:24px;margin-bottom:14px}
+.hero-kicker{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+.hero-title{font-size:clamp(28px,5vw,44px);line-height:1.05;font-weight:800;color:#f8fafc;margin-bottom:8px}
+.hero-sub{font-size:14px;color:var(--muted);max-width:820px;line-height:1.7}
+.pill-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.pill{border-radius:999px;padding:5px 11px;font-size:11px;font-weight:700;border:0.5px solid var(--border);background:rgba(255,255,255,.03)}
+.pill.ok{background:rgba(52,211,153,.12);border-color:rgba(52,211,153,.22);color:#b6f5d8}
+.pill.info{background:rgba(56,189,248,.12);border-color:rgba(56,189,248,.22);color:#c8ecff}
+.layout{display:grid;grid-template-columns:320px minmax(0,1fr);gap:14px;align-items:start}
+.panel{background:var(--card);border:0.5px solid var(--border);border-radius:18px;padding:18px}
+.panel-title{font-size:16px;font-weight:800;color:#f8fafc;margin-bottom:6px}
+.panel-sub{font-size:12px;color:var(--dim);line-height:1.6;margin-bottom:14px}
+.summary-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.summary-card{background:rgba(255,255,255,.04);border:0.5px solid var(--border);border-radius:14px;padding:12px}
+.summary-val{font-size:24px;font-weight:800;font-family:'DM Mono',monospace;line-height:1;color:#fff}
+.summary-lbl{font-size:11px;color:var(--dim);margin-top:4px;line-height:1.35}
+.search-box{display:grid;gap:10px;margin-top:14px}
+.input{width:100%;background:rgba(255,255,255,.06);border:0.5px solid var(--border);border-radius:10px;color:var(--text);padding:11px 12px;font:inherit;font-size:14px;outline:none}
+.input:focus{border-color:var(--purple)}
+.lookup-card{background:rgba(255,255,255,.03);border:0.5px solid var(--border);border-radius:14px;padding:14px}
+.lookup-name{font-size:18px;font-weight:800;color:#f8fafc;margin-bottom:6px}
+.lookup-desc{font-size:13px;color:var(--muted);line-height:1.7}
+.lookup-badge-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.badge{border-radius:999px;padding:4px 10px;font-size:11px;font-weight:700}
+.drug-list{display:grid;gap:8px;margin-top:14px}
+.drug-item{border-radius:14px;padding:12px 13px;background:rgba(255,255,255,.03);border:0.5px solid rgba(255,255,255,.05);display:grid;gap:4px}
+.drug-item:hover{border-color:rgba(255,255,255,.16)}
+.drug-item-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.drug-item-name{font-size:14px;font-weight:800;color:#f8fafc}
+.drug-item-desc{font-size:12px;color:var(--muted);line-height:1.6}
+.drug-item-tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{border-radius:999px;padding:3px 9px;font-size:10px;font-weight:700}
+.tag-ae{background:rgba(248,113,113,.12);border:0.5px solid rgba(248,113,113,.24);color:#fecaca}
+.tag-eff{background:rgba(251,191,36,.12);border:0.5px solid rgba(251,191,36,.24);color:#fde68a}
+.tag-dose{background:rgba(56,189,248,.12);border:0.5px solid rgba(56,189,248,.24);color:#bae6fd}
+.tag-none{background:rgba(148,163,184,.12);border:0.5px solid rgba(148,163,184,.24);color:#cbd5e1}
+.section{background:var(--card);border:0.5px solid var(--border);border-radius:18px;padding:18px;margin-top:14px}
+.section-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.section-title{font-size:16px;font-weight:800;color:#f8fafc}
+.section-sub{font-size:12px;color:var(--dim);margin-top:4px}
+.bar-list{display:grid;gap:10px}
+.bar-row{display:grid;grid-template-columns:minmax(0,1fr) 56px;gap:10px;align-items:center}
+.bar-label{font-size:13px;color:#f8fafc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-count{font-size:11px;color:var(--muted);text-align:right;font-family:'DM Mono',monospace}
+.bar-track{height:10px;background:rgba(255,255,255,.05);border-radius:999px;overflow:hidden}
+.bar-fill{height:100%;border-radius:999px}
+.risk-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.risk-card{background:rgba(255,255,255,.04);border:0.5px solid var(--border);border-radius:14px;padding:12px}
+.risk-card .k{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+.risk-card .v{font-size:18px;font-weight:800;font-family:'DM Mono',monospace}
+.risk-card .s{font-size:11px;color:var(--muted);margin-top:4px}
+.plan-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.plan-card{border-radius:14px;padding:14px;background:rgba(255,255,255,.03);border:0.5px solid var(--border)}
+.plan-title{font-size:13px;font-weight:800;margin-bottom:8px}
+.plan-item{font-size:12px;color:var(--muted);margin-bottom:6px;line-height:1.6}
+.footer{margin-top:16px;font-size:11px;color:rgba(255,255,255,.32);text-align:center}
+@media(max-width:920px){.layout{grid-template-columns:1fr}.risk-grid,.plan-grid,.summary-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:640px){
+  .main{padding:16px 12px 32px}
+  .hero{padding:18px}
+  .panel,.section{padding:16px}
+  .risk-grid,.plan-grid,.summary-grid{grid-template-columns:1fr}
+  .drug-item-head{flex-direction:column}
+  .controls{width:100%;justify-content:space-between}
+}
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-icon">🧬</div>
+      <div class="brand-text">
+        <div class="brand-title">DNA Demo Patient</div>
+        <div class="brand-sub">Conference sample / no real data</div>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="btn btn-print" type="button" onclick="window.print()">Print PDF</button>
+      <a class="btn btn-ghost" href="/demo/">Back to Demo</a>
+      <a class="btn btn-primary" href="/">Main site</a>
+    </div>
+  </div>
+
+  <main class="main">
+    <div class="demo-banner">DEMO / SAMPLE DATA ONLY - no real patient data, no Turso connection, no login required.</div>
+
+    <section class="hero">
+      <div class="hero-kicker">Conference Presentation</div>
+      <div class="hero-title">ตัวอย่างหน้า patient สำหรับงานประชุม</div>
+      <div class="hero-sub">ชุดข้อมูลนี้สร้างขึ้นใหม่ทั้งหมดเพื่อสาธิตการอ่านผลยีน, ความเสี่ยงโรค, PGx, โภชนาการ และแผนดูแลผู้ป่วยในมุมที่เข้าใจง่าย.</div>
+      <div class="pill-row">
+        <span class="pill ok">ข้อมูลตัวอย่างใหม่</span>
+        <span class="pill info">ไม่เชื่อมต่อฐานข้อมูลจริง</span>
+        <span class="pill info">พร้อมใช้บนเวที</span>
+      </div>
+    </section>
+
+    <section class="layout">
+      <aside class="panel">
+        <div class="panel-title">Patient Snapshot</div>
+        <div class="panel-sub">ข้อมูลสรุปสำหรับสไลด์เปิดงาน</div>
+        <div class="summary-grid" id="summary-grid"></div>
+      </aside>
+
+      <section>
+        <div class="section">
+          <div class="section-head">
+            <div>
+              <div class="section-title">ข้อมูลผู้ป่วยตัวอย่าง</div>
+              <div class="section-sub">ข้อมูลแสดงผลเท่านั้น - ใช้ชุดข้อมูลใหม่สำหรับ demo</div>
+            </div>
+          </div>
+          <div class="risk-grid" id="risk-grid"></div>
+        </div>
+
+        <div class="section">
+          <div class="section-head">
+            <div>
+              <div class="section-title">PGx Search</div>
+              <div class="section-sub">ค้นหาได้เฉพาะยาของผู้ป่วยตัวอย่างคนนี้</div>
+            </div>
+          </div>
+          <div class="search-box">
+            <input class="input" id="drug-search" list="drug-options" placeholder="พิมพ์หรือเลือกชื่อยา" oninput="updateSearch(this.value)" onchange="selectDrug(this.value)">
+            <datalist id="drug-options"></datalist>
+            <div class="lookup-card" id="drug-result"></div>
+          </div>
+          <div class="drug-list" id="drug-list"></div>
+        </div>
+
+        <div class="section">
+          <div class="section-head">
+            <div>
+              <div class="section-title">แผนการดูแล</div>
+              <div class="section-sub">ใช้เล่าให้กรรมการดูภาพรวมง่าย ๆ</div>
+            </div>
+          </div>
+          <div class="plan-grid" id="plan-grid"></div>
+        </div>
+
+        <div class="section">
+          <div class="section-head">
+            <div>
+              <div class="section-title">โภชนาการและสิ่งแวดล้อม</div>
+              <div class="section-sub">แปลไทยให้เข้าใจง่ายสำหรับผู้ฟัง</div>
+            </div>
+          </div>
+          <div class="bar-list" id="nutrition-list"></div>
+          <div style="height:10px"></div>
+          <div class="bar-list" id="food-list"></div>
+        </div>
+
+        <div class="footer">Demo only. Use this page for presentation, not for clinical decisions.</div>
+      </section>
+    </section>
+  </main>
+
+<script>
+const DATA = {
+  patient: {
+    participantNo: 'DEMO-21',
+    displayName: 'คุณอริสา ตัวอย่าง',
+    portalNote: 'หญิงอายุ 46 ปี สนใจการดูแลสุขภาพเชิงป้องกัน',
+  },
+  stats: { risks: 6, pgx: 11, nutrition: 5, food: 7 },
+  risks: [
+    { name: 'Type 2 Diabetes (T2D)', mult: 3.85, note: 'เสี่ยงสูงขึ้น ต้องเน้นคุมอาหารและติดตามน้ำตาล' },
+    { name: 'Stroke', mult: 2.74, note: 'ควบคุมความดันและไขมันช่วยลดความเสี่ยง' },
+    { name: 'Gout', mult: 2.31, note: 'ควบคุมอาหารและน้ำหนักตัว' },
+    { name: 'COPD', mult: 1.92, note: 'หลีกเลี่ยงควันบุหรี่และดูแลปอด' },
+    { name: 'Schizophrenia', mult: 1.55, note: 'เป็นความเสี่ยงเชิงพันธุกรรม ไม่ใช่การวินิจฉัย' },
+    { name: 'Venous Thromboembolism', mult: 1.48, note: 'สังเกตอาการบวมและเจ็บน่อง' },
+  ],
+  pgx: [
+    { drug_name: 'Clopidogrel', display_name: 'Clopidogrel', risk_type: 'insufficient_efficacy', short_description: 'ยาต้านเกล็ดเลือด ใช้ลดการอุดตันของหลอดเลือด' },
+    { drug_name: 'Warfarin', display_name: 'Warfarin', risk_type: 'dose_reduction', short_description: 'ยาละลายลิ่มเลือด ต้องปรับขนาดยาอย่างระมัดระวัง' },
+    { drug_name: 'Simvastatin', display_name: 'Simvastatin', risk_type: 'adverse_effect', short_description: 'ยาลดไขมันในเลือด ใช้ควบคุมคอเลสเตอรอล' },
+    { drug_name: 'Metoprolol', display_name: 'Metoprolol', risk_type: 'dose_reduction', short_description: 'ยาควบคุมหัวใจและความดัน' },
+    { drug_name: 'Citalopram', display_name: 'Citalopram', risk_type: 'adverse_effect', short_description: 'ยาต้านซึมเศร้า ใช้ปรับสมดุลอารมณ์' },
+    { drug_name: 'Omeprazole', display_name: 'Omeprazole', risk_type: 'insufficient_efficacy', short_description: 'ยาลดกรด ใช้รักษาแผลและกรดไหลย้อน' },
+    { drug_name: 'Codeine', display_name: 'Codeine', risk_type: 'adverse_effect', short_description: 'ยาแก้ปวดกลุ่ม opioid ใช้ระวังอาการง่วง' },
+    { drug_name: 'Tacrolimus', display_name: 'Tacrolimus', risk_type: 'dose_reduction', short_description: 'ยากดภูมิ ต้องติดตามระดับยา' },
+    { drug_name: 'Amitriptyline', display_name: 'Amitriptyline', risk_type: 'adverse_effect', short_description: 'ยารักษาอาการปวดปลายประสาทและซึมเศร้า' },
+    { drug_name: 'Pantoprazole', display_name: 'Pantoprazole', risk_type: 'insufficient_efficacy', short_description: 'ยาลดกรดและป้องกันแผลในกระเพาะ' },
+    { drug_name: 'Rosuvastatin', display_name: 'Rosuvastatin', risk_type: 'dose_reduction', short_description: 'ยาลดไขมันในเลือดที่ใช้กันบ่อย' },
+  ],
+  nutrition: [
+    ['วิตามินดี (Vitamin D)', 'ต้องการสูง'],
+    ['แมกนีเซียม (Magnesium)', 'ต้องการสูงเล็กน้อย'],
+    ['สังกะสี (Zinc)', 'ต้องการสูง'],
+    ['วิตามินบี 12 (Vitamin B12)', 'ต้องการสูงเล็กน้อย'],
+    ['ธาตุเหล็ก (Iron)', 'ต้องการสูง'],
+  ],
+  food: [
+    ['ถั่วลิสง (Peanuts)', 'อาหารที่อาจแพ้'],
+    ['ไข่ไก่ (Hen Eggs)', 'อาหารที่อาจแพ้'],
+    ['นมวัว (Cow Milk)', 'อาหารที่อาจแพ้'],
+    ['เกสรดอกไม้ (Pollen)', 'สิ่งแวดล้อม'],
+    ['ไรฝุ่น (Dust Mite)', 'สิ่งแวดล้อม'],
+    ['ควันบุหรี่ (Smoke)', 'สิ่งแวดล้อม'],
+    ['กุ้ง (Shrimp)', 'อาหารที่อาจแพ้'],
+  ],
+  plans: {
+    exercise: [
+      'เดินเร็ว 30 นาที 5 วัน/สัปดาห์',
+      'เวทเทรนนิ่ง 2 วัน/สัปดาห์',
+      'เพิ่มความหนักแบบค่อยเป็นค่อยไป',
+    ],
+    diet: [
+      'เน้นผัก ผลไม้ โปรตีนไม่ติดมัน',
+      'ลดหวาน มัน เค็ม และอาหารแปรรูป',
+      'ดื่มน้ำให้พอและแบ่งมื้ออาหารสม่ำเสมอ',
+    ],
+    monitor: [
+      'ตรวจความดัน น้ำตาล และไขมัน',
+      'ทบทวนยากับแพทย์/เภสัชกร',
+      'ติดตามตามความเสี่ยงเฉพาะของแต่ละคน',
+    ],
+  }
+};
+
+function splitPgx(items){
+  return {
+    ae: items.filter(i=>i.risk_type==='adverse_effect'),
+    eff: items.filter(i=>i.risk_type==='insufficient_efficacy'),
+    dose: items.filter(i=>i.risk_type==='dose_reduction'),
+  };
+}
+
+const pgxGroups = splitPgx(DATA.pgx);
+let selectedDrug = DATA.pgx[0]?.display_name || '';
+let searchQuery = '';
+
+function riskBadge(type){
+  if (type === 'adverse_effect') return ['🟥 เสี่ยงผลข้างเคียง', 'tag-ae'];
+  if (type === 'insufficient_efficacy') return ['🟨 ประสิทธิภาพลดลง', 'tag-eff'];
+  if (type === 'dose_reduction') return ['🟦 ปรับขนาดยา', 'tag-dose'];
+  return ['PGx', 'tag-none'];
+}
+
+function renderSummary(){
+  const items = [
+    { v: DATA.stats.risks, l: 'ความเสี่ยงโรค' },
+    { v: DATA.stats.pgx, l: 'รายการ PGx' },
+    { v: DATA.stats.nutrition, l: 'สารอาหารที่ต้องการ' },
+  ];
+  return items.map(item => `<div class="summary-card"><div class="summary-val">${item.v}</div><div class="summary-lbl">${item.l}</div></div>`).join('');
+}
+
+function renderRisks(){
+  return DATA.risks.map((row, i) => {
+    const width = Math.min(row.mult / 4 * 100, 100);
+    return `
+      <div class="risk-card">
+        <div class="k">#${i + 1}</div>
+        <div class="v">${row.mult.toFixed(2)}×</div>
+        <div class="s">${row.name}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function getDrug(name){
+  const needle = String(name || '').trim().toLowerCase();
+  if (!needle) return null;
+  return DATA.pgx.find(row => row.display_name.toLowerCase() === needle || row.drug_name.toLowerCase() === needle) || null;
+}
+
+function renderDrugLookup(){
+  const matched = getDrug(selectedDrug);
+  if (matched) {
+    const [label, cls] = riskBadge(matched.risk_type);
+    return `
+      <div class="lookup-name">${matched.display_name}</div>
+      <div class="lookup-desc"><strong>สรรพคุณ:</strong> ${matched.short_description}</div>
+      <div class="lookup-badge-row"><span class="badge ${cls}">${label}</span></div>
+    `;
+  }
+  return `<div class="lookup-desc">เลือกชื่อยาเพื่อดูรายละเอียด</div>`;
+}
+
+function renderDrugList(){
+  const needle = String(searchQuery || '').trim().toLowerCase();
+  const rows = DATA.pgx.filter(row => !needle || row.display_name.toLowerCase().includes(needle) || row.short_description.toLowerCase().includes(needle));
+  if (!rows.length) return `<div class="lookup-desc">ไม่พบข้อมูลยา</div>`;
+  return rows.map(row => {
+    const [label, cls] = riskBadge(row.risk_type);
+    return `
+      <div class="drug-item" onclick="selectDrug('${row.display_name.replace(/'/g, "\\'")}')">
+        <div class="drug-item-head">
+          <div class="drug-item-name">${row.display_name}</div>
+          <div class="drug-item-tags"><span class="tag ${cls}">${label}</span></div>
+        </div>
+        <div class="drug-item-desc">${row.short_description}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderNutrition(){
+  return DATA.nutrition.map(([name, level], idx) => `
+    <div>
+      <div class="bar-row">
+        <div class="bar-label">${name}</div>
+        <div class="bar-count">${level}</div>
+      </div>
+      <div class="bar-track"><div class="bar-fill" style="width:${100 - idx * 8}%;background:var(--green)"></div></div>
+    </div>
+  `).join('');
+}
+
+function renderFood(){
+  return DATA.food.map(([name, level], idx) => `
+    <div>
+      <div class="bar-row">
+        <div class="bar-label">${name}</div>
+        <div class="bar-count">${level}</div>
+      </div>
+      <div class="bar-track"><div class="bar-fill" style="width:${95 - idx * 7}%;background:${level === 'อาหารที่อาจแพ้' ? 'var(--orange)' : 'var(--blue)'}"></div></div>
+    </div>
+  `).join('');
+}
+
+function renderPlans(){
+  return `
+    <div class="plan-card">
+      <div class="plan-title" style="color:var(--blue)">Exercise</div>
+      ${DATA.plans.exercise.map(item => `<div class="plan-item">• ${item}</div>`).join('')}
+    </div>
+    <div class="plan-card">
+      <div class="plan-title" style="color:var(--green)">Diet</div>
+      ${DATA.plans.diet.map(item => `<div class="plan-item">• ${item}</div>`).join('')}
+    </div>
+    <div class="plan-card">
+      <div class="plan-title" style="color:var(--orange)">Monitoring</div>
+      ${DATA.plans.monitor.map(item => `<div class="plan-item">• ${item}</div>`).join('')}
+    </div>
+  `;
+}
+
+function updateSearch(value){
+  searchQuery = value;
+  document.getElementById('drug-list').innerHTML = renderDrugList();
+}
+function selectDrug(name){
+  selectedDrug = name;
+  searchQuery = name;
+  document.getElementById('drug-search').value = name;
+  document.getElementById('drug-result').innerHTML = renderDrugLookup();
+  document.getElementById('drug-list').innerHTML = renderDrugList();
+}
+
+function init(){
+  document.getElementById('summary-grid').innerHTML = renderSummary();
+  document.getElementById('risk-grid').innerHTML = renderRisks();
+  document.getElementById('drug-options').innerHTML = DATA.pgx.map(row => `<option value="${row.display_name}"></option>`).join('');
+  document.getElementById('drug-result').innerHTML = renderDrugLookup();
+  document.getElementById('drug-list').innerHTML = renderDrugList();
+  document.getElementById('plan-grid').innerHTML = renderPlans();
+  document.getElementById('nutrition-list').innerHTML = renderNutrition();
+  document.getElementById('food-list').innerHTML = renderFood();
+}
+
+init();
+</script>
+</body>
+</html>
