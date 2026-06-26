@@ -124,6 +124,7 @@ body[data-font="lg"]{font-size:17px}
 .tab-btn.act-diet{background:rgba(52,211,153,.1);border-color:var(--green);color:var(--green)}
 .tab-btn.act-mon{background:rgba(251,146,60,.1);border-color:var(--orange);color:var(--orange)}
 .tab-icon{font-size:16px;display:block;margin-bottom:2px}
+.plan-panel-title{display:none}
 .plan-sum{border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:13px;line-height:1.6}
 .plan-item{display:flex;gap:10px;align-items:flex-start;margin-bottom:9px}
 .plan-dot{width:5px;height:5px;border-radius:50%;margin-top:9px;flex-shrink:0}
@@ -255,6 +256,10 @@ body[data-font="lg"] .food-tag,body[data-font="lg"] .exp-tag{font-size:14px}
   .badge,.cat-badge{color:#111827 !important}
   .tab-btn{border-color:#d1d5db !important;color:#111827 !important;background:#fff !important}
   .tab-btn.act-ex,.tab-btn.act-diet,.tab-btn.act-mon{border-color:#94a3b8 !important;color:#111827 !important;background:#f8fafc !important}
+  .tab-row{display:none !important}
+  .plan-panel{display:block !important;margin-top:8px;padding-top:8px;border-top:1px solid #e5e7eb;break-inside:avoid-page;page-break-inside:avoid}
+  .tab-row + .plan-panel{border-top:0;padding-top:0}
+  .plan-panel-title{display:block !important;font-size:12px;font-weight:800;color:#0f172a !important;margin:2px 0 6px}
   .plan-sum,.drug-group,.wgs-block,.stat-card,.nutr-card{break-inside:avoid}
   .print-only{display:block !important}
   .print-only .print-head{border:1px solid #d1d5db;border-radius:12px;padding:12px 14px;margin-bottom:12px;background:#f8fafc}
@@ -1157,7 +1162,8 @@ function render(){
   const tabPanels = tabs.map(ti=>{
     const sumC = ti.key==="ex"?"rgba(56,189,248,.08)":ti.key==="diet"?"rgba(52,211,153,.08)":"rgba(251,146,60,.08)";
     const sumB = ti.key==="ex"?"rgba(56,189,248,.25)":ti.key==="diet"?"rgba(52,211,153,.25)":"rgba(251,146,60,.25)";
-    return `<div id="tp-${ti.key}" style="display:${activeTab===ti.key?"block":"none"}">
+    return `<div id="tp-${ti.key}" class="plan-panel" style="display:${activeTab===ti.key?"block":"none"}">
+      <div class="plan-panel-title">${ti.icon} ${ti.label}</div>
       <div class="plan-sum" style="background:${sumC};border:0.5px solid ${sumB}">
         <span style="font-weight:600;color:${ti.col}">📌 ${t('sum')}</span>
         <span style="color:var(--soft)">${ti.sum}</span>
