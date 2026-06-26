@@ -47,6 +47,8 @@ body[data-font="lg"]{font-size:17px}
 .btn:hover{border-color:rgba(255,255,255,.2)}
 .btn:disabled{opacity:.45;cursor:not-allowed}
 .btn-print{background:rgba(56,189,248,.14);border-color:rgba(56,189,248,.28);color:#bae6fd}
+.mobile-menu-toggle{display:none;position:fixed;right:12px;bottom:12px;z-index:250;background:rgba(15,23,42,.92);border:1px solid var(--border);border-radius:999px;color:var(--text);padding:10px 14px;font-size:13px;font-weight:800;font-family:inherit;box-shadow:0 12px 32px rgba(0,0,0,.28)}
+.mobile-menu-toggle.is-active{background:rgba(56,189,248,.16);border-color:rgba(56,189,248,.35);color:#bae6fd}
 .main{max-width:860px;margin:0 auto;padding:24px 16px 48px}
 .login-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:18px;padding:22px;margin-bottom:18px}
 .login-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:12px}
@@ -192,6 +194,9 @@ body[data-font="lg"] .food-tag,body[data-font="lg"] .exp-tag{font-size:14px}
 }
 @media(max-width:600px){
   body{font-size:14px}
+  body.has-report .mobile-menu-toggle{display:inline-flex;align-items:center;gap:6px}
+  body.mobile-chrome-hidden .disclaimer,body.mobile-chrome-hidden .topbar,body.mobile-chrome-hidden .login-card{display:none}
+  body.mobile-chrome-hidden .main{padding-top:12px;padding-bottom:72px}
   .topbar{padding:12px 14px;align-items:flex-start}
   .logo{width:100%}
   .controls{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -243,6 +248,7 @@ body[data-font="lg"] .food-tag,body[data-font="lg"] .exp-tag{font-size:14px}
   *, *::before, *::after{box-shadow:none !important; text-shadow:none !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; color:#111827 !important; background-color:transparent !important}
   body{background:#fff !important;color:#111827 !important;font-size:11px;line-height:1.45}
   .glow,.topbar,.login-card,.consent-card,.disclaimer,.footer,.btn-print,#logout-btn,#pgx-print-section{display:none !important}
+  .mobile-menu-toggle{display:none !important}
   .main{max-width:none;padding:0 0 8mm}
   .wrap{z-index:auto}
   .card,.hero-risk,.stat-card,.nutr-card,.pgx-card,.wgs-block,.drug-group,.c-tag,.food-tag,.exp-tag{background:#fff !important;border-color:#d1d5db !important}
@@ -284,6 +290,7 @@ body[data-font="lg"] .food-tag,body[data-font="lg"] .exp-tag{font-size:14px}
 <div class="wrap">
 
 <div class="disclaimer" id="disclaimer"></div>
+<button class="mobile-menu-toggle" id="mobile-menu-toggle" onclick="toggleMobileMenu()" type="button">ซ่อนเมนู</button>
 
 <div class="topbar">
   <div class="logo">
@@ -490,6 +497,8 @@ const TEXT = {
     notSigned:"ยังไม่ได้เข้าสู่ระบบ",
     emptyText:"กรุณาเข้าสู่ระบบเพื่อดูรายงานของคุณ",
     emptyHint:"ระบบจะแสดงเฉพาะข้อมูลของผู้เข้าร่วมที่ล็อกอินอยู่เท่านั้น",
+    hideMenu:"ซ่อนเมนู",
+    showMenu:"แสดงเมนู",
     consentKicker:"คำชี้แจงก่อนรับชมข้อมูล",
     consentTitle:"ข้อมูล Precision Medicine เบื้องต้นสำหรับพระคุณเจ้า",
     consentP1:"นมัสการพระคุณเจ้า ข้อมูลในระบบนี้เป็นข้อมูลเบื้องต้นด้านเวชศาสตร์แม่นยำ (Precision Medicine) ซึ่งอาจประกอบด้วยข้อมูลความเสี่ยงทางพันธุกรรม ข้อมูลหลายตำแหน่งทางพันธุกรรม (Polygenic Risk) ข้อมูลยีนที่เกี่ยวข้องกับการตอบสนองต่อยา (Pharmacogenomics: PGx) และข้อมูลจีโนมิกส์อื่น ๆ เฉพาะบางส่วนที่ถูกนำมาวิเคราะห์ในระบบนี้",
@@ -576,6 +585,8 @@ const TEXT = {
     notSigned:"Not signed in",
     emptyText:"Please sign in to view your report",
     emptyHint:"Only the currently authenticated participant record is shown here",
+    hideMenu:"Hide menu",
+    showMenu:"Show menu",
     consentKicker:"Notice before viewing",
     consentTitle:"Preliminary Precision Medicine Information",
     consentP1:"This portal provides preliminary Precision Medicine information. It may include genetic risk information, polygenic risk information, pharmacogenomics (PGx), and selected genomic findings that were analysed in this system.",
@@ -659,6 +670,7 @@ let activeTab = 'ex';
 let expandedDrugGroups = { ae: false, eff: false, dose: false };
 let currentTheme = 'dark';
 let currentFontSize = 'md';
+let mobileChromeHidden = false;
 
 function t(key){ return TEXT[currentLang][key] || key; }
 function storageGet(key, fallback){
@@ -691,6 +703,18 @@ function initDisplayPrefs(){
   setTheme(storageGet('dnaDashTheme', 'dark'), false);
   setFontSize(storageGet('dnaDashFontSize', 'md'), false);
 }
+function updateMobileMenuButton(){
+  const btn = document.getElementById('mobile-menu-toggle');
+  if (!btn) return;
+  btn.textContent = mobileChromeHidden ? t('showMenu') : t('hideMenu');
+  btn.classList.toggle('is-active', mobileChromeHidden);
+}
+function setMobileChromeHidden(hidden){
+  mobileChromeHidden = Boolean(hidden);
+  document.body.classList.toggle('mobile-chrome-hidden', mobileChromeHidden);
+  updateMobileMenuButton();
+}
+function toggleMobileMenu(){ setMobileChromeHidden(!mobileChromeHidden); }
 function dn(name){
   const text = String(name || '').trim();
   if (currentLang === 'TH' && DTH[text]) return `${DTH[text]} (${text})`;
@@ -797,6 +821,7 @@ function setStaticText(){
   document.getElementById('login-btn').textContent = t('login');
   document.getElementById('empty-text').textContent = t('emptyText');
   document.getElementById('empty-hint').textContent = t('emptyHint');
+  updateMobileMenuButton();
 }
 
 function setLang(lang){
@@ -888,6 +913,8 @@ function renderConsent(){
     </div>
   `;
   consent.style.display = 'block';
+  document.body.classList.remove('has-report');
+  setMobileChromeHidden(false);
   document.getElementById('dash').style.display = 'none';
   document.getElementById('empty').style.display = 'none';
 }
@@ -1250,6 +1277,7 @@ function render(){
 
   document.getElementById('dash').innerHTML = h;
   document.getElementById('dash').style.display = 'block';
+  document.body.classList.add('has-report');
   document.getElementById('consent').style.display = 'none';
   document.getElementById('empty').style.display = 'none';
 }
@@ -1282,6 +1310,8 @@ async function patientLogout() {
   } finally {
     currentData = null;
     consentAccepted = false;
+    document.body.classList.remove('has-report');
+    setMobileChromeHidden(false);
     openR = null;
     activeTab = 'ex';
     expandedDrugGroups = { ae: false, eff: false, dose: false };
