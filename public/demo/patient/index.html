@@ -49,6 +49,16 @@ body[data-font="lg"]{font-size:17px}
 .input:focus{border-color:var(--purple)}
 .main{max-width:860px;margin:0 auto;padding:24px 16px 48px}
 .demo-banner{background:linear-gradient(135deg,rgba(56,189,248,.12),rgba(167,139,250,.08));border:1px solid rgba(56,189,248,.25);border-radius:18px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:#cdefff;font-weight:700;letter-spacing:.03em}
+.consent-card{background:var(--bg2);border:0.5px solid var(--hero-border);border-radius:18px;padding:22px;margin-bottom:18px}
+.consent-kicker{font-size:10px;color:var(--blue);letter-spacing:.12em;text-transform:uppercase;font-weight:800;margin-bottom:5px}
+.consent-title{font-size:20px;font-weight:800;color:var(--strong);line-height:1.35;margin-bottom:10px}
+.consent-copy{display:grid;gap:10px;font-size:14px;color:var(--soft);line-height:1.85}
+.consent-note{border-left:3px solid var(--amber);padding:9px 12px;background:rgba(251,191,36,.08);border-radius:10px;color:var(--text)}
+.consent-check{display:flex;gap:10px;align-items:flex-start;margin-top:14px;font-size:13px;color:var(--text);line-height:1.65}
+.consent-check input{width:18px;height:18px;margin-top:3px;accent-color:var(--green);flex-shrink:0}
+.consent-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:16px}
+.consent-primary{background:rgba(52,211,153,.14);border-color:rgba(52,211,153,.32);color:var(--green);font-weight:800}
+.consent-primary:disabled{opacity:.45;cursor:not-allowed}
 .hero-top{text-align:center;padding:20px 0 12px}
 .hero-greeting{font-size:11px;color:var(--dim);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
 .hero-id{font-size:26px;font-weight:800;color:var(--strong);margin-bottom:3px}
@@ -218,7 +228,7 @@ body[data-font="lg"] .food-tag,body[data-font="lg"] .exp-tag{font-size:14px}
   :root{--bg:#ffffff;--bg2:#ffffff;--border:#dbe2ea;--text:#111827;--muted:#4b5563;--dim:#6b7280}
   *, *::before, *::after{box-shadow:none !important;text-shadow:none !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;color:#111827 !important;background-color:transparent !important}
   body{background:#fff !important;color:#111827 !important;font-size:11px;line-height:1.45}
-  .glow,.topbar,.disclaimer,.footer,.btn-print{display:none !important}
+  .glow,.topbar,.disclaimer,.footer,.btn-print,.consent-card{display:none !important}
   .main{max-width:none;padding:0 0 8mm}
   .card,.hero-risk,.stat-card,.nutr-card,.pgx-card,.wgs-block,.drug-group,.c-tag,.food-tag,.exp-tag{background:#fff !important;border-color:#d1d5db !important}
   .card,.hero-risk{break-inside:avoid-page;page-break-inside:avoid}
@@ -282,7 +292,8 @@ body[data-font="lg"] .food-tag,body[data-font="lg"] .exp-tag{font-size:14px}
 
 <main class="main">
   <div class="demo-banner">DEMO / SAMPLE DATA ONLY - no real patient data, no Turso connection, one mock patient for presentation.</div>
-  <div id="dash"></div>
+  <div id="consent" class="consent-card"></div>
+  <div id="dash" style="display:none"></div>
 </main>
 
 </div>
@@ -316,6 +327,14 @@ const TEXT = {
     print:"พิมพ์ / PDF",
     participant:"หมายเลข",
     researchOnly:"ข้อมูลตัวอย่างเพื่อการสาธิตเท่านั้น · ไม่ใช่การวินิจฉัยโรค",
+    consentKicker:"ตัวอย่างแบบฟอร์มรับทราบข้อมูล",
+    consentTitle:"คำชี้แจงก่อนรับชมตัวอย่างรายงาน",
+    consentP1:"ข้อมูลในหน้านี้เป็นข้อมูลจำลองสำหรับสาธิตรูปแบบรายงานผู้ป่วยเท่านั้น ไม่ใช่ข้อมูลของผู้เข้าร่วมจริง และไม่มีการเชื่อมต่อกับฐานข้อมูลผู้ป่วยหรือ Turso",
+    consentP2:"ตัวอย่างนี้แสดงรูปแบบการสื่อสารข้อมูล Precision Medicine เบื้องต้น ซึ่งอาจประกอบด้วยความเสี่ยงทางพันธุกรรม ข้อมูลที่เกี่ยวข้องกับยา และข้อมูลจีโนมิกส์บางส่วนที่นำมาวิเคราะห์ในระบบ",
+    consentP3:"ข้อมูลลักษณะนี้ใช้เพื่อประกอบการพิจารณาแนวโน้มโอกาสเกิดโรค การดูแลตนเอง และการออกแบบสุขภาพเฉพาะบุคคลเท่านั้น ไม่ใช่คำวินิจฉัยโรค และไม่สามารถบอกข้อมูลสุขภาพทั้งหมดได้",
+    consentNote:"เมื่อนำไปใช้กับผู้ป่วยจริง ควรอธิบายร่วมกับบริบทสุขภาพและคำแนะนำจากทีมแพทย์และบุคลากรทางการแพทย์",
+    consentCheck:"รับทราบว่านี่เป็นข้อมูลจำลองสำหรับสาธิต consent และตัวอย่างรายงานเท่านั้น",
+    consentAccept:"รับทราบและดูตัวอย่างรายงาน",
     highestRisk:"ความเสี่ยงสูงสุดที่พบ",
     apoe:"ยีน APOE (ความเสี่ยงสมองเสื่อม)",
     noCarrier:"ไม่พบข้อมูลยีนโรคทางพันธุกรรม",
@@ -382,6 +401,14 @@ const TEXT = {
     print:"Print / PDF",
     participant:"Participant",
     researchOnly:"Demo data only · Not a medical diagnosis",
+    consentKicker:"Sample consent form",
+    consentTitle:"Notice Before Viewing the Sample Report",
+    consentP1:"This page uses mock data to demonstrate the patient report format only. It is not a real participant record and is not connected to the patient database or Turso.",
+    consentP2:"This sample shows how preliminary Precision Medicine information may be communicated, including genetic risk, pharmacogenomics, and selected genomic findings analysed in the system.",
+    consentP3:"This type of information supports discussion of disease-risk tendencies, self-care, and personalised health planning only. It is not a medical diagnosis and does not cover all health information.",
+    consentNote:"For real patients, this information should be explained together with health context and guidance from the medical and healthcare team.",
+    consentCheck:"I acknowledge that this is mock data for demonstrating consent and the sample report only.",
+    consentAccept:"Acknowledge and View Sample Report",
     highestRisk:"Highest Risk Found",
     apoe:"APOE Genotype",
     noCarrier:"No genetic disease carrier noted",
@@ -509,6 +536,7 @@ let activeTab = 'ex';
 let expandedDrugGroups = { ae: false, eff: false, dose: false };
 let currentTheme = 'dark';
 let currentFontSize = 'md';
+let consentAccepted = false;
 
 function t(key){ return TEXT[currentLang][key] || key; }
 function storageGet(key, fallback){ try { return localStorage.getItem(key) || fallback; } catch (_) { return fallback; } }
@@ -766,6 +794,43 @@ function setLang(lang){
   document.getElementById('disclaimer').innerHTML = t('disclaimer');
   document.getElementById('logo-sub').textContent = t('logoSub');
   document.getElementById('print-btn').textContent = t('print');
+  if (consentAccepted) render();
+  else renderConsent();
+}
+
+function renderConsent(){
+  const consent = document.getElementById('consent');
+  consent.innerHTML = `
+    <div class="consent-kicker">${t('consentKicker')}</div>
+    <div class="consent-title">${t('consentTitle')}</div>
+    <div class="consent-copy">
+      <p>${t('consentP1')}</p>
+      <p>${t('consentP2')}</p>
+      <p>${t('consentP3')}</p>
+      <div class="consent-note">${t('consentNote')}</div>
+    </div>
+    <label class="consent-check">
+      <input id="consent-check" type="checkbox" onchange="toggleConsentButton()">
+      <span>${t('consentCheck')}</span>
+    </label>
+    <div class="consent-actions">
+      <button class="btn consent-primary" id="consent-accept" onclick="acceptConsent()" disabled>${t('consentAccept')}</button>
+    </div>
+  `;
+  consent.style.display = 'block';
+  document.getElementById('dash').style.display = 'none';
+}
+
+function toggleConsentButton(){
+  const checked = document.getElementById('consent-check')?.checked;
+  const button = document.getElementById('consent-accept');
+  if (button) button.disabled = !checked;
+}
+
+function acceptConsent(){
+  if (!document.getElementById('consent-check')?.checked) return;
+  consentAccepted = true;
+  document.getElementById('consent').style.display = 'none';
   render();
 }
 
@@ -982,6 +1047,7 @@ function render(){
   </div>`;
 
   document.getElementById('dash').innerHTML = h;
+  document.getElementById('dash').style.display = 'block';
 }
 
 function toggleR(i){ openR = openR === i ? null : i; render(); }
@@ -994,7 +1060,7 @@ function init(){
   document.getElementById('disclaimer').innerHTML = t('disclaimer');
   document.getElementById('logo-sub').textContent = t('logoSub');
   document.getElementById('print-btn').textContent = t('print');
-  render();
+  renderConsent();
 }
 
 window.onload = init;
