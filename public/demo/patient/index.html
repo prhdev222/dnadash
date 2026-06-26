@@ -334,15 +334,15 @@ const TEXT = {
     riskProfileSub:"แตะชื่อโรคเพื่ออ่านคำอธิบาย",
     tapHint:"👆 แตะที่ชื่อโรคเพื่ออ่านคำอธิบาย",
     genericRisk:"พบความเสี่ยงทางพันธุกรรมสำหรับโรคนี้",
-    urgent:"ควรปรึกษาแพทย์โดยเร็ว",
-    monitor:"แจ้งแพทย์และติดตามอาการ",
+    urgent:"ควรปรึกษาทีมแพทย์และบุคลากรทางการแพทย์โดยเร็ว",
+    monitor:"แจ้งทีมแพทย์และบุคลากรทางการแพทย์และติดตามอาการ",
     prevent:"ดูแลสุขภาพเชิงป้องกัน",
     riskHigher:"ความเสี่ยงสูงกว่าคนทั่วไป",
     wgs:"ผลตรวจยีนพิเศษ (WGS)",
     wgsSub:"เป็นข้อมูลความเสี่ยงที่พบในยีน ไม่ใช่การวินิจฉัยโรค",
     cancerFlags:"ยีนที่เกี่ยวกับมะเร็ง",
     noCancer:"ไม่พบยีนมะเร็งที่น่าเป็นห่วง",
-    cancerNote:"แนะนำตรวจคัดกรองกับแพทย์ตามช่วงอายุ",
+    cancerNote:"แนะนำตรวจคัดกรองกับทีมแพทย์และบุคลากรทางการแพทย์ตามช่วงอายุ",
     heartFlags:"ยีนที่เกี่ยวกับหัวใจ",
     noHeart:"ไม่พบความผิดปกติ",
     other:"ข้อมูลอื่น ๆ",
@@ -359,7 +359,7 @@ const TEXT = {
     dietSum:"เน้นอาหารแนว Mediterranean/DASH เพิ่มผัก ผลไม้ โปรตีนคุณภาพดี และลดหวาน มัน เค็ม รวมถึงอาหารแปรรูป",
     monSum:"ติดตามสุขภาพอย่างสม่ำเสมอ ดูค่าความดัน น้ำตาล ไขมัน และตรวจเพิ่มเติมตามความเสี่ยงเฉพาะของคุณ",
     pgxTitle:"ข้อมูลยีนที่เกี่ยวกับยา (PGx)",
-    pgxSub2:"ข้อมูลนี้เป็นเพียงข้อบ่งชี้เบื้องต้นจากข้อมูลทางจีโนมิกส์โดยรวม อาจไม่ตรงกับการตอบสนองต่อยาจริงของแต่ละบุคคล และควรใช้ประกอบการพิจารณาของแพทย์หรือเภสัชกรเท่านั้น",
+    pgxSub2:"ข้อมูลนี้เป็นเพียงข้อบ่งชี้เบื้องต้นจากข้อมูลทางจีโนมิกส์โดยรวม อาจไม่ตรงกับการตอบสนองต่อยาจริงของแต่ละบุคคล และควรใช้ประกอบการพิจารณาของทีมแพทย์และบุคลากรทางการแพทย์เท่านั้น",
     ae:"เสี่ยงผลข้างเคียง",
     eff:"ประสิทธิภาพลดลง",
     dose:"ปรับขนาดยา",
@@ -400,15 +400,15 @@ const TEXT = {
     riskProfileSub:"Tap a disease name for details",
     tapHint:"👆 Tap a disease name to read explanation",
     genericRisk:"Genetic predisposition identified for this condition.",
-    urgent:"Consult a doctor promptly",
-    monitor:"Inform your doctor and monitor symptoms",
+    urgent:"Consult the medical and healthcare team promptly",
+    monitor:"Inform the medical and healthcare team and monitor symptoms",
     prevent:"Preventive health care",
     riskHigher:"Risk is higher than average",
     wgs:"Whole Genome Sequencing Findings",
     wgsSub:"These indicate genetic predisposition, not current disease",
     cancerFlags:"Cancer-related Gene Flags",
     noCancer:"No significant cancer flags",
-    cancerNote:"Recommend screening with your doctor based on age",
+    cancerNote:"Recommend screening with the medical and healthcare team based on age",
     heartFlags:"Cardiac Gene Findings",
     noHeart:"No cardiac variants detected",
     other:"Other Findings",
@@ -425,7 +425,7 @@ const TEXT = {
     dietSum:"Follow a Mediterranean/DASH-style pattern with more vegetables, fruit, quality protein, and less sugar, salt, and processed food.",
     monSum:"Keep up regular health checks, including blood pressure, glucose, lipids, and any extra screening relevant to your individual risks.",
     pgxTitle:"Pharmacogenomics (PGx)",
-    pgxSub2:"This is preliminary information based on overall genomic data. It may not reflect an individual's actual drug response and should be interpreted by a doctor or pharmacist.",
+    pgxSub2:"This is preliminary information based on overall genomic data. It may not reflect an individual's actual drug response and should be interpreted by the medical and healthcare team.",
     ae:"Adverse Effect Risk",
     eff:"Reduced Efficacy",
     dose:"Dose Adjustment",
@@ -457,7 +457,7 @@ const DATA = {
     wgs_other: 'No additional high-risk monogenic finding detected',
     exercise_plan: 'เน้นคาร์ดิโอแรงกระแทกต่ำ เช่น เดินเร็วหรือปั่นจักรยาน 30 นาที 5 วัน/สัปดาห์<br>เสริมเวทเทรนนิ่งเบา ๆ 2 วัน/สัปดาห์<br>วอร์มอัปก่อนออกกำลังและเพิ่มความหนักแบบค่อยเป็นค่อยไป',
     diet_plan: 'ใช้แนวทางอาหารแบบ Mediterranean/DASH<br>เพิ่มผัก ผลไม้ โปรตีนไม่ติดมัน และธัญพืชไม่ขัดสี<br>ลดหวาน มัน เค็ม และอาหารแปรรูป',
-    monitoring_plan: 'ติดตามความดัน น้ำตาล ไขมัน และน้ำหนักอย่างสม่ำเสมอ<br>ทบทวนยาที่ใช้เป็นประจำกับแพทย์หรือเภสัชกร<br>ประเมินความเสี่ยงตามอายุและประวัติครอบครัวทุกปี',
+    monitoring_plan: 'ติดตามความดัน น้ำตาล ไขมัน และน้ำหนักอย่างสม่ำเสมอ<br>ทบทวนยาที่ใช้เป็นประจำกับทีมแพทย์และบุคลากรทางการแพทย์<br>ประเมินความเสี่ยงตามอายุและประวัติครอบครัวทุกปี',
   },
   risks: [
     { disease_name: 'Type 2 Diabetes (T2D)', multiplier: 3.48 },
@@ -617,6 +617,21 @@ function splitPgx(pgx){
 }
 function replaceFromMap(text, replacements){ return replacements.reduce((out, [from, to]) => out.replaceAll(from, to), text); }
 function hasThai(text){ return /[ก-๙]/.test(String(text || '')); }
+function neutralizeHealthcareRoleText(text){
+  return String(text || '')
+    .replaceAll('แพทย์ เภสัชกร หรือบุคลากรทางการแพทย์', 'ทีมแพทย์และบุคลากรทางการแพทย์')
+    .replaceAll('แพทย์หรือเภสัชกร', 'ทีมแพทย์และบุคลากรทางการแพทย์')
+    .replaceAll('เภสัชกร/แพทย์', 'ทีมแพทย์และบุคลากรทางการแพทย์')
+    .replaceAll('ปรึกษาแพทย์', 'ปรึกษาทีมแพทย์และบุคลากรทางการแพทย์')
+    .replaceAll('แจ้งแพทย์', 'แจ้งทีมแพทย์และบุคลากรทางการแพทย์')
+    .replaceAll('ดุลยพินิจแพทย์', 'ดุลยพินิจของทีมแพทย์และบุคลากรทางการแพทย์')
+    .replaceAll('pharmacist/doctor', 'the medical and healthcare team')
+    .replaceAll('doctor or pharmacist', 'the medical and healthcare team')
+    .replaceAll('doctor, pharmacist, or healthcare professional', 'the medical and healthcare team')
+    .replaceAll('your doctor', 'the medical and healthcare team')
+    .replaceAll('a doctor', 'the medical and healthcare team')
+    .replaceAll('your clinician', 'the medical and healthcare team');
+}
 function languageSafeText(raw, fallback=''){
   const text = String(raw || '').trim();
   if (!text) return fallback;
@@ -650,14 +665,14 @@ function pgxShortDescription(row){
 }
 const PLAN_FALLBACK_EN = {
   ex: 'Follow a moderate exercise plan and increase intensity gradually as tolerated.',
-  diet: 'Follow the recommended Mediterranean/DASH-style diet and review individual restrictions with your clinician.',
-  mon: 'Continue regular monitoring and age-appropriate screening as advised by your clinician.'
+  diet: 'Follow the recommended Mediterranean/DASH-style diet and review individual restrictions with the medical and healthcare team.',
+  mon: 'Continue regular monitoring and age-appropriate screening as advised by the medical and healthcare team.'
 };
 function localizePlanLine(line, kind){
   let text = String(line || '').trim();
   if (!text) return text;
   if (currentLang === 'TH') {
-    return replaceFromMap(text, [
+    return neutralizeHealthcareRoleText(replaceFromMap(text, [
       ['cardio/endurance', 'คาร์ดิโอและความอึด'],
       ['cardio', 'คาร์ดิโอ'],
       ['resistance training', 'การฝึกแรงต้านหรือเวทเทรนนิ่ง'],
@@ -687,7 +702,7 @@ function localizePlanLine(line, kind){
       ['fasting lipid profile', 'ไขมันในเลือดขณะอดอาหาร'],
       ['fasting glucose/HbA1c', 'น้ำตาลในเลือดและ HbA1c'],
       ['liver/kidney function', 'การทำงานของตับและไต'],
-      ['ทบทวนยาโดยเภสัชกร/แพทย์พร้อม PGx', 'ทบทวนยากับแพทย์หรือเภสัชกรร่วมกับข้อมูล PGx'],
+      ['ทบทวนยาโดยเภสัชกร/แพทย์พร้อม PGx', 'ทบทวนยากับทีมแพทย์และบุคลากรทางการแพทย์ร่วมกับข้อมูล PGx'],
       ['Cardiometabolic/ASCVD', 'ความเสี่ยงหัวใจ หลอดเลือด และเมตาบอลิก'],
       ['ASCVD risk score', 'คะแนนประเมินความเสี่ยงโรคหัวใจและหลอดเลือด'],
       ['ECG ตามอายุ/อาการ', 'ตรวจคลื่นไฟฟ้าหัวใจตามอายุหรืออาการ'],
@@ -698,7 +713,7 @@ function localizePlanLine(line, kind){
       ['smoking/alcohol', 'บุหรี่และแอลกอฮอล์'],
       ['CBC/Hb typing/ferritin', 'ตรวจความสมบูรณ์เม็ดเลือด การแยกชนิดฮีโมโกลบิน และระดับเฟอร์ริติน'],
       ['ให้คำปรึกษาคู่ครอง/ครอบครัวถ้าจะมีบุตร', 'ปรึกษาคู่ครองหรือครอบครัวหากวางแผนมีบุตร']
-    ]);
+    ]));
   }
   const localized = replaceFromMap(text, [
     ['เน้นคาร์ดิโอแรงกระแทกต่ำ เช่น เดินเร็วหรือปั่นจักรยาน 30 นาที 5 วัน/สัปดาห์', 'Focus on low-impact cardio, such as brisk walking or cycling for 30 minutes, 5 days/week'],
@@ -708,7 +723,7 @@ function localizePlanLine(line, kind){
     ['เพิ่มผัก ผลไม้ โปรตีนไม่ติดมัน และธัญพืชไม่ขัดสี', 'Increase vegetables, fruit, lean protein, and whole grains'],
     ['ลดหวาน มัน เค็ม และอาหารแปรรูป', 'Reduce sugar, fat, salt, and processed foods'],
     ['ติดตามความดัน น้ำตาล ไขมัน และน้ำหนักอย่างสม่ำเสมอ', 'Monitor blood pressure, glucose, lipids, and weight regularly'],
-    ['ทบทวนยาที่ใช้เป็นประจำกับแพทย์หรือเภสัชกร', 'Review regular medicines with a doctor or pharmacist'],
+    ['ทบทวนยาที่ใช้เป็นประจำกับแพทย์หรือเภสัชกร', 'Review regular medicines with the medical and healthcare team'],
     ['ประเมินความเสี่ยงตามอายุและประวัติครอบครัวทุกปี', 'Review age- and family-history-based risks each year'],
     ['โปรแกรมสมดุล', 'Balanced programme'],
     ['เน้น cardio/endurance เป็นหลัก ร่วมกับเวทเทรนนิ่ง', 'Focus on cardio/endurance together with strength training'],
@@ -732,15 +747,16 @@ function localizePlanLine(line, kind){
     ['พบ thalassemia ใน WGS', 'Thalassemia flagged in WGS'],
     ['ตรวจ CBC/Hb typing/ferritin ก่อนเสริมธาตุเหล็ก', 'check CBC/Hb typing/ferritin before taking iron supplements'],
     ['พื้นฐานทุกปี', 'Annual baseline checks'],
-    ['ทบทวนยาโดยเภสัชกร/แพทย์พร้อม PGx', 'review medicines with a pharmacist/doctor together with PGx'],
+    ['ทบทวนยาโดยเภสัชกร/แพทย์พร้อม PGx', 'review medicines with the medical and healthcare team together with PGx'],
     ['พิจารณา ASCVD risk score, ECG ตามอายุ/อาการ', 'consider ASCVD risk scoring and ECG based on age/symptoms'],
     ['ประเมิน baseline cognition, sleep apnea/sleep quality, คุม BP/lipid/glucose และหลีกเลี่ยง smoking/alcohol', 'check baseline cognition and sleep quality, control BP/lipids/glucose, and avoid smoking/alcohol'],
     ['ทำ age-appropriate screening', 'perform age-appropriate screening'],
-    ['ตามดุลยพินิจแพทย์', 'as advised by your doctor'],
+    ['ตามดุลยพินิจแพทย์', 'as advised by the medical and healthcare team'],
     ['ให้คำปรึกษาคู่ครอง/ครอบครัวถ้าจะมีบุตร', 'seek partner/family counselling if planning a pregnancy']
   ]);
-  if (hasThai(localized)) return PLAN_FALLBACK_EN[kind] || 'Review this item with your clinician.';
-  return localized;
+  const safeLocalized = neutralizeHealthcareRoleText(localized);
+  if (hasThai(safeLocalized)) return PLAN_FALLBACK_EN[kind] || 'Review this item with the medical and healthcare team.';
+  return safeLocalized;
 }
 
 function setLang(lang){
