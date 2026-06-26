@@ -1032,9 +1032,9 @@ function render(){
   </div>`;
 
   const pgxSections = [
-    { key: 'ae', label: t('ae'), rows: pgxGroups.ae, style: 'rgba(248,113,113,.1)', border: 'rgba(248,113,113,.3)', text: '#fecaca' },
-    { key: 'eff', label: t('eff'), rows: pgxGroups.eff, style: 'rgba(251,191,36,.1)', border: 'rgba(251,191,36,.3)', text: '#fde68a' },
-    { key: 'dose', label: t('dose'), rows: pgxGroups.dose, style: 'rgba(56,189,248,.1)', border: 'rgba(56,189,248,.3)', text: '#bae6fd' }
+    { key: 'ae', label: t('ae'), rows: pgxGroups.ae, style: 'rgba(248,113,113,.1)', border: 'rgba(248,113,113,.3)', text: 'var(--red)' },
+    { key: 'eff', label: t('eff'), rows: pgxGroups.eff, style: 'rgba(251,191,36,.1)', border: 'rgba(251,191,36,.3)', text: 'var(--amber)' },
+    { key: 'dose', label: t('dose'), rows: pgxGroups.dose, style: 'rgba(56,189,248,.1)', border: 'rgba(56,189,248,.3)', text: 'var(--blue)' }
   ];
   const pgxGroupHtml = pgxSections
     .filter(section => section.rows.length)
