@@ -215,6 +215,10 @@
       background:rgba(255,255,255,.03);
       border:1px solid rgba(255,255,255,.06);
     }
+    .access-item.primary-access{
+      background:linear-gradient(135deg, rgba(20,184,166,.12), rgba(52,211,153,.06));
+      border-color:rgba(52,211,153,.24);
+    }
     .access-icon{
       width:48px;height:48px;border-radius:16px;
       display:flex;align-items:center;justify-content:center;
@@ -248,6 +252,11 @@
       background:rgba(255,255,255,.05);
       border:1px solid rgba(255,255,255,.08);
       width:fit-content;
+    }
+    .primary-access .access-link{
+      background:linear-gradient(135deg, rgba(20,184,166,.95), rgba(52,211,153,.95));
+      color:#031420;
+      border-color:transparent;
     }
     .access-link:hover{border-color:rgba(255,255,255,.18)}
     .feature-grid{
@@ -335,8 +344,8 @@
         <h1>Precision & Personalized Medicine สำหรับพระสงฆ์</h1>
         <p class="sub">ระบบสื่อสารข้อมูลสุขภาพเชิงป้องกันเฉพาะรายบุคคล สำหรับประกอบการดูแลตนเอง การประเมินแนวโน้มความเสี่ยง และการปรึกษาทีมแพทย์และบุคลากรทางการแพทย์ของโรงพยาบาลสงฆ์</p>
         <div class="hero-actions">
-          <a class="btn btn-primary" href="/admin/">เข้าสู่ระบบเจ้าหน้าที่</a>
-          <a class="btn btn-secondary" href="/patient/">เข้าสู่ระบบผู้เข้าร่วม</a>
+          <a class="btn btn-primary" href="/patient/">เข้าสู่ระบบผู้เข้าร่วม</a>
+          <a class="btn btn-secondary" href="/admin/">เข้าสู่ระบบเจ้าหน้าที่</a>
           <a class="btn btn-tertiary" href="/demo/patient/">ดูตัวอย่างรายงานผู้ป่วย</a>
         </div>
         <div class="tag-row">
@@ -353,20 +362,20 @@
         </div>
         <div class="panel-copy">สำหรับเจ้าหน้าที่และพระคุณเจ้าผู้เข้าร่วมโครงการ ข้อมูลจะแสดงตามสิทธิ์การเข้าใช้งานของแต่ละบุคคลเท่านั้น</div>
         <div class="access-list">
+          <div class="access-item primary-access">
+            <div class="access-icon">พส</div>
+            <div>
+              <div class="access-name">ระบบผู้เข้าร่วมโครงการ</div>
+              <div class="access-desc">สำหรับพระคุณเจ้าผู้เข้าร่วมโครงการ เข้าดูข้อมูลของตนเองด้วยหมายเลขผู้เข้าร่วมและรหัสผ่าน</div>
+              <a class="access-link" href="/patient/">เข้าสู่รายงานส่วนบุคคล</a>
+            </div>
+          </div>
           <div class="access-item">
             <div class="access-icon">จนท.</div>
             <div>
               <div class="access-name">ระบบเจ้าหน้าที่</div>
               <div class="access-desc">สำหรับจัดการข้อมูลผู้เข้าร่วมโครงการ รหัสผ่าน และลิงก์เข้าสู่รายงานรายบุคคล</div>
               <a class="access-link" href="/admin/">เข้าสู่ระบบเจ้าหน้าที่</a>
-            </div>
-          </div>
-          <div class="access-item">
-            <div class="access-icon">พส</div>
-            <div>
-              <div class="access-name">ระบบผู้เข้าร่วมโครงการ</div>
-              <div class="access-desc">สำหรับพระคุณเจ้าผู้เข้าร่วมโครงการ เข้าดูข้อมูลของตนเองด้วยหมายเลขผู้เข้าร่วมและรหัสผ่าน</div>
-              <a class="access-link" href="/patient/">เข้าสู่รายงานส่วนบุคคล</a>
             </div>
           </div>
           <div class="access-item">
