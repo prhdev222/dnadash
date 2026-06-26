@@ -19,6 +19,7 @@ export async function onRequestGet(context) {
     `SELECT p.participant_no,
             CASE WHEN pa.participant_no IS NULL THEN 0 ELSE 1 END AS has_access,
             COALESCE(pa.enabled, 0) AS enabled,
+            COALESCE(pa.password_plain, '') AS password_plain,
             pa.updated_at
      FROM patients p
      LEFT JOIN patient_portal_access pa ON pa.participant_no = p.participant_no
@@ -86,13 +87,14 @@ export async function onRequestPost(context) {
 
   const sql = existingAccess.rows.length
     ? `UPDATE patient_portal_access
-       SET password_hash = ?, enabled = ?, updated_at = datetime('now')
+       SET password_hash = ?, password_plain = ?, enabled = ?, updated_at = datetime('now')
        WHERE participant_no = ?`
-    : `INSERT INTO patient_portal_access (password_hash, enabled, updated_at, participant_no)
-       VALUES (?, ?, datetime('now'), ?)`;
+    : `INSERT INTO patient_portal_access (password_hash, password_plain, enabled, updated_at, participant_no)
+       VALUES (?, ?, ?, datetime('now'), ?)`;
 
   const result = await tursoExecute(context, sql, [
     { type: "text", value: passwordHash },
+    { type: "text", value: password },
     { type: "integer", value: enabled },
     { type: "integer", value: participantNo },
   ]);

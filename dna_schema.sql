@@ -91,6 +91,7 @@ CREATE TABLE IF NOT EXISTS portal_sessions (
 CREATE TABLE IF NOT EXISTS patient_portal_access (
   participant_no INTEGER PRIMARY KEY,
   password_hash TEXT NOT NULL,
+  password_plain TEXT,
   enabled INTEGER NOT NULL DEFAULT 1,
   updated_at TEXT DEFAULT (datetime('now')),
   FOREIGN KEY (participant_no) REFERENCES patients(participant_no) ON DELETE CASCADE

@@ -175,7 +175,14 @@ var(--bg)}
 .auth-actions{display:flex;gap:10px;align-items:center;margin-top:16px;flex-wrap:wrap}
 .qr-box{display:grid;gap:12px;justify-items:center;text-align:center}
 .qr-box img{width:220px;height:220px;border-radius:12px;background:#fff;padding:10px}
+.qr-box a{display:inline-block}
 .link-box{display:block;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg3);color:var(--blue);text-decoration:none;word-break:break-all;font-size:12px}
+.credential-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border:1px solid rgba(56,189,248,.25);border-radius:999px;background:rgba(56,189,248,.1);color:#bae6fd;font-weight:800;font-family:'DM Mono',monospace;font-size:12px}
+.password-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border:1px solid rgba(52,211,153,.25);border-radius:999px;background:rgba(52,211,153,.1);color:#a7f3d0;font-weight:800;font-family:'DM Mono',monospace;font-size:12px}
+.qr-tag{display:inline-grid;justify-items:center;gap:4px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:7px;color:var(--text);cursor:pointer;font-family:inherit}
+.qr-tag:hover{border-color:rgba(56,189,248,.45);background:rgba(56,189,248,.08)}
+.qr-tag img{width:58px;height:58px;border-radius:6px;background:#fff;padding:4px}
+.qr-tag span{font-size:10px;font-weight:800;color:#bae6fd}
 @media(max-width:980px){
   .layout{flex-direction:column;height:auto}
   .sidebar{width:100%;min-width:0;border-right:none;border-bottom:1px solid var(--border);padding:10px 0}
@@ -345,6 +352,15 @@ let DB = {patients:[],risks:[],pgx:[],cancer:[],nutrition:[],food:[],access:[],p
 let currentPage = 'overview';
 let modalSaveCallback = null;
 let currentAdmin = '';
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
 
 // ─── SERVER API ────────────────────────────────────────────
 async function apiFetch(url, options={}) {
@@ -1055,20 +1071,26 @@ function renderFood(filterPno) {
 }
 
 function renderPortalAccess() {
+  const qrUrlForPortal = (portalUrl, size = 180) =>
+    `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(portalUrl)}`;
   const rows = DB.patients.map(patient => {
     const access = DB.access.find(item => Number(item.participant_no) === Number(patient.participant_no));
+    const portalUrl = access?.portal_url || `${location.origin}/patient/?participant=${patient.participant_no}`;
     return {
       participant_no: patient.participant_no,
+      username: String(patient.participant_no),
       has_access: access ? Number(access.has_access) === 1 : false,
       enabled: access ? Number(access.enabled) === 1 : false,
+      password_plain: access?.password_plain || '',
       updated_at: access?.updated_at || '',
-      portal_url: access?.portal_url || `${location.origin}/patient/?participant=${patient.participant_no}`
+      portal_url: portalUrl,
+      qr_url: qrUrlForPortal(portalUrl, 180)
     };
   });
 
   return `
 <div class="page-title">🔐 Patient Portal Access</div>
-<div class="page-sub">ตั้งรหัสผ่านให้ผู้ป่วยแต่ละคน และสร้าง QR code สำหรับหน้า patient portal</div>
+<div class="page-sub">ตั้งรหัสผ่านให้ผู้ป่วยแต่ละคน และสร้าง QR code สำหรับให้สแกนเข้าหน้า patient portal</div>
 <div class="tbl-wrap">
   <div class="tbl-header">
     <div class="tbl-title">🔐 Portal Credentials (${rows.length})</div>
@@ -1077,13 +1099,20 @@ function renderPortalAccess() {
     </div>
   </div>
   <table id="portal-tbl">
-    <tr><th>Participant</th><th>Status</th><th>Updated</th><th>Portal Link</th><th>Actions</th></tr>
+    <tr><th>Participant</th><th>Username</th><th>Password</th><th>Status</th><th>QR Code</th><th>Updated</th><th>Actions</th></tr>
     ${rows.map(row => `
       <tr>
         <td style="font-weight:700;color:var(--purple)">P${row.participant_no}</td>
+        <td><span class="credential-pill">${row.username}</span></td>
+        <td>${row.password_plain ? `<span class="password-pill">${escapeHtml(row.password_plain)}</span>` : '<span style="color:var(--dim)">—</span>'}</td>
         <td>${row.has_access ? `<span class="badge ${row.enabled ? 'badge-auto' : 'badge-exp'}">${row.enabled ? 'Ready' : 'Disabled'}</span>` : '<span class="badge badge-exp">Not set</span>'}</td>
+        <td>
+          <button class="qr-tag" onclick="showPortalQr(${row.participant_no})" title="Show QR code for P${row.participant_no}">
+            <img src="${escapeHtml(row.qr_url)}" alt="QR code for P${row.participant_no}">
+            <span>Scan</span>
+          </button>
+        </td>
         <td style="font-size:11px;color:var(--muted)">${row.updated_at || '—'}</td>
-        <td style="max-width:260px"><a href="${row.portal_url}" target="_blank" class="link-box">${row.portal_url}</a></td>
         <td style="white-space:nowrap">
           <button class="td-edit" onclick="openPortalPasswordModal(${row.participant_no})">${row.has_access ? '🔁 Reset Password' : '🔐 Set Password'}</button>
           <button class="td-edit" onclick="showPortalQr(${row.participant_no})">📱 QR</button>
@@ -1457,18 +1486,24 @@ function showAddFood() {
 }
 
 function openPortalPasswordModal(participantNo) {
+  const row = DB.access.find(item => Number(item.participant_no) === Number(participantNo));
+  const currentPassword = row?.password_plain || '';
   document.getElementById('modal-title').textContent = `Patient Portal Password — P${participantNo}`;
   document.getElementById('modal-foot').style.display = 'flex';
   document.getElementById('modal-body').innerHTML = `
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+  <span class="credential-pill">Username: ${participantNo}</span>
+  ${currentPassword ? `<span class="password-pill">Password: ${escapeHtml(currentPassword)}</span>` : '<span class="badge badge-exp">No saved password</span>'}
+</div>
 <div class="form-group" style="margin-bottom:10px">
   <label class="form-label">Portal Password</label>
-  <input class="form-control" id="portal-password" type="password" placeholder="At least 6 characters">
+  <input class="form-control" id="portal-password" type="text" value="${escapeHtml(currentPassword)}" placeholder="At least 6 characters">
 </div>
 <div class="form-group">
   <label class="form-label">Confirm Password</label>
-  <input class="form-control" id="portal-password-confirm" type="password" placeholder="Repeat password">
+  <input class="form-control" id="portal-password-confirm" type="text" value="${escapeHtml(currentPassword)}" placeholder="Repeat password">
 </div>
-<div style="margin-top:10px;font-size:11px;color:var(--muted)">QR code will contain the portal link only. Password is not embedded in the QR.</div>`;
+<div style="margin-top:10px;font-size:11px;color:var(--muted)">QR code opens the patient portal with this participant number. The patient uses the password shown here to sign in.</div>`;
   modalSaveCallback = async () => {
     const password = document.getElementById('portal-password').value;
     const confirm = document.getElementById('portal-password-confirm').value;
@@ -1499,13 +1534,18 @@ function showPortalQr(participantNo) {
   const row = DB.access.find(item => Number(item.participant_no) === Number(participantNo));
   const portalUrl = row?.portal_url || `${location.origin}/patient/?participant=${participantNo}`;
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(portalUrl)}`;
+  const password = row?.password_plain || '';
   document.getElementById('modal-title').textContent = `Patient Portal QR — P${participantNo}`;
   document.getElementById('modal-foot').style.display = 'none';
   document.getElementById('modal-body').innerHTML = `
 <div class="qr-box">
-  <img src="${qrUrl}" alt="QR code for patient portal">
-  <div style="font-size:12px;color:var(--muted)">This QR sends the patient to their portal page with the participant number in the URL.</div>
-  <a class="link-box" href="${portalUrl}" target="_blank">${portalUrl}</a>
+  <a href="${escapeHtml(portalUrl)}" target="_blank"><img src="${escapeHtml(qrUrl)}" alt="QR code for patient portal"></a>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+    <span class="credential-pill">Username: ${participantNo}</span>
+    ${password ? `<span class="password-pill">Password: ${escapeHtml(password)}</span>` : '<span class="badge badge-exp">Password not set</span>'}
+  </div>
+  <div style="font-size:12px;color:var(--muted)">สแกน QR เพื่อเปิดหน้า patient portal ระบบจะกรอกหมายเลขผู้เข้าร่วมให้ แล้วใช้ password ด้านบนเข้าสู่ระบบ</div>
+  <a class="link-box" href="${escapeHtml(portalUrl)}" target="_blank">${escapeHtml(portalUrl)}</a>
 </div>`;
   document.getElementById('modal').style.display = 'flex';
 }
