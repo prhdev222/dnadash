@@ -12,18 +12,37 @@
   --text:#e2e8f0;--muted:rgba(255,255,255,0.45);--dim:rgba(255,255,255,0.25);
   --purple:#a78bfa;--blue:#38bdf8;--green:#34d399;--amber:#fbbf24;
   --red:#f87171;--orange:#fb923c;
+  --topbar-bg:rgba(8,13,24,0.95);--control-bg:rgba(255,255,255,0.04);--control-active:rgba(167,139,250,0.2);
+  --strong:#f1f5f9;--soft:rgba(255,255,255,.68);--hero-panel:linear-gradient(135deg,rgba(167,139,250,.1),rgba(56,189,248,.06));
+  --hero-border:rgba(167,139,250,.22);--track:rgba(255,255,255,.07);--glow:rgba(167,139,250,.06);
 }
 body{background:var(--bg);color:var(--text);font-family:'Sarabun',system-ui,'Noto Sans Thai',sans-serif;min-height:100vh;font-size:15px;line-height:1.6}
+body.theme-light{
+  --bg:#f6f8fb;--bg2:#ffffff;--border:rgba(15,23,42,.11);--text:#172033;--muted:#64748b;--dim:#8a94a6;
+  --purple:#7c3aed;--blue:#0284c7;--green:#059669;--amber:#b45309;--red:#dc2626;--orange:#ea580c;
+  --topbar-bg:rgba(248,250,252,.94);--control-bg:rgba(15,23,42,.045);--control-active:rgba(14,165,233,.12);
+  --strong:#0f172a;--soft:#475569;--hero-panel:linear-gradient(135deg,rgba(14,165,233,.12),rgba(124,58,237,.06));
+  --hero-border:rgba(14,165,233,.2);--track:rgba(15,23,42,.1);--glow:rgba(14,165,233,.05);
+  --cat-autoimmune:#7c3aed;--cat-neuro:#047857;--cat-vascular:#0369a1;--cat-mental:#be185d;--cat-cancer:#dc2626;--cat-metabolic:#c2410c;--cat-other:#475569;
+}
+body[data-font="sm"]{font-size:14px}
+body[data-font="lg"]{font-size:17px}
 .disclaimer{background:rgba(56,189,248,0.07);border-bottom:0.5px solid rgba(56,189,248,0.2);padding:9px 20px;text-align:center;font-size:11px;color:rgba(56,189,248,0.8);line-height:1.5}
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:0.5px solid var(--border);flex-wrap:wrap;gap:10px;position:sticky;top:0;background:rgba(8,13,24,0.95);backdrop-filter:blur(12px);z-index:100}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:0.5px solid var(--border);flex-wrap:wrap;gap:10px;position:sticky;top:0;background:var(--topbar-bg);backdrop-filter:blur(12px);z-index:100}
 .logo{display:flex;align-items:center;gap:10px}
 .logo-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#a78bfa,#38bdf8);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
-.logo-text{font-size:14px;font-weight:700;letter-spacing:.04em;color:#fff}
+.logo-text{font-size:14px;font-weight:700;letter-spacing:.04em;color:var(--strong)}
 .logo-sub{font-size:10px;color:var(--dim);letter-spacing:.06em}
 .controls{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
-.lang-wrap{display:flex;background:rgba(255,255,255,0.04);border:0.5px solid var(--border);border-radius:20px;overflow:hidden}
+.lang-wrap,.font-wrap{display:flex;background:var(--control-bg);border:0.5px solid var(--border);border-radius:20px;overflow:hidden}
 .lang-btn{padding:7px 16px;border:none;background:transparent;cursor:pointer;font-size:12px;font-weight:700;color:var(--muted);transition:all .2s;font-family:inherit;white-space:nowrap}
-.lang-btn.active{background:rgba(167,139,250,0.2);color:var(--purple)}
+.lang-btn.active{background:var(--control-active);color:var(--purple)}
+.view-controls{display:flex;gap:6px;align-items:center}
+.theme-btn,.font-btn{border:none;background:transparent;color:var(--muted);font-family:inherit;font-weight:800;cursor:pointer;transition:all .2s}
+.theme-btn{width:34px;height:34px;border-radius:50%;background:var(--control-bg);border:0.5px solid var(--border);font-size:15px}
+.theme-btn.active,.font-btn.active{background:var(--control-active);color:var(--purple)}
+.font-btn{min-width:34px;padding:7px 10px;font-size:12px}
+.font-btn[data-size="lg"]{font-size:14px}
 .btn{background:rgba(255,255,255,0.06);border:0.5px solid var(--border);border-radius:8px;color:var(--text);padding:8px 12px;font-size:13px;font-family:inherit;cursor:pointer;text-decoration:none}
 .btn:hover{border-color:rgba(255,255,255,.2)}
 .btn-print{background:rgba(56,189,248,.14);border-color:rgba(56,189,248,.28);color:#bae6fd}
@@ -41,12 +60,12 @@ body{background:var(--bg);color:var(--text);font-family:'Sarabun',system-ui,'Not
 .empty-hint{font-size:12px;color:var(--dim)}
 .hero-top{text-align:center;padding:20px 0 12px}
 .hero-greeting{font-size:11px;color:var(--dim);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
-.hero-id{font-size:26px;font-weight:800;color:#f1f5f9;margin-bottom:3px}
+.hero-id{font-size:26px;font-weight:800;color:var(--strong);margin-bottom:3px}
 .hero-sub{font-size:12px;color:var(--dim)}
-.hero-risk{background:linear-gradient(135deg,rgba(167,139,250,.1),rgba(56,189,248,.06));border:0.5px solid rgba(167,139,250,.22);border-radius:18px;padding:20px 22px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.hero-risk{background:var(--hero-panel);border:0.5px solid var(--hero-border);border-radius:18px;padding:20px 22px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
 .risk-label{font-size:10px;color:var(--dim);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px}
 .risk-big{font-family:'DM Mono',monospace;font-size:46px;font-weight:800;line-height:1;letter-spacing:-.02em}
-.risk-name{font-size:15px;font-weight:500;color:rgba(255,255,255,.7);margin-top:5px}
+.risk-name{font-size:15px;font-weight:500;color:var(--soft);margin-top:5px}
 .apoe-label{font-size:10px;color:var(--dim);margin-bottom:5px;text-align:right}
 .apoe-badge{background:rgba(167,139,250,.15);border:0.5px solid rgba(167,139,250,.4);border-radius:8px;padding:7px 16px;font-size:15px;font-weight:800;color:var(--purple);font-family:'DM Mono',monospace;display:inline-block}
 .carrier{font-size:11px;color:var(--muted);margin-top:5px;text-align:right}
@@ -59,7 +78,7 @@ body{background:var(--bg);color:var(--text);font-family:'Sarabun',system-ui,'Not
 .card{background:var(--bg2);border:0.5px solid var(--border);border-radius:18px;padding:20px 22px;margin-bottom:14px}
 .sh{display:flex;align-items:center;gap:8px;margin-bottom:6px}
 .sh-icon{font-size:18px}
-.sh-title{font-size:16px;font-weight:700;color:#f1f5f9}
+.sh-title{font-size:16px;font-weight:700;color:var(--strong)}
 .sh-sub{font-size:11px;color:var(--dim);padding-left:26px;margin-bottom:12px}
 .risk-item{border-radius:12px;border:0.5px solid var(--border);background:rgba(255,255,255,.02);margin-bottom:4px;cursor:pointer;transition:border-color .2s,background .2s}
 .risk-item:hover{border-color:rgba(255,255,255,.18)}
@@ -68,10 +87,10 @@ body{background:var(--bg);color:var(--text);font-family:'Sarabun',system-ui,'Not
 .ri-num{font-size:11px;color:var(--dim);min-width:18px;font-family:'DM Mono',monospace}
 .ri-body{flex:1;min-width:0}
 .ri-name-row{display:flex;align-items:center;gap:7px;margin-bottom:6px;flex-wrap:wrap}
-.ri-name{font-size:14px;font-weight:600;color:#f1f5f9}
+.ri-name{font-size:14px;font-weight:600;color:var(--strong)}
 .cat-badge{font-size:9px;padding:2px 7px;border-radius:20px;font-weight:600;white-space:nowrap}
 .bar-row{display:flex;align-items:center;gap:8px}
-.bar-track{flex:1;height:5px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden}
+.bar-track{flex:1;height:5px;background:var(--track);border-radius:3px;overflow:hidden}
 .bar-fill{height:100%;border-radius:3px;transition:width .7s cubic-bezier(.4,0,.2,1)}
 .ri-mult{font-size:12px;font-weight:700;font-family:'DM Mono',monospace;min-width:44px;text-align:right}
 .ri-chevron{font-size:10px;color:var(--dim);margin-left:4px}
@@ -83,7 +102,7 @@ body{background:var(--bg);color:var(--text);font-family:'Sarabun',system-ui,'Not
 .wgs-title{font-size:12px;font-weight:600;margin-bottom:8px}
 .cancer-tags{display:flex;flex-wrap:wrap;gap:6px}
 .c-tag{background:rgba(248,113,113,.12);border-radius:8px;padding:6px 12px}
-.c-name{font-size:13px;color:#f1f5f9;font-weight:600}
+.c-name{font-size:13px;color:var(--strong);font-weight:600}
 .c-mult{font-size:11px;color:var(--red);font-family:'DM Mono',monospace}
 .nutr-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
 .nutr-card{background:rgba(52,211,153,.07);border:0.5px solid rgba(52,211,153,.2);border-radius:12px;padding:12px 14px}
@@ -98,7 +117,7 @@ body{background:var(--bg);color:var(--text);font-family:'Sarabun',system-ui,'Not
 .plan-sum{border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:13px;line-height:1.6}
 .plan-item{display:flex;gap:10px;align-items:flex-start;margin-bottom:9px}
 .plan-dot{width:5px;height:5px;border-radius:50%;margin-top:9px;flex-shrink:0}
-.plan-text{font-size:13px;color:rgba(255,255,255,.68);line-height:1.7}
+.plan-text{font-size:13px;color:var(--soft);line-height:1.7}
 .pgx-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
 .pgx-card{border-radius:12px;padding:12px;text-align:center}
 .pgx-num{font-size:24px;font-weight:800;font-family:'DM Mono',monospace}
@@ -111,11 +130,11 @@ body{background:var(--bg);color:var(--text);font-family:'Sarabun',system-ui,'Not
 .drug-groups{display:grid;gap:10px}
 .drug-group{border:0.5px solid var(--border);border-radius:12px;padding:12px 14px;background:rgba(255,255,255,.025)}
 .drug-group-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:8px}
-.drug-group-title{font-size:13px;font-weight:700;color:#f1f5f9}
+.drug-group-title{font-size:13px;font-weight:700;color:var(--strong)}
 .drug-group-count{font-size:11px;color:var(--muted)}
 .drug-group-list{display:grid;gap:8px}
 .drug-item{border-radius:10px;padding:10px 12px;background:rgba(255,255,255,.03);border:0.5px solid rgba(255,255,255,.05)}
-.drug-item-name{font-size:13px;font-weight:700;color:#f8fafc;margin-bottom:4px}
+.drug-item-name{font-size:13px;font-weight:700;color:var(--strong);margin-bottom:4px}
 .drug-toggle{margin-top:8px}
 .link-btn{border:none;background:transparent;color:var(--blue);font:inherit;font-size:12px;font-weight:700;cursor:pointer;padding:0}
 .link-btn:hover{text-decoration:underline}
@@ -128,7 +147,28 @@ body{background:var(--bg);color:var(--text);font-family:'Sarabun',system-ui,'Not
 .footer-txt{font-size:10px;color:rgba(255,255,255,.2);margin-bottom:8px}
 .fbadges{display:flex;justify-content:center;gap:7px;flex-wrap:wrap}
 .fbadge{border-radius:20px;padding:3px 12px;font-size:10px;font-weight:600}
-.glow{position:fixed;top:-300px;left:50%;transform:translateX(-50%);width:700px;height:600px;background:radial-gradient(ellipse,rgba(167,139,250,.06) 0%,transparent 65%);pointer-events:none;z-index:0}
+.glow{position:fixed;top:-300px;left:50%;transform:translateX(-50%);width:700px;height:600px;background:radial-gradient(ellipse,var(--glow) 0%,transparent 65%);pointer-events:none;z-index:0}
+body.theme-light .card,body.theme-light .login-card,body.theme-light .stat-card,body.theme-light .risk-item,body.theme-light .drug-group,body.theme-light .drug-item{background:#fff}
+body.theme-light .input,body.theme-light .btn{background:rgba(15,23,42,.045)}
+body.theme-light .btn-print{background:rgba(2,132,199,.1);border-color:rgba(2,132,199,.25);color:var(--blue)}
+body.theme-light .risk-item.open{background:rgba(14,165,233,.08);border-color:rgba(14,165,233,.28)}
+body.theme-light .risk-item:hover{border-color:rgba(15,23,42,.2)}
+body.theme-light .nutr-card{background:rgba(16,185,129,.08)}
+body.theme-light .nutr-name{color:var(--green)}
+body.theme-light .drug-tag{color:var(--amber)}
+body.theme-light .c-tag{background:rgba(248,113,113,.12)}
+body.theme-light .food-tag{background:rgba(251,146,60,.11);color:#c2410c}
+body.theme-light .exp-tag{background:rgba(100,116,139,.09);color:#334155}
+body.theme-light .wgs-muted-title{color:#475569 !important}
+body[data-font="sm"] .sh-title{font-size:15px}
+body[data-font="sm"] .ri-name,body[data-font="sm"] .risk-name,body[data-font="sm"] .nutr-name,body[data-font="sm"] .c-name,body[data-font="sm"] .drug-item-name{font-size:13px}
+body[data-font="sm"] .sh-sub,body[data-font="sm"] .hero-sub,body[data-font="sm"] .ri-explain,body[data-font="sm"] .ri-advice,body[data-font="sm"] .plan-text,body[data-font="sm"] .plan-sum{font-size:12px}
+body[data-font="lg"] .sh-title{font-size:19px}
+body[data-font="lg"] .hero-id{font-size:30px}
+body[data-font="lg"] .risk-big{font-size:52px}
+body[data-font="lg"] .ri-name,body[data-font="lg"] .risk-name,body[data-font="lg"] .nutr-name,body[data-font="lg"] .c-name,body[data-font="lg"] .drug-item-name{font-size:16px}
+body[data-font="lg"] .sh-sub,body[data-font="lg"] .hero-sub,body[data-font="lg"] .ri-explain,body[data-font="lg"] .ri-advice,body[data-font="lg"] .plan-text,body[data-font="lg"] .plan-sum{font-size:15px}
+body[data-font="lg"] .food-tag,body[data-font="lg"] .exp-tag{font-size:14px}
 .wrap{position:relative;z-index:1}
 .print-only{display:none}
 .print-pgx{display:none}
@@ -142,7 +182,14 @@ body{background:var(--bg);color:var(--text);font-family:'Sarabun',system-ui,'Not
 @media(max-width:600px){
   body{font-size:14px}
   .topbar{padding:12px 14px;align-items:flex-start}
-  .controls{width:100%;justify-content:space-between}
+  .logo{width:100%}
+  .controls{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .lang-wrap,.view-controls{grid-column:1/-1}
+  .lang-btn,.font-btn{flex:1}
+  .view-controls{display:grid;grid-template-columns:42px 1fr;align-items:stretch}
+  .font-wrap{display:flex}
+  .theme-btn{width:42px;height:42px}
+  .controls>.btn{width:100%;text-align:center}
   .main{padding:14px 12px 28px}
   .login-card,.card{padding:16px}
   .login-grid{grid-template-columns:1fr}
@@ -233,6 +280,14 @@ body{background:var(--bg);color:var(--text);font-family:'Sarabun',system-ui,'Not
     <div class="lang-wrap">
       <button class="lang-btn active" id="btnTH" onclick="setLang('TH')">🇹🇭 TH</button>
       <button class="lang-btn" id="btnEN" onclick="setLang('EN')">🇬🇧 EN</button>
+    </div>
+    <div class="view-controls" aria-label="Display settings">
+      <button class="theme-btn" id="theme-toggle" onclick="toggleTheme()" title="Light / Dark mode" aria-label="Toggle light or dark mode">☾</button>
+      <div class="font-wrap" aria-label="Text size">
+        <button class="font-btn" id="font-sm" data-size="sm" onclick="setFontSize('sm')" title="Small text">A</button>
+        <button class="font-btn active" id="font-md" data-size="md" onclick="setFontSize('md')" title="Medium text">A</button>
+        <button class="font-btn" id="font-lg" data-size="lg" onclick="setFontSize('lg')" title="Large text">A</button>
+      </div>
     </div>
     <button class="btn btn-print" onclick="printPatient()" id="print-btn"></button>
     <button class="btn" onclick="patientLogout()" id="logout-btn"></button>
@@ -393,13 +448,13 @@ const EXP_EN = {
 };
 
 const CATS = {
-  autoimmune:{bg:"rgba(167,139,250,.14)",border:"rgba(167,139,250,.35)",text:"#c4b5fd",th:"ภูมิคุ้มกัน",en:"Autoimmune"},
-  neuro:{bg:"rgba(52,211,153,.12)",border:"rgba(52,211,153,.3)",text:"#6ee7b7",th:"สมอง/ประสาท",en:"Neuro"},
-  vascular:{bg:"rgba(56,189,248,.12)",border:"rgba(56,189,248,.3)",text:"#7dd3fc",th:"หัวใจ/หลอดเลือด",en:"Vascular"},
-  mental:{bg:"rgba(244,114,182,.12)",border:"rgba(244,114,182,.3)",text:"#f9a8d4",th:"สุขภาพจิต",en:"Mental"},
-  cancer:{bg:"rgba(248,113,113,.12)",border:"rgba(248,113,113,.3)",text:"#fca5a5",th:"มะเร็ง",en:"Cancer"},
-  metabolic:{bg:"rgba(251,146,60,.14)",border:"rgba(251,146,60,.35)",text:"#fdba74",th:"เมตาบอลิก",en:"Metabolic"},
-  other:{bg:"rgba(148,163,184,.1)",border:"rgba(148,163,184,.2)",text:"#cbd5e1",th:"อื่น ๆ",en:"Other"}
+  autoimmune:{bg:"rgba(167,139,250,.14)",border:"rgba(167,139,250,.35)",text:"var(--cat-autoimmune,#c4b5fd)",th:"ภูมิคุ้มกัน",en:"Autoimmune"},
+  neuro:{bg:"rgba(52,211,153,.12)",border:"rgba(52,211,153,.3)",text:"var(--cat-neuro,#6ee7b7)",th:"สมอง/ประสาท",en:"Neuro"},
+  vascular:{bg:"rgba(56,189,248,.12)",border:"rgba(56,189,248,.3)",text:"var(--cat-vascular,#7dd3fc)",th:"หัวใจ/หลอดเลือด",en:"Vascular"},
+  mental:{bg:"rgba(244,114,182,.12)",border:"rgba(244,114,182,.3)",text:"var(--cat-mental,#f9a8d4)",th:"สุขภาพจิต",en:"Mental"},
+  cancer:{bg:"rgba(248,113,113,.12)",border:"rgba(248,113,113,.3)",text:"var(--cat-cancer,#fca5a5)",th:"มะเร็ง",en:"Cancer"},
+  metabolic:{bg:"rgba(251,146,60,.14)",border:"rgba(251,146,60,.35)",text:"var(--cat-metabolic,#fdba74)",th:"เมตาบอลิก",en:"Metabolic"},
+  other:{bg:"rgba(148,163,184,.1)",border:"rgba(148,163,184,.2)",text:"var(--cat-other,#cbd5e1)",th:"อื่น ๆ",en:"Other"}
 };
 
 const TEXT = {
@@ -562,8 +617,40 @@ let currentData = null;
 let openR = null;
 let activeTab = 'ex';
 let expandedDrugGroups = { ae: false, eff: false, dose: false };
+let currentTheme = 'dark';
+let currentFontSize = 'md';
 
 function t(key){ return TEXT[currentLang][key] || key; }
+function storageGet(key, fallback){
+  try { return localStorage.getItem(key) || fallback; } catch (_) { return fallback; }
+}
+function storageSet(key, value){
+  try { localStorage.setItem(key, value); } catch (_) {}
+}
+function setTheme(theme, persist=true){
+  currentTheme = theme === 'light' ? 'light' : 'dark';
+  document.body.classList.toggle('theme-light', currentTheme === 'light');
+  const btn = document.getElementById('theme-toggle');
+  if (btn) {
+    btn.textContent = currentTheme === 'light' ? '☀' : '☾';
+    btn.classList.toggle('active', currentTheme === 'light');
+  }
+  if (persist) storageSet('dnaDashTheme', currentTheme);
+}
+function toggleTheme(){ setTheme(currentTheme === 'light' ? 'dark' : 'light'); }
+function setFontSize(size, persist=true){
+  currentFontSize = ['sm','md','lg'].includes(size) ? size : 'md';
+  document.body.dataset.font = currentFontSize;
+  ['sm','md','lg'].forEach(item => {
+    const btn = document.getElementById(`font-${item}`);
+    if (btn) btn.classList.toggle('active', item === currentFontSize);
+  });
+  if (persist) storageSet('dnaDashFontSize', currentFontSize);
+}
+function initDisplayPrefs(){
+  setTheme(storageGet('dnaDashTheme', 'dark'), false);
+  setFontSize(storageGet('dnaDashFontSize', 'md'), false);
+}
 function dn(name){
   if (currentLang === 'TH' && DTH[name]) return `${DTH[name]} (${name})`;
   return name;
@@ -787,7 +874,7 @@ function render(){
   let h = `<div class="hero-top">
     <div class="hero-greeting">${t('greeting')}</div>
     <div class="hero-id">${t('participant')} ${data.participantNo}</div>
-    ${patientLabel ? `<div class="hero-sub" style="color:#cbd5e1;font-weight:700">${patientLabel}</div>` : ""}
+    ${patientLabel ? `<div class="hero-sub" style="color:var(--strong);font-weight:700">${patientLabel}</div>` : ""}
     ${patientNote ? `<div class="hero-sub">${patientNote}</div>` : ""}
     <div class="hero-sub">${t('researchOnly')}</div>
   </div>
@@ -891,18 +978,18 @@ function render(){
     <div class="sh"><span class="sh-icon">🔬</span><span class="sh-title">${t('wgs')}</span></div>
     <div class="sh-sub">${t('wgsSub')}</div>
     <div class="wgs-block" style="background:rgba(248,113,113,.07);border:0.5px solid rgba(248,113,113,.2)">
-      <div class="wgs-title" style="color:#fca5a5">🎗️ ${t('cancerFlags')}</div>
+      <div class="wgs-title" style="color:var(--red)">🎗️ ${t('cancerFlags')}</div>
       <div class="cancer-tags">${cancerH}</div>
       ${data.cancer.length?`<div style="font-size:11px;color:var(--muted);margin-top:8px">💬 ${t('cancerNote')}</div>`:""}
     </div>
     <div class="wgs-block" style="background:rgba(56,189,248,.07);border:0.5px solid rgba(56,189,248,.2)">
-      <div class="wgs-title" style="color:#7dd3fc">❤️ ${t('heartFlags')}</div>
+      <div class="wgs-title" style="color:var(--blue)">❤️ ${t('heartFlags')}</div>
       <div style="font-size:13px;color:var(--text)">${data.patient.wgs_heart || t('noHeart')}</div>
       ${data.patient.wgs_heart ? `<div class="gene-note">${findingSummary(data.patient.wgs_heart)}</div>` : ""}
     </div>
     ${data.patient.wgs_other ? `<div class="wgs-block" style="background:rgba(148,163,184,.07);border:0.5px solid rgba(148,163,184,.15)">
-      <div class="wgs-title" style="color:#cbd5e1">🧬 ${t('other')}</div>
-      <div style="font-size:13px;color:rgba(255,255,255,.6);line-height:1.6">${data.patient.wgs_other}</div>
+      <div class="wgs-title wgs-muted-title" style="color:#cbd5e1">🧬 ${t('other')}</div>
+      <div style="font-size:13px;color:var(--soft);line-height:1.6">${data.patient.wgs_other}</div>
       <div class="gene-note">${findingSummary(data.patient.wgs_other)}</div>
     </div>` : ""}
   </div>`;
@@ -933,7 +1020,7 @@ function render(){
     return `<div id="tp-${ti.key}" style="display:${activeTab===ti.key?"block":"none"}">
       <div class="plan-sum" style="background:${sumC};border:0.5px solid ${sumB}">
         <span style="font-weight:600;color:${ti.col}">📌 ${t('sum')}</span>
-        <span style="color:rgba(255,255,255,.7)">${ti.sum}</span>
+        <span style="color:var(--soft)">${ti.sum}</span>
       </div>
       ${mkItems(ti.items,ti.col)}
     </div>`;
@@ -1067,6 +1154,7 @@ async function loadPortalData() {
 }
 
 async function checkExistingSession() {
+  initDisplayPrefs();
   setStaticText();
   const participant = queryParam('participant');
   if (participant) document.getElementById('participant-no').value = participant;
