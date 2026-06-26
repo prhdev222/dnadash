@@ -652,28 +652,38 @@ function initDisplayPrefs(){
   setFontSize(storageGet('dnaDashFontSize', 'md'), false);
 }
 function dn(name){
-  if (currentLang === 'TH' && DTH[name]) return `${DTH[name]} (${name})`;
-  return name;
+  const text = String(name || '').trim();
+  if (currentLang === 'TH' && DTH[text]) return `${DTH[text]} (${text})`;
+  if (currentLang === 'EN' && hasThai(text)) return 'Risk item';
+  return text;
 }
 function rawDiseaseLabel(name){
   const text = String(name || '').trim();
   if (!text) return '';
-  return currentLang === 'TH' && DTH[text] ? `${DTH[text]} (${text})` : text;
+  if (currentLang === 'TH' && DTH[text]) return `${DTH[text]} (${text})`;
+  if (currentLang === 'EN' && hasThai(text)) return 'genetic finding';
+  return text;
 }
 function wn(name){
-  if (currentLang === 'TH' && WGS_TH[name]) return `${WGS_TH[name]} (${name})`;
-  return name;
+  const text = String(name || '').trim();
+  if (currentLang === 'TH' && WGS_TH[text]) return `${WGS_TH[text]} (${text})`;
+  if (currentLang === 'EN' && hasThai(text)) return 'Genomic finding';
+  return text;
 }
 function nn(name){
-  if (currentLang === 'TH' && NUTRIENT_TH[name]) return `${NUTRIENT_TH[name]} (${name})`;
-  return name;
+  const text = String(name || '').trim();
+  if (currentLang === 'TH' && NUTRIENT_TH[text]) return `${NUTRIENT_TH[text]} (${text})`;
+  if (currentLang === 'EN' && hasThai(text)) return 'Nutrient item';
+  return text;
 }
 function iname(name){
+  const text = String(name || '').trim();
   if (currentLang === 'TH') {
-    const translated = ITEM_TH[name] || FOOD_TH[name];
-    if (translated) return `${translated} (${name})`;
+    const translated = ITEM_TH[text] || FOOD_TH[text];
+    if (translated) return `${translated} (${text})`;
   }
-  return name;
+  if (currentLang === 'EN' && hasThai(text)) return 'Risk item';
+  return text;
 }
 function expl(name){ return currentLang === 'TH' ? (EXP_TH[name] || '') : (EXP_EN[name] || ''); }
 function apoeSummary(genotype){
@@ -684,6 +694,11 @@ function apoeSummary(genotype){
 function carrierSummary(raw){
   const text = String(raw || '').trim();
   if (!text) return t('noCarrier');
+  if (currentLang === 'EN' && hasThai(text)) {
+    if (/ไม่พบ|ไม่มี/.test(text)) return t('noCarrier');
+    if (/พาหะ/.test(text)) return `Carrier status noted. ${t('carrierNote')}`;
+    return `Genetic finding noted. ${t('wgsNote')}`;
+  }
   const [diseaseRaw] = text.split(':');
   const disease = String(diseaseRaw || '').trim() || text;
   const label = rawDiseaseLabel(disease);
@@ -699,6 +714,7 @@ function carrierSummary(raw){
 function findingSummary(raw){
   const text = String(raw || '').trim();
   if (!text) return t('noData');
+  if (currentLang === 'EN' && hasThai(text)) return `Genomic finding noted. ${t('wgsNote')}`;
   if (currentLang === 'TH') return `${text}. ${t('wgsNote')}`;
   return `${text}. ${t('wgsNote')}`;
 }
@@ -773,8 +789,41 @@ function splitPgx(pgx){
 function replaceFromMap(text, replacements){
   return replacements.reduce((out, [from, to]) => out.replaceAll(from, to), text);
 }
+function hasThai(text){ return /[ก-๙]/.test(String(text || '')); }
+function languageSafeText(raw, fallback=''){
+  const text = String(raw || '').trim();
+  if (!text) return fallback;
+  if (currentLang === 'EN' && hasThai(text)) return fallback;
+  return text;
+}
+function displayCarrierText(raw){
+  const text = String(raw || '').trim();
+  if (!text) return t('noCarrier');
+  if (currentLang === 'EN' && hasThai(text)) {
+    if (/ไม่พบ|ไม่มี/.test(text)) return t('noCarrier');
+    return 'Genetic finding noted';
+  }
+  return text;
+}
+function displayFindingText(raw, fallback){
+  const text = String(raw || '').trim();
+  if (!text) return fallback;
+  if (currentLang === 'EN' && hasThai(text)) return 'Genomic finding noted';
+  return text;
+}
+function pgxDrugName(row){
+  return languageSafeText(row.display_name, row.drug_name || '');
+}
+function pgxShortDescription(row){
+  return languageSafeText(row.short_description, '');
+}
+const PLAN_FALLBACK_EN = {
+  ex: 'Follow a moderate exercise plan and increase intensity gradually as tolerated.',
+  diet: 'Follow the recommended Mediterranean/DASH-style diet and review individual restrictions with your clinician.',
+  mon: 'Continue regular monitoring and age-appropriate screening as advised by your clinician.'
+};
 
-function localizePlanLine(line){
+function localizePlanLine(line, kind){
   let text = String(line || '').trim();
   if (!text) return text;
   if (currentLang === 'TH') {
@@ -826,7 +875,16 @@ function localizePlanLine(line){
       ['ให้คำปรึกษาคู่ครอง/ครอบครัวถ้าจะมีบุตร', 'ปรึกษาคู่ครองหรือครอบครัวหากวางแผนมีบุตร']
     ]);
   }
-  return replaceFromMap(text, [
+  const localized = replaceFromMap(text, [
+    ['เน้นคาร์ดิโอแรงกระแทกต่ำ เช่น เดินเร็วหรือปั่นจักรยาน 30 นาที 5 วัน/สัปดาห์', 'Focus on low-impact cardio, such as brisk walking or cycling for 30 minutes, 5 days/week'],
+    ['เสริมเวทเทรนนิ่งเบา ๆ 2 วัน/สัปดาห์', 'Add light strength training 2 days/week'],
+    ['วอร์มอัปก่อนออกกำลังและเพิ่มความหนักแบบค่อยเป็นค่อยไป', 'Warm up before exercise and increase intensity gradually'],
+    ['ใช้แนวทางอาหารแบบ Mediterranean/DASH', 'Use a Mediterranean/DASH-style eating pattern'],
+    ['เพิ่มผัก ผลไม้ โปรตีนไม่ติดมัน และธัญพืชไม่ขัดสี', 'Increase vegetables, fruit, lean protein, and whole grains'],
+    ['ลดหวาน มัน เค็ม และอาหารแปรรูป', 'Reduce sugar, fat, salt, and processed foods'],
+    ['ติดตามความดัน น้ำตาล ไขมัน และน้ำหนักอย่างสม่ำเสมอ', 'Monitor blood pressure, glucose, lipids, and weight regularly'],
+    ['ทบทวนยาที่ใช้เป็นประจำกับแพทย์หรือเภสัชกร', 'Review regular medicines with a doctor or pharmacist'],
+    ['ประเมินความเสี่ยงตามอายุและประวัติครอบครัวทุกปี', 'Review age- and family-history-based risks each year'],
     ['โปรแกรมสมดุล', 'Balanced programme'],
     ['เน้น cardio/endurance เป็นหลัก ร่วมกับเวทเทรนนิ่ง', 'Focus on cardio/endurance together with strength training'],
     ['ทำแบบผสม โดยเพิ่ม strength/power interval ได้ แต่ยังต้องมี cardio เพื่อป้องกัน NCD', 'Use a mixed routine, adding strength/power intervals while keeping cardio for non-communicable disease prevention'],
@@ -856,6 +914,8 @@ function localizePlanLine(line){
     ['ตามดุลยพินิจแพทย์', 'as advised by your doctor'],
     ['ให้คำปรึกษาคู่ครอง/ครอบครัวถ้าจะมีบุตร', 'seek partner/family counselling if planning a pregnancy']
   ]);
+  if (hasThai(localized)) return PLAN_FALLBACK_EN[kind] || 'Review this item with your clinician.';
+  return localized;
 }
 
 function render(){
@@ -868,8 +928,8 @@ function render(){
   const tc = mc(topRisk.mult || 0);
   const pgxGroups = splitPgx(data.pgx || []);
   const totalPgx = pgxGroups.ae.length + pgxGroups.eff.length + pgxGroups.dose.length;
-  const patientLabel = data.patient.display_name || '';
-  const patientNote = data.patient.portal_note || '';
+  const patientLabel = languageSafeText(data.patient.display_name, '');
+  const patientNote = languageSafeText(data.patient.portal_note, '');
 
   let h = `<div class="hero-top">
     <div class="hero-greeting">${t('greeting')}</div>
@@ -903,7 +963,10 @@ function render(){
           <div class="print-pgx-title" style="color:${group.color}">${group.label}</div>
           <div class="print-pgx-count">${group.rows.length} ${t('items')}</div>
           <div class="print-pgx-list">
-            ${group.rows.length ? group.rows.map(row => `<div class="print-pgx-item">${row.display_name || row.drug_name}${row.short_description ? ` - ${row.short_description}` : ''}</div>`).join('') : `<div class="print-pgx-item">${t('noData')}</div>`}
+            ${group.rows.length ? group.rows.map(row => {
+              const desc = pgxShortDescription(row);
+              return `<div class="print-pgx-item">${pgxDrugName(row)}${desc ? ` - ${desc}` : ''}</div>`;
+            }).join('') : `<div class="print-pgx-item">${t('noData')}</div>`}
           </div>
         </div>
       `).join('')}
@@ -921,7 +984,7 @@ function render(){
       ${patientLabel ? `<div class="gene-note">${patientLabel}</div>` : ""}
       ${patientNote ? `<div class="gene-note">${patientNote}</div>` : ""}
       <div class="gene-note">${apoeSummary(data.patient.apoe_genotype || 'ε3/ε3')}</div>
-      <div class="carrier">🧬 ${data.patient.genetic_diseases || t('noCarrier')}</div>
+      <div class="carrier">🧬 ${displayCarrierText(data.patient.genetic_diseases)}</div>
       <div class="gene-note">${carrierSummary(data.patient.genetic_diseases)}</div>
     </div>
   </div>`;
@@ -984,12 +1047,12 @@ function render(){
     </div>
     <div class="wgs-block" style="background:rgba(56,189,248,.07);border:0.5px solid rgba(56,189,248,.2)">
       <div class="wgs-title" style="color:var(--blue)">❤️ ${t('heartFlags')}</div>
-      <div style="font-size:13px;color:var(--text)">${data.patient.wgs_heart || t('noHeart')}</div>
+      <div style="font-size:13px;color:var(--text)">${displayFindingText(data.patient.wgs_heart, t('noHeart'))}</div>
       ${data.patient.wgs_heart ? `<div class="gene-note">${findingSummary(data.patient.wgs_heart)}</div>` : ""}
     </div>
     ${data.patient.wgs_other ? `<div class="wgs-block" style="background:rgba(148,163,184,.07);border:0.5px solid rgba(148,163,184,.15)">
       <div class="wgs-title wgs-muted-title" style="color:#cbd5e1">🧬 ${t('other')}</div>
-      <div style="font-size:13px;color:var(--soft);line-height:1.6">${data.patient.wgs_other}</div>
+      <div style="font-size:13px;color:var(--soft);line-height:1.6">${displayFindingText(data.patient.wgs_other, t('noData'))}</div>
       <div class="gene-note">${findingSummary(data.patient.wgs_other)}</div>
     </div>` : ""}
   </div>`;
@@ -1007,7 +1070,7 @@ function render(){
   const exL = parseLines(data.patient.exercise_plan);
   const dL = parseLines(data.patient.diet_plan);
   const mL = parseLines(data.patient.monitoring_plan);
-  const mkItems = (lines,dot)=>lines.map(l=>`<div class="plan-item"><div class="plan-dot" style="background:${dot}"></div><div class="plan-text">${localizePlanLine(l)}</div></div>`).join("");
+  const mkItems = (lines,dot,key)=>lines.map(l=>`<div class="plan-item"><div class="plan-dot" style="background:${dot}"></div><div class="plan-text">${localizePlanLine(l,key)}</div></div>`).join("");
   const tabs = [
     {key:"ex",icon:"🏃",label:t('ex'),col:"var(--blue)",items:exL,sum:t('exSum')},
     {key:"diet",icon:"🥗",label:t('diet'),col:"var(--green)",items:dL,sum:t('dietSum')},
@@ -1022,7 +1085,7 @@ function render(){
         <span style="font-weight:600;color:${ti.col}">📌 ${t('sum')}</span>
         <span style="color:var(--soft)">${ti.sum}</span>
       </div>
-      ${mkItems(ti.items,ti.col)}
+      ${mkItems(ti.items,ti.col,ti.key)}
     </div>`;
   }).join("");
   h += `<div class="card">
@@ -1044,7 +1107,7 @@ function render(){
       const hiddenCount = Math.max(section.rows.length - visibleRows.length, 0);
       const items = visibleRows.map(row => `
         <div class="drug-item">
-          <div class="drug-item-name" style="color:${section.text}">${row.display_name || row.drug_name}</div>
+          <div class="drug-item-name" style="color:${section.text}">${pgxDrugName(row)}</div>
         </div>
       `).join("");
       return `
