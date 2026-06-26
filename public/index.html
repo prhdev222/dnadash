@@ -77,13 +77,15 @@
     }
     .brand-mark{
       width:48px;height:48px;border-radius:16px;
-      display:flex;align-items:center;justify-content:center;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
       background:linear-gradient(135deg, rgba(20,184,166,.95), rgba(245,158,11,.88));
       box-shadow:0 10px 30px rgba(20,184,166,.16);
-      font-size:18px;
+      font-size:15px;
+      line-height:1;
       font-weight:900;
       flex-shrink:0;
     }
+    .brand-mark small{font-size:7px;font-weight:800;margin-top:3px;letter-spacing:0;color:rgba(255,255,255,.92)}
     .brand-copy{display:grid;gap:2px}
     .brand-title{font-size:15px;font-weight:800;letter-spacing:.03em}
     .brand-sub{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
@@ -323,7 +325,7 @@
     <section class="hero">
       <div>
         <div class="brand">
-          <div class="brand-mark">รพ</div>
+          <div class="brand-mark">PRH<small>Precision</small></div>
           <div class="brand-copy">
             <div class="brand-title">โรงพยาบาลสงฆ์</div>
             <div class="brand-sub">Precision & Personalized Medicine</div>
