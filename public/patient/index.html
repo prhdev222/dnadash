@@ -45,6 +45,7 @@ body[data-font="lg"]{font-size:17px}
 .font-btn[data-size="lg"]{font-size:14px}
 .btn{background:rgba(255,255,255,0.06);border:0.5px solid var(--border);border-radius:8px;color:var(--text);padding:8px 12px;font-size:13px;font-family:inherit;cursor:pointer;text-decoration:none}
 .btn:hover{border-color:rgba(255,255,255,.2)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
 .btn-print{background:rgba(56,189,248,.14);border-color:rgba(56,189,248,.28);color:#bae6fd}
 .main{max-width:860px;margin:0 auto;padding:24px 16px 48px}
 .login-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:18px;padding:22px;margin-bottom:18px}
@@ -54,6 +55,15 @@ body[data-font="lg"]{font-size:17px}
 .label{font-size:11px;color:var(--muted);margin-bottom:6px}
 .login-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}
 .status{font-size:12px;color:var(--muted)}
+.consent-card{background:var(--bg2);border:0.5px solid var(--hero-border);border-radius:18px;padding:22px;margin-bottom:18px}
+.consent-kicker{font-size:10px;color:var(--blue);letter-spacing:.12em;text-transform:uppercase;font-weight:800;margin-bottom:5px}
+.consent-title{font-size:20px;font-weight:800;color:var(--strong);line-height:1.35;margin-bottom:10px}
+.consent-copy{display:grid;gap:10px;font-size:14px;color:var(--soft);line-height:1.85}
+.consent-note{border-left:3px solid var(--amber);padding:9px 12px;background:rgba(251,191,36,.08);border-radius:10px;color:var(--text)}
+.consent-check{display:flex;gap:10px;align-items:flex-start;margin-top:14px;font-size:13px;color:var(--text);line-height:1.65}
+.consent-check input{width:18px;height:18px;margin-top:3px;accent-color:var(--green);flex-shrink:0}
+.consent-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:16px}
+.consent-primary{background:rgba(52,211,153,.14);border-color:rgba(52,211,153,.32);color:var(--green);font-weight:800}
 .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:42vh;gap:14px;text-align:center}
 .empty-icon{font-size:48px;opacity:.5}
 .empty-text{font-size:15px;color:var(--muted)}
@@ -148,7 +158,7 @@ body[data-font="lg"]{font-size:17px}
 .fbadges{display:flex;justify-content:center;gap:7px;flex-wrap:wrap}
 .fbadge{border-radius:20px;padding:3px 12px;font-size:10px;font-weight:600}
 .glow{position:fixed;top:-300px;left:50%;transform:translateX(-50%);width:700px;height:600px;background:radial-gradient(ellipse,var(--glow) 0%,transparent 65%);pointer-events:none;z-index:0}
-body.theme-light .card,body.theme-light .login-card,body.theme-light .stat-card,body.theme-light .risk-item,body.theme-light .drug-group,body.theme-light .drug-item{background:#fff}
+body.theme-light .card,body.theme-light .login-card,body.theme-light .consent-card,body.theme-light .stat-card,body.theme-light .risk-item,body.theme-light .drug-group,body.theme-light .drug-item{background:#fff}
 body.theme-light .input,body.theme-light .btn{background:rgba(15,23,42,.045)}
 body.theme-light .btn-print{background:rgba(2,132,199,.1);border-color:rgba(2,132,199,.25);color:var(--blue)}
 body.theme-light .risk-item.open{background:rgba(14,165,233,.08);border-color:rgba(14,165,233,.28)}
@@ -191,7 +201,9 @@ body[data-font="lg"] .food-tag,body[data-font="lg"] .exp-tag{font-size:14px}
   .theme-btn{width:42px;height:42px}
   .controls>.btn{width:100%;text-align:center}
   .main{padding:14px 12px 28px}
-  .login-card,.card{padding:16px}
+  .login-card,.consent-card,.card{padding:16px}
+  .consent-title{font-size:18px}
+  .consent-copy{font-size:13px}
   .login-grid{grid-template-columns:1fr}
   .login-actions{flex-direction:column;align-items:stretch}
   .login-actions .btn{width:100%}
@@ -229,7 +241,7 @@ body[data-font="lg"] .food-tag,body[data-font="lg"] .exp-tag{font-size:14px}
   :root{--bg:#ffffff;--bg2:#ffffff;--border:#dbe2ea;--text:#111827;--muted:#4b5563;--dim:#6b7280}
   *, *::before, *::after{box-shadow:none !important; text-shadow:none !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; color:#111827 !important; background-color:transparent !important}
   body{background:#fff !important;color:#111827 !important;font-size:11px;line-height:1.45}
-  .glow,.topbar,.login-card,.disclaimer,.footer,.btn-print,#logout-btn,#pgx-print-section{display:none !important}
+  .glow,.topbar,.login-card,.consent-card,.disclaimer,.footer,.btn-print,#logout-btn,#pgx-print-section{display:none !important}
   .main{max-width:none;padding:0 0 8mm}
   .wrap{z-index:auto}
   .card,.hero-risk,.stat-card,.nutr-card,.pgx-card,.wgs-block,.drug-group,.c-tag,.food-tag,.exp-tag{background:#fff !important;border-color:#d1d5db !important}
@@ -319,6 +331,8 @@ body[data-font="lg"] .food-tag,body[data-font="lg"] .exp-tag{font-size:14px}
     <div class="empty-text" id="empty-text"></div>
     <div class="empty-hint" id="empty-hint"></div>
   </div>
+
+  <div id="consent" class="consent-card" style="display:none"></div>
 
   <div id="dash" style="display:none"></div>
 </main>
@@ -471,6 +485,16 @@ const TEXT = {
     notSigned:"ยังไม่ได้เข้าสู่ระบบ",
     emptyText:"กรุณาเข้าสู่ระบบเพื่อดูรายงานของคุณ",
     emptyHint:"ระบบจะแสดงเฉพาะข้อมูลของผู้เข้าร่วมที่ล็อกอินอยู่เท่านั้น",
+    consentKicker:"คำชี้แจงก่อนรับชมข้อมูล",
+    consentTitle:"ข้อมูล Precision Medicine เบื้องต้นสำหรับพระคุณเจ้า",
+    consentP1:"นมัสการพระคุณเจ้า ข้อมูลในระบบนี้เป็นข้อมูลเบื้องต้นด้านเวชศาสตร์แม่นยำ (Precision Medicine) ซึ่งอาจประกอบด้วยข้อมูลความเสี่ยงทางพันธุกรรม ข้อมูลหลายตำแหน่งทางพันธุกรรม (Polygenic Risk) ข้อมูลยีนที่เกี่ยวข้องกับการตอบสนองต่อยา (Pharmacogenomics: PGx) และข้อมูลจีโนมิกส์อื่น ๆ เฉพาะบางส่วนที่ถูกนำมาวิเคราะห์ในระบบนี้",
+    consentP2:"ข้อมูลดังกล่าวมีวัตถุประสงค์เพื่อใช้ประกอบการพิจารณาแนวโน้มโอกาสเกิดโรค ข้อควรระวังเบื้องต้น การดูแลตนเอง และการออกแบบแนวทางส่งเสริมสุขภาพให้เหมาะสมกับแต่ละบุคคล โดยมิได้ครอบคลุมข้อมูลทางพันธุกรรมหรือข้อมูลสุขภาพทั้งหมดของพระคุณเจ้า และไม่สามารถบอกหรือทำนายผลด้านสุขภาพ การเกิดโรค หรือการตอบสนองต่อยาได้ทั้งหมด",
+    consentP3:"ผลประเมินนี้มิใช่คำวินิจฉัยโรค มิใช่การยืนยันว่าจะเกิดโรคหรือเกิดผลข้างเคียงจากยา และไม่ควรใช้แทนคำแนะนำ การตรวจรักษา หรือการพิจารณาทางการแพทย์จากแพทย์ เภสัชกร หรือบุคลากรทางการแพทย์",
+    consentP4:"ผลลัพธ์อาจเปลี่ยนแปลงได้เมื่อมีข้อมูลวิชาการ ฐานข้อมูลประชากร หรือหลักฐานทางจีโนมิกส์เพิ่มเติม และอาจแตกต่างกันตามเชื้อชาติ สายพันธุ์ บรรพบุรุษ รวมถึงบริบทสุขภาพของแต่ละบุคคล",
+    consentNote:"หากพระคุณเจ้ามีอาการเจ็บป่วย กำลังรับยา หรือมีข้อกังวลด้านสุขภาพ ควรปรึกษาแพทย์หรือเภสัชกรก่อนปรับการดูแลสุขภาพหรือการใช้ยา",
+    consentCheck:"อาตมภาพรับทราบคำชี้แจงข้างต้น และเข้าใจว่าข้อมูลนี้เป็นข้อมูลเบื้องต้นเพื่อประกอบการพิจารณาเท่านั้น",
+    consentAccept:"รับทราบและเข้าสู่รายงาน",
+    consentDecline:"ออกจากระบบ",
     greeting:"ผลการตรวจดีเอ็นเอส่วนบุคคล · รหัสผู้เข้าร่วม",
     participant:"หมายเลข",
     researchOnly:"ข้อมูลเพื่อการวิจัยเท่านั้น · ไม่ใช่การวินิจฉัยโรค",
@@ -547,6 +571,16 @@ const TEXT = {
     notSigned:"Not signed in",
     emptyText:"Please sign in to view your report",
     emptyHint:"Only the currently authenticated participant record is shown here",
+    consentKicker:"Notice before viewing",
+    consentTitle:"Preliminary Precision Medicine Information",
+    consentP1:"This portal provides preliminary Precision Medicine information. It may include genetic risk information, polygenic risk information, pharmacogenomics (PGx), and selected genomic findings that were analysed in this system.",
+    consentP2:"The information is intended to support consideration of disease-risk tendencies, preliminary precautions, self-care, and personalised health planning. It does not cover all genetic or health information and cannot fully predict health outcomes, disease occurrence, or medication response.",
+    consentP3:"This assessment is not a medical diagnosis, does not confirm that a disease or medication side effect will occur, and should not replace clinical advice, examination, treatment, or medical decisions by a doctor, pharmacist, or healthcare professional.",
+    consentP4:"Results may change as scientific evidence, population databases, or genomic evidence expand, and may vary by ethnicity, ancestry, lineage, and each person's health context.",
+    consentNote:"If you have symptoms, are taking medicines, or have health concerns, please consult a doctor or pharmacist before changing health care or medication use.",
+    consentCheck:"I acknowledge the notice above and understand that this is preliminary information for consideration only.",
+    consentAccept:"Acknowledge and view report",
+    consentDecline:"Log out",
     greeting:"Personal DNA Report · Participant",
     participant:"Participant",
     researchOnly:"Research data only · Not a medical diagnosis",
@@ -614,6 +648,7 @@ const TEXT = {
 
 let currentLang = 'TH';
 let currentData = null;
+let consentAccepted = false;
 let openR = null;
 let activeTab = 'ex';
 let expandedDrugGroups = { ae: false, eff: false, dose: false };
@@ -764,7 +799,10 @@ function setLang(lang){
   document.getElementById("btnTH").classList.toggle("active",lang==="TH");
   document.getElementById("btnEN").classList.toggle("active",lang==="EN");
   setStaticText();
-  if (currentData) render();
+  if (currentData) {
+    if (consentAccepted) render();
+    else renderConsent();
+  }
 }
 
 function getTopRiskSummary(risks){
@@ -822,6 +860,45 @@ const PLAN_FALLBACK_EN = {
   diet: 'Follow the recommended Mediterranean/DASH-style diet and review individual restrictions with your clinician.',
   mon: 'Continue regular monitoring and age-appropriate screening as advised by your clinician.'
 };
+
+function renderConsent(){
+  const consent = document.getElementById('consent');
+  consent.innerHTML = `
+    <div class="consent-kicker">${t('consentKicker')}</div>
+    <div class="consent-title">${t('consentTitle')}</div>
+    <div class="consent-copy">
+      <p>${t('consentP1')}</p>
+      <p>${t('consentP2')}</p>
+      <p>${t('consentP3')}</p>
+      <p>${t('consentP4')}</p>
+      <div class="consent-note">${t('consentNote')}</div>
+    </div>
+    <label class="consent-check">
+      <input id="consent-check" type="checkbox" onchange="toggleConsentButton()">
+      <span>${t('consentCheck')}</span>
+    </label>
+    <div class="consent-actions">
+      <button class="btn consent-primary" id="consent-accept" onclick="acceptConsent()" disabled>${t('consentAccept')}</button>
+      <button class="btn" onclick="patientLogout()">${t('consentDecline')}</button>
+    </div>
+  `;
+  consent.style.display = 'block';
+  document.getElementById('dash').style.display = 'none';
+  document.getElementById('empty').style.display = 'none';
+}
+
+function toggleConsentButton(){
+  const checked = document.getElementById('consent-check')?.checked;
+  const button = document.getElementById('consent-accept');
+  if (button) button.disabled = !checked;
+}
+
+function acceptConsent(){
+  if (!document.getElementById('consent-check')?.checked) return;
+  consentAccepted = true;
+  document.getElementById('consent').style.display = 'none';
+  render();
+}
 
 function localizePlanLine(line, kind){
   let text = String(line || '').trim();
@@ -1167,6 +1244,7 @@ function render(){
 
   document.getElementById('dash').innerHTML = h;
   document.getElementById('dash').style.display = 'block';
+  document.getElementById('consent').style.display = 'none';
   document.getElementById('empty').style.display = 'none';
 }
 
@@ -1197,10 +1275,12 @@ async function patientLogout() {
     await fetch('/api/patient/logout', { method: 'POST' });
   } finally {
     currentData = null;
+    consentAccepted = false;
     openR = null;
     activeTab = 'ex';
     expandedDrugGroups = { ae: false, eff: false, dose: false };
     document.getElementById('dash').style.display = 'none';
+    document.getElementById('consent').style.display = 'none';
     document.getElementById('empty').style.display = 'flex';
     document.getElementById('portal-status').textContent = t('notSigned');
     document.getElementById('participant-password').value = '';
@@ -1210,10 +1290,11 @@ async function patientLogout() {
 async function loadPortalData() {
   const data = await apiFetch('/api/patient/data');
   currentData = data;
+  consentAccepted = false;
   expandedDrugGroups = { ae: false, eff: false, dose: false };
   document.getElementById('participant-no').value = data.participantNo;
   document.getElementById('portal-status').textContent = `${t('signedIn')} ${data.participantNo}`;
-  render();
+  renderConsent();
 }
 
 async function checkExistingSession() {
