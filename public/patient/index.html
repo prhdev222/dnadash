@@ -116,15 +116,9 @@ body{background:var(--bg);color:var(--text);font-family:'Sarabun',system-ui,'Not
 .drug-group-list{display:grid;gap:8px}
 .drug-item{border-radius:10px;padding:10px 12px;background:rgba(255,255,255,.03);border:0.5px solid rgba(255,255,255,.05)}
 .drug-item-name{font-size:13px;font-weight:700;color:#f8fafc;margin-bottom:4px}
-.drug-item-desc{font-size:12px;color:var(--muted);line-height:1.6}
 .drug-toggle{margin-top:8px}
 .link-btn{border:none;background:transparent;color:var(--blue);font:inherit;font-size:12px;font-weight:700;cursor:pointer;padding:0}
 .link-btn:hover{text-decoration:underline}
-.drug-lookup{display:grid;gap:10px;margin-bottom:14px}
-.lookup-card{background:rgba(255,255,255,.03);border:0.5px solid var(--border);border-radius:12px;padding:12px 14px}
-.lookup-name{font-size:14px;font-weight:700;color:#f1f5f9;margin-bottom:5px}
-.lookup-desc{font-size:12px;color:var(--muted);line-height:1.6}
-.lookup-empty{font-size:12px;color:var(--dim)}
 .allergy-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .al-lbl{font-size:12px;font-weight:600;margin-bottom:8px}
 .tag-list{display:flex;flex-wrap:wrap;gap:5px}
@@ -191,18 +185,18 @@ body{background:var(--bg);color:var(--text);font-family:'Sarabun',system-ui,'Not
   .glow,.topbar,.login-card,.disclaimer,.footer,.btn-print,#logout-btn,#pgx-print-section{display:none !important}
   .main{max-width:none;padding:0 0 8mm}
   .wrap{z-index:auto}
-  .card,.hero-risk,.stat-card,.nutr-card,.pgx-card,.lookup-card,.wgs-block,.drug-group,.c-tag,.food-tag,.exp-tag{background:#fff !important;border-color:#d1d5db !important}
+  .card,.hero-risk,.stat-card,.nutr-card,.pgx-card,.wgs-block,.drug-group,.c-tag,.food-tag,.exp-tag{background:#fff !important;border-color:#d1d5db !important}
   .card,.hero-risk{break-inside:avoid-page;page-break-inside:avoid}
   .risk-item,.drug-group,.stat-card,.nutr-card,.pgx-card{break-inside:avoid-page;page-break-inside:avoid}
   .risk-big{font-size:34px;color:#0f172a !important}
   .hero-id{font-size:20px;color:#0f172a !important}
-  .hero-sub,.sh-sub,.stat-sub,.lookup-desc,.nutr-level,.ri-explain,.ri-advice,.c-mult,.footer-txt{color:#4b5563 !important}
-  .sh-title,.risk-name,.lookup-name,.nutr-name,.drug-item-name,.c-name{color:#0f172a !important}
+  .hero-sub,.sh-sub,.stat-sub,.nutr-level,.ri-explain,.ri-advice,.c-mult,.footer-txt{color:#4b5563 !important}
+  .sh-title,.risk-name,.nutr-name,.drug-item-name,.c-name{color:#0f172a !important}
   .bar-fill,.bar-fill2,.stack-seg,.plan-dot,.legend-dot{opacity:.85 !important}
-  .badge,.cat-badge,.lookup-badge{color:#111827 !important}
+  .badge,.cat-badge{color:#111827 !important}
   .tab-btn{border-color:#d1d5db !important;color:#111827 !important;background:#fff !important}
   .tab-btn.act-ex,.tab-btn.act-diet,.tab-btn.act-mon{border-color:#94a3b8 !important;color:#111827 !important;background:#f8fafc !important}
-  .plan-sum,.lookup-card,.drug-group,.wgs-block,.stat-card,.nutr-card{break-inside:avoid}
+  .plan-sum,.drug-group,.wgs-block,.stat-card,.nutr-card{break-inside:avoid}
   .print-only{display:block !important}
   .print-only .print-head{border:1px solid #d1d5db;border-radius:12px;padding:12px 14px;margin-bottom:12px;background:#f8fafc}
   .print-only .print-title{font-size:16px;font-weight:800;color:#0f172a;margin-bottom:2px}
@@ -468,13 +462,7 @@ const TEXT = {
     dietSum:"เน้นอาหารแนว Mediterranean/DASH เพิ่มผัก ผลไม้ โปรตีนคุณภาพดี และลดหวาน มัน เค็ม รวมถึงอาหารแปรรูป",
     monSum:"ติดตามสุขภาพอย่างสม่ำเสมอ ดูค่าความดัน น้ำตาล ไขมัน และตรวจเพิ่มเติมตามความเสี่ยงเฉพาะของคุณ",
     pgxTitle:"ข้อมูลยีนที่เกี่ยวกับยา (PGx)",
-    pgxSub2:"ยีนของคุณอาจส่งผลต่อการตอบสนองต่อยาบางชนิด — แจ้งแพทย์และเภสัชกรทุกครั้ง",
-    drugLookup:"ค้นหาชื่อยา",
-    drugLookupSub:"ค้นหายาที่อยู่ในรายชื่อ PGx ของคุณ เพื่อดูความเสี่ยงและสรรพคุณแบบย่อ",
-    drugLookupPlaceholder:"พิมพ์หรือเลือกชื่อยา",
-    noDrugSelected:"เลือกชื่อยาเพื่อดูรายละเอียด",
-    noDrugMatch:"ไม่พบยานี้ในรายการ PGx ของคุณ",
-    shortUse:"สรรพคุณโดยย่อ",
+    pgxSub2:"ข้อมูลนี้เป็นเพียงข้อบ่งชี้เบื้องต้นจากข้อมูลทางจีโนมิกส์โดยรวม อาจไม่ตรงกับการตอบสนองต่อยาจริงของแต่ละบุคคล และควรใช้ประกอบการพิจารณาของแพทย์หรือเภสัชกรเท่านั้น",
     ae:"เสี่ยงผลข้างเคียง",
     eff:"ประสิทธิภาพลดลง",
     dose:"ปรับขนาดยา",
@@ -550,13 +538,7 @@ const TEXT = {
     dietSum:"Follow a Mediterranean/DASH-style pattern with more vegetables, fruit, quality protein, and less sugar, salt, and processed food.",
     monSum:"Keep up regular health checks, including blood pressure, glucose, lipids, and any extra screening relevant to your individual risks.",
     pgxTitle:"Pharmacogenomics (PGx)",
-    pgxSub2:"Your genes may affect drug response — always inform your doctor and pharmacist",
-    drugLookup:"Drug Lookup",
-    drugLookupSub:"Search a drug from your PGx list to review the risk and a short use description",
-    drugLookupPlaceholder:"Type or choose a drug name",
-    noDrugSelected:"Select a drug name to view details",
-    noDrugMatch:"This drug is not in your PGx list",
-    shortUse:"Short use description",
+    pgxSub2:"This is preliminary information based on overall genomic data. It may not reflect an individual's actual drug response and should be interpreted by a doctor or pharmacist.",
     ae:"Adverse Effect Risk",
     eff:"Reduced Efficacy",
     dose:"Dose Adjustment",
@@ -579,7 +561,6 @@ let currentLang = 'TH';
 let currentData = null;
 let openR = null;
 let activeTab = 'ex';
-let selectedDrug = '';
 let expandedDrugGroups = { ae: false, eff: false, dose: false };
 
 function t(key){ return TEXT[currentLang][key] || key; }
@@ -702,42 +683,6 @@ function splitPgx(pgx){
   return { ae, eff, dose };
 }
 
-function getPatientDrugOptions(pgx){
-  const seen = new Set();
-  return pgx
-    .map(row => String(row.display_name || row.drug_name || '').trim())
-    .filter(Boolean)
-    .filter(name => {
-      const key = name.toLowerCase();
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    })
-    .sort((a, b) => a.localeCompare(b));
-}
-
-function findPatientDrug(pgx, drugName){
-  const needle = String(drugName || '').trim().toLowerCase();
-  if (!needle) return null;
-  return pgx.find(row => {
-    const raw = String(row.drug_name || '').trim().toLowerCase();
-    const display = String(row.display_name || '').trim().toLowerCase();
-    return raw === needle || display === needle;
-  }) || null;
-}
-
-function getDrugLookupMarkup(matchedDrug, query){
-  if (matchedDrug) {
-    return `
-      <div class="lookup-name">${matchedDrug.display_name || matchedDrug.drug_name}</div>
-      <div class="lookup-desc"><strong>${t('shortUse')}:</strong> ${matchedDrug.short_description || t('noData')}</div>
-    `;
-  }
-  return query
-    ? `<div class="lookup-empty">${t('noDrugMatch')}</div>`
-    : `<div class="lookup-empty">${t('noDrugSelected')}</div>`;
-}
-
 function replaceFromMap(text, replacements){
   return replacements.reduce((out, [from, to]) => out.replaceAll(from, to), text);
 }
@@ -836,7 +781,6 @@ function render(){
   const tc = mc(topRisk.mult || 0);
   const pgxGroups = splitPgx(data.pgx || []);
   const totalPgx = pgxGroups.ae.length + pgxGroups.eff.length + pgxGroups.dose.length;
-  const patientDrugOptions = getPatientDrugOptions(data.pgx || []);
   const patientLabel = data.patient.display_name || '';
   const patientNote = data.patient.portal_note || '';
 
@@ -1005,7 +949,6 @@ function render(){
     { key: 'eff', label: t('eff'), rows: pgxGroups.eff, style: 'rgba(251,191,36,.1)', border: 'rgba(251,191,36,.3)', text: '#fde68a' },
     { key: 'dose', label: t('dose'), rows: pgxGroups.dose, style: 'rgba(56,189,248,.1)', border: 'rgba(56,189,248,.3)', text: '#bae6fd' }
   ];
-  const matchedDrug = findPatientDrug(data.pgx || [], selectedDrug);
   const pgxGroupHtml = pgxSections
     .filter(section => section.rows.length)
     .map(section => {
@@ -1034,12 +977,6 @@ function render(){
   h += `<div class="card" id="pgx-print-section">
     <div class="sh"><span class="sh-icon">💊</span><span class="sh-title">${t('pgxTitle')}</span></div>
     <div class="sh-sub">${t('pgxSub2')}</div>
-    <div class="drug-lookup">
-      <div class="drug-lbl">${t('drugLookupSub')}</div>
-      <input class="input" id="drug-search" list="drug-options" placeholder="${t('drugLookupPlaceholder')}" value="${selectedDrug}" oninput="updateDrugSearch(this.value)" onchange="selectDrug(this.value)">
-      <datalist id="drug-options">${patientDrugOptions.map(name => `<option value="${name}"></option>`).join('')}</datalist>
-      <div class="lookup-card" id="drug-lookup-result">${getDrugLookupMarkup(matchedDrug, selectedDrug)}</div>
-    </div>
     <div class="pgx-grid">
       <div class="pgx-card" style="background:rgba(248,113,113,.1);border:0.5px solid rgba(248,113,113,.3)">
         <div class="pgx-num" style="color:var(--red)">${pgxGroups.ae.length}</div>
@@ -1086,13 +1023,6 @@ function render(){
 function toggleR(i){ openR = openR === i ? null : i; render(); }
 function switchTab(ti){ activeTab = ti; render(); }
 function printPatient(){ window.print(); }
-function updateDrugSearch(name){
-  selectedDrug = name;
-  const target = document.getElementById('drug-lookup-result');
-  if (!target || !currentData) return;
-  target.innerHTML = getDrugLookupMarkup(findPatientDrug(currentData.pgx || [], selectedDrug), selectedDrug);
-}
-function selectDrug(name){ updateDrugSearch(name); }
 function toggleDrugGroup(key){ expandedDrugGroups[key] = !expandedDrugGroups[key]; render(); }
 
 async function patientLogin() {
@@ -1119,7 +1049,6 @@ async function patientLogout() {
     currentData = null;
     openR = null;
     activeTab = 'ex';
-    selectedDrug = '';
     expandedDrugGroups = { ae: false, eff: false, dose: false };
     document.getElementById('dash').style.display = 'none';
     document.getElementById('empty').style.display = 'flex';
@@ -1131,7 +1060,6 @@ async function patientLogout() {
 async function loadPortalData() {
   const data = await apiFetch('/api/patient/data');
   currentData = data;
-  selectedDrug = getPatientDrugOptions(data.pgx || [])[0] || '';
   expandedDrugGroups = { ae: false, eff: false, dose: false };
   document.getElementById('participant-no').value = data.participantNo;
   document.getElementById('portal-status').textContent = `${t('signedIn')} ${data.participantNo}`;
